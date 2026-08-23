@@ -50,6 +50,15 @@ export const useConfigStore = defineStore('config', () => {
     if (isKnownLang(id)) lang.value = id
   }
 
+  // state: 판 아래 마당의 배경. 고른 것은 저장해 둔다.
+  const YARD_THEMES = ['meadow', 'seaside', 'night', 'snow', 'city']
+  const isKnownTheme = (id) => YARD_THEMES.includes(id)
+  const yardTheme = ref(isKnownTheme(saved.yardTheme) ? saved.yardTheme : 'meadow')
+  const yardList = computed(() => YARD_THEMES.map((id) => ({ id, label: t.value(`yard.${id}`) })))
+  function setYardTheme(id) {
+    if (isKnownTheme(id)) yardTheme.value = id
+  }
+
   // state: 사용 가능한 모드 목록과 현재 선택된 모드
   // 이름은 언어를 타므로 id 만 두고 표시용 이름은 그때그때 번역해서 만든다.
   const MODE_IDS = ['repair', 'farm', 'site', 'bike', 'hike', 'baseball', 'laundry']
@@ -79,9 +88,12 @@ export const useConfigStore = defineStore('config', () => {
   // (교재에서는 각 컴포넌트의 computed 로 두고 Composable 은 범위 제외로 안내되어 있다)
   // ─────────────────────────────────────────────
   // 단위와 모드, 언어는 다시 들어왔을 때도 그대로여야 한다
-  watch([unit, currentMode, lang], ([u, m, l]) => {
+  watch([unit, currentMode, lang, yardTheme], ([u, m, l, y]) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ unit: u, currentMode: m, lang: l }))
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ unit: u, currentMode: m, lang: l, yardTheme: y }),
+      )
     } catch {
       // 저장이 막힌 환경에서는 넘어간다
     }
@@ -101,6 +113,9 @@ export const useConfigStore = defineStore('config', () => {
     lang,
     t,
     setLang,
+    yardTheme,
+    yardList,
+    setYardTheme,
     modeList,
     currentMode,
     currentModeLabel,

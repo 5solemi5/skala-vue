@@ -37,6 +37,16 @@ export default {
   'here.failedTitle': '위치는 찾았지만 날씨를 못 받았습니다. 다시 눌러 보세요',
   'here.unnamed': '지금 이곳',
 
+  // ── 마당 배경 ──
+  'yard.aria': '마당 배경 고르기',
+  'yard.prev': '앞 배경',
+  'yard.next': '다음 배경',
+  'yard.meadow': '들판',
+  'yard.seaside': '바닷가',
+  'yard.night': '밤하늘',
+  'yard.snow': '눈밭',
+  'yard.city': '골목',
+
   // ── 날씨 상태 ────────────────────────────────
   'cond.clear': '맑음',
   'cond.clouds': '구름',
