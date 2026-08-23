@@ -1,19 +1,25 @@
 <script setup>
+import { computed } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
+import { useConfigStore } from '@/stores/configStore'
 import UnitToggler from './components/exercise/UnitToggler.vue'
+import LangToggler from './components/service/LangToggler.vue'
 import BrandMark from './components/service/BrandMark.vue'
 
-const navList = [
-  { to: '/', label: '오늘의 채비' },
-  { to: '/about', label: '서비스 소개' },
-]
+const configStore = useConfigStore()
+
+// 이름은 언어를 타므로 경로와 키만 두고 표시용 이름은 그때그때 만든다
+const navList = computed(() => [
+  { to: '/', label: configStore.t('nav.home') },
+  { to: '/about', label: configStore.t('nav.about') },
+])
 
 // 수업 산출물. 서비스 메뉴와 급을 나눠 구분선 뒤에 둔다.
-const courseLinks = [
-  { to: '/lab', label: '문법 실습실' },
-  { to: '/archive', label: '과제 아카이브' },
-  { to: '/dev-log', label: '개발 기록' },
-]
+const courseLinks = computed(() => [
+  { to: '/lab', label: configStore.t('nav.lab') },
+  { to: '/archive', label: configStore.t('nav.archive') },
+  { to: '/dev-log', label: configStore.t('nav.devlog') },
+])
 </script>
 
 <template>
@@ -23,12 +29,12 @@ const courseLinks = [
         <RouterLink to="/" class="brand">
           <BrandMark :size="30" />
           <span class="brand-text">
-            <span class="brand-name">오늘의 채비</span>
-            <span class="brand-sub">같은 하늘, 다른 하루</span>
+            <span class="brand-name">{{ configStore.t('brand.name') }}</span>
+            <span class="brand-sub">{{ configStore.t('brand.tagline') }}</span>
           </span>
         </RouterLink>
 
-        <nav class="nav" aria-label="주요 메뉴">
+        <nav class="nav" :aria-label="configStore.t('nav.mainAria')">
           <RouterLink v-for="item in navList" :key="item.to" :to="item.to" class="nav-item">
             {{ item.label }}
           </RouterLink>
@@ -39,7 +45,10 @@ const courseLinks = [
             {{ item.label }}
           </RouterLink>
 
-          <UnitToggler class="unit" />
+          <div class="switches">
+            <LangToggler />
+            <UnitToggler />
+          </div>
         </nav>
       </div>
     </header>
@@ -52,8 +61,8 @@ const courseLinks = [
 
     <footer class="site-footer">
       <div class="foot-inner">
-        <p class="foot-left">SKALA Full-Stack Engineering &middot; Frontend framework: Vue.js</p>
-        <nav class="foot-links" aria-label="만든 과정">
+        <p class="foot-left">{{ configStore.t('foot.credit') }}</p>
+        <nav class="foot-links" :aria-label="configStore.t('nav.courseAria')">
           <RouterLink v-for="item in courseLinks" :key="item.to" :to="item.to" class="foot-link">
             {{ item.label }}
           </RouterLink>
@@ -160,7 +169,11 @@ const courseLinks = [
   border-bottom-color: var(--color-ink-3);
 }
 
-.unit {
+/* 보는 방식을 바꾸는 스위치 둘을 한 덩어리로 묶는다 */
+.switches {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-left: 4px;
 }
 
@@ -221,7 +234,7 @@ const courseLinks = [
   .shell {
     margin-top: 22px;
   }
-  .unit {
+  .switches {
     margin-left: auto;
   }
 }

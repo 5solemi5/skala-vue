@@ -8,9 +8,9 @@ import { buildAdvice } from './adviceRules'
  * 규칙을 고치면 시간대 판정도 같이 따라오게 하려고 별도 기준을 만들지 않았다.
  */
 export const scoreHour = (row, mode) => {
-  // 판정 함수는 하루 단위 값(minTemp, status)도 함께 보므로 시간대 값으로 채워 넣는다
+  // 판정 함수는 하루 단위 값(minTemp, condition)도 함께 보므로 시간대 값으로 채워 넣는다
   const advices = buildAdvice(
-    { ...row, minTemp: row.temp, status: row.rainProb >= 60 ? '비' : '맑음' },
+    { ...row, minTemp: row.temp, condition: row.rainProb >= 60 ? 'Rain' : 'Clear' },
     mode,
   )
 

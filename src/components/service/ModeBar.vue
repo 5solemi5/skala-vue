@@ -1,4 +1,8 @@
 <script setup>
+import { useConfigStore } from '@/stores/configStore'
+
+const configStore = useConfigStore()
+
 defineProps({
   modeList: { type: Array, required: true },
   currentMode: { type: String, required: true },
@@ -8,8 +12,8 @@ defineEmits(['change-mode'])
 
 <template>
   <div class="modebar">
-    <p class="eyebrow">무엇을 볼까요</p>
-    <div class="seg" role="tablist" aria-label="하는 일 선택">
+    <p class="eyebrow">{{ configStore.t('mode.eyebrow') }}</p>
+    <div class="seg" role="tablist" :aria-label="configStore.t('mode.aria')">
       <button
         v-for="mode in modeList"
         :key="mode.id"

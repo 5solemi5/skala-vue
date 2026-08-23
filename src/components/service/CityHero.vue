@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
+import { groupOf } from '@/utils/weatherCondition'
 import VerdictMark from './VerdictMark.vue'
 import HourlyBar from './HourlyBar.vue'
 
@@ -21,6 +22,10 @@ const displayTemp = computed(() => (props.city ? configStore.convertTemp(props.c
 const order = { stop: 0, warn: 1, info: 2, good: 3 }
 const sorted = computed(() => [...props.adviceList].sort((a, b) => order[a.level] - order[b.level]))
 const lead = computed(() => sorted.value[0] ?? null)
+// description 이 비어 있을 때만 쓰는 대체 표기
+const conditionLabel = computed(() =>
+  props.city ? configStore.t(`cond.${groupOf(props.city.condition)}`) : '',
+)
 const rest = computed(() => sorted.value.slice(1))
 </script>
 
@@ -31,11 +36,11 @@ const rest = computed(() => sorted.value.slice(1))
         <p class="region">{{ city.region }}</p>
         <h2>{{ city.name }}</h2>
         <p class="cond">
-          {{ city.description ?? city.status }}
+          {{ city.description ?? conditionLabel }}
           <span class="sep">·</span>
-          습도 <span class="tnum">{{ city.humidity }}%</span>
+          {{ configStore.t('hero.humidity') }} <span class="tnum">{{ city.humidity }}%</span>
           <span class="sep">·</span>
-          강수확률 <span class="tnum">{{ city.rainProb }}%</span>
+          {{ configStore.t('hero.rainProb') }} <span class="tnum">{{ city.rainProb }}%</span>
         </p>
       </div>
 
@@ -50,8 +55,8 @@ const rest = computed(() => sorted.value.slice(1))
           {{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span>
         </p>
         <p class="band">
-          <span v-if="city.temp >= 25">🔥 더움 (25도 이상)</span>
-          <span v-else>❄️ 선선함 (25도 미만)</span>
+          <span v-if="city.temp >= 25">{{ configStore.t('hero.hot') }}</span>
+          <span v-else>{{ configStore.t('hero.mild') }}</span>
         </p>
       </div>
     </div>
@@ -80,7 +85,7 @@ const rest = computed(() => sorted.value.slice(1))
     <div class="foot">
       <p class="status" aria-live="polite">{{ statusText }}</p>
       <button type="button" class="more" @click="$emit('open-detail', city)">
-        상세보기
+        {{ configStore.t('hero.detail') }}
         <span aria-hidden="true">→</span>
       </button>
     </div>

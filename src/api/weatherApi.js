@@ -28,35 +28,28 @@ export const DEFAULT_CITIES = [
   { id: 'city_06', name: '강릉', lat: 37.7519, lon: 128.8761, region: '강원권' },
 ]
 
-/** OpenWeatherMap 의 영문 상태를 교재 예제와 같은 한글 표기로 맞춘다 */
-const toStatusLabel = (main) => {
-  const map = {
-    Clear: '맑음',
-    Clouds: '구름',
-    Rain: '비',
-    Drizzle: '비',
-    Thunderstorm: '비',
-    Snow: '눈',
-    Mist: '흐림',
-    Fog: '흐림',
-    Haze: '흐림',
-    Dust: '흐림',
-    Smoke: '흐림',
-  }
-  return map[main] ?? '흐림'
-}
+/** 화면 언어를 OpenWeatherMap 이 알아듣는 값으로 바꾼다 (한국어는 'kr') */
+const owmLang = (lang) => (lang === 'en' ? 'en' : 'kr')
 
 /** 한 도시의 현재 날씨 (OpenWeatherMap) */
-const fetchCurrent = async (city) => {
+const fetchCurrent = async (city, lang) => {
   const { data } = await axios.get(OWM_URL, {
-    params: { lat: city.lat, lon: city.lon, appid: OWM_KEY, units: 'metric', lang: 'kr' },
+    params: {
+      lat: city.lat,
+      lon: city.lon,
+      appid: OWM_KEY,
+      units: 'metric',
+      lang: owmLang(lang),
+    },
   })
   return {
     temp: Math.round(data.main.temp),
     feelsLike: Math.round(data.main.feels_like),
     humidity: data.main.humidity,
     wind: Number(data.wind.speed.toFixed(1)),
-    status: toStatusLabel(data.weather[0].main),
+    // 판정에 쓰는 값. 언어와 상관없이 늘 같은 영문 코드다.
+    condition: data.weather[0].main,
+    // 화면에 그대로 뿌리는 설명. 위 lang 에 따라 언어가 바뀌어 온다.
     description: data.weather[0].description,
     icon: data.weather[0].icon,
   }
@@ -80,9 +73,9 @@ const fetchDaily = async (city) => {
 }
 
 /** 두 API 를 합쳐 화면이 쓰는 형태로 만든다 */
-export const fetchCityWeather = async (city) => {
+export const fetchCityWeather = async (city, lang = 'ko') => {
   // 서로 의존하지 않는 요청이라 순차 대기하지 않고 동시에 보낸다
-  const [current, daily] = await Promise.all([fetchCurrent(city), fetchDaily(city)])
+  const [current, daily] = await Promise.all([fetchCurrent(city, lang), fetchDaily(city)])
   return { id: city.id, name: city.name, region: city.region, ...current, ...daily }
 }
 
@@ -91,8 +84,8 @@ export const fetchCityWeather = async (city) => {
  * Promise.all 은 하나만 실패해도 전부 버려서, 도시 한 곳 때문에 화면이 통째로 비어버린다.
  * allSettled 로 바꿔서 성공한 것만 모으고 실패한 도시는 따로 알려준다.
  */
-export const fetchAllWeather = async (cities) => {
-  const results = await Promise.allSettled(cities.map((city) => fetchCityWeather(city)))
+export const fetchAllWeather = async (cities, lang = 'ko') => {
+  const results = await Promise.allSettled(cities.map((city) => fetchCityWeather(city, lang)))
   const ok = []
   const failed = []
   results.forEach((r, i) => {
@@ -110,13 +103,14 @@ export const fetchAllWeather = async (cities) => {
  * 반대로 영월은 Open-Meteo 에 없고 OpenWeatherMap 에만 있다.
  * 한 곳만 쓰면 "우리 동네가 안 나온다"는 일이 생긴다.
  */
-const searchOwm = async (query) => {
+const searchOwm = async (query, lang) => {
   const { data } = await axios.get(GEO_URL, {
     params: { q: query, limit: 5, appid: OWM_KEY },
   })
   return data.map((c) => ({
     id: `geo_${c.lat.toFixed(3)}_${c.lon.toFixed(3)}`,
-    name: c.local_names?.ko ?? c.name,
+    // 영어로 보고 있으면 영문 표기를 먼저 쓴다
+    name: lang === 'en' ? c.name : (c.local_names?.ko ?? c.name),
     region: c.state ?? c.country,
     lat: c.lat,
     lon: c.lon,
@@ -124,9 +118,9 @@ const searchOwm = async (query) => {
   }))
 }
 
-const searchMeteo = async (query) => {
+const searchMeteo = async (query, lang) => {
   const { data } = await axios.get(METEO_GEO_URL, {
-    params: { name: query, count: 5, language: 'ko', format: 'json' },
+    params: { name: query, count: 5, language: lang === 'en' ? 'en' : 'ko', format: 'json' },
   })
   return (data.results ?? [])
     .filter((c) => c.country_code === 'KR')
@@ -140,8 +134,8 @@ const searchMeteo = async (query) => {
     }))
 }
 
-export const searchCity = async (query) => {
-  const results = await Promise.allSettled([searchOwm(query), searchMeteo(query)])
+export const searchCity = async (query, lang = 'ko') => {
+  const results = await Promise.allSettled([searchOwm(query, lang), searchMeteo(query, lang)])
   const found = results.filter((r) => r.status === 'fulfilled').flatMap((r) => r.value)
 
   // 좌표가 거의 같은 결과는 한 번만 보여준다

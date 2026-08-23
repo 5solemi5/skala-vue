@@ -35,7 +35,7 @@ const selectedPersonId = ref('')
 const peopleTools = ref(null)
 
 const searchQuery = ref('')
-const selectedCityInfo = ref('목록에서 지역을 누르면 여기가 바뀝니다.')
+const selectedCityInfo = ref(configStore.t('home.hint'))
 const selectedId = ref('')
 
 const modeList = computed(() => configStore.modeList)
@@ -45,7 +45,7 @@ const loadWeather = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    const { list, failed } = await fetchAllWeather(cityStore.cities)
+    const { list, failed } = await fetchAllWeather(cityStore.cities, configStore.lang)
     weatherList.value = list
     failedCities.value = failed.map((f) => f.city.name)
     updatedAt.value = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
@@ -59,8 +59,8 @@ const loadWeather = async () => {
     console.error('날씨 데이터를 불러오지 못했습니다:', error)
     errorMessage.value =
       error.response?.status === 401
-        ? 'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
-        : `날씨 데이터를 불러오지 못했습니다. (${error.message})`
+        ? configStore.t('home.keyFail')
+        : configStore.t('home.loadFailWith', { message: error.message })
   } finally {
     isLoading.value = false
   }
@@ -69,7 +69,9 @@ const loadWeather = async () => {
 // 사람마다 자기 지역 날씨를 받아 둔다
 const loadPeople = async () => {
   const list = peopleStore.people
-  const results = await Promise.allSettled(list.map((p) => fetchCityWeather(p.city)))
+  const results = await Promise.allSettled(
+    list.map((p) => fetchCityWeather(p.city, configStore.lang)),
+  )
   const map = {}
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') map[list[i].id] = r.value
@@ -124,6 +126,16 @@ watch(
 
 watch(selectedId, () => loadHourly())
 
+// 날씨 설명('튼구름')은 API 가 언어에 맞춰 내려주는 값이라
+// 화면 문구만 바꾸면 이 부분만 이전 언어로 남는다. 언어가 바뀌면 다시 받는다.
+watch(
+  () => configStore.lang,
+  () => {
+    loadWeather()
+    loadPeople()
+  },
+)
+
 // 사람을 고치거나 추가하면 그 사람 지역 날씨를 다시 받는다
 watch(
   () => peopleStore.people.map((p) => `${p.id}:${p.city.id}:${p.modeId}`).join(','),
@@ -141,10 +153,13 @@ const filteredWeatherList = computed(() => {
   return weatherList.value.filter((item) => item.name.includes(query))
 })
 
+// 판정 문구를 만들 때 필요한 것들. 언어나 단위가 바뀌면 문구도 따라 바뀐다.
+const adviceOpts = computed(() => ({ lang: configStore.lang, unit: configStore.unit }))
+
 const adviceMap = computed(() => {
   const map = {}
   weatherList.value.forEach((item) => {
-    map[item.id] = buildAdvice(item, currentMode.value)
+    map[item.id] = buildAdvice(item, currentMode.value, adviceOpts.value)
   })
   return map
 })
@@ -153,7 +168,7 @@ const peopleAdvice = computed(() => {
   const map = {}
   peopleStore.people.forEach((p) => {
     const w = peopleWeather.value[p.id]
-    if (w) map[p.id] = buildAdvice(w, p.modeId)
+    if (w) map[p.id] = buildAdvice(w, p.modeId, adviceOpts.value)
   })
   return map
 })
@@ -186,10 +201,10 @@ const summaryLine = computed(() => {
   const total = filteredWeatherList.value.length
   if (!total) return ''
   const parts = []
-  if (stopCount.value) parts.push(`${stopCount.value}곳은 오늘 피하시는 편이 낫습니다`)
-  if (warnCount.value) parts.push(`${warnCount.value}곳은 주의가 필요합니다`)
-  if (!parts.length) return `${total}곳 모두 오늘은 괜찮습니다`
-  return `${total}곳 중 ${parts.join(', ')}`
+  if (stopCount.value) parts.push(configStore.t('home.summaryStop', { n: stopCount.value }))
+  if (warnCount.value) parts.push(configStore.t('home.summaryWarn', { n: warnCount.value }))
+  if (!parts.length) return configStore.t('home.summaryNone', { total })
+  return configStore.t('home.summary', { total, parts: parts.join(', ') })
 })
 
 watch(selectedCityInfo, (newInfo, oldInfo) => {
@@ -202,7 +217,7 @@ watchEffect(() => {
 
 watch(currentMode, (newMode, oldMode) => {
   console.log(`🧰 [watch] 모드 변경: ${oldMode} ➡️ ${newMode} — 채비 기준을 다시 적용합니다.`)
-  selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
+  selectedCityInfo.value = configStore.t('home.modeChanged', { mode: configStore.currentModeLabel })
 })
 
 // 대상을 고르면 하는 일과 지역이 함께 바뀐다.
@@ -224,7 +239,7 @@ const handlePersonSelect = (person) => {
 
 const handleSelect = (city) => {
   selectedId.value = city.id
-  selectedCityInfo.value = `${city.name}이 선택되었습니다.`
+  selectedCityInfo.value = configStore.t('home.picked', { name: city.name })
 }
 
 const handleDetail = (city) => {
@@ -254,10 +269,12 @@ const handleDetail = (city) => {
 
     <p v-if="errorMessage" class="alert stop">{{ errorMessage }}</p>
     <p v-else-if="failedCities.length" class="alert warn">
-      {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
+      {{ configStore.t('home.partialFail', { names: failedCities.join(', ') }) }}
     </p>
 
-    <div v-if="isLoading && !weatherList.length" class="loading">불러오는 중입니다</div>
+    <div v-if="isLoading && !weatherList.length" class="loading">
+      {{ configStore.t('home.loading') }}
+    </div>
 
     <template v-else>
       <CityHero
@@ -271,15 +288,15 @@ const handleDetail = (city) => {
       <section class="list">
         <header class="list-head">
           <div>
-            <h3>다른 지역</h3>
+            <h3>{{ configStore.t('home.others') }}</h3>
             <p v-if="summaryLine" class="summary" :class="{ warn: stopCount > 0 || warnCount > 0 }">
               {{ summaryLine }}
             </p>
           </div>
           <div class="meta">
-            <span v-if="updatedAt" class="tnum">{{ updatedAt }} 기준</span>
+            <span v-if="updatedAt" class="tnum">{{ configStore.t('home.asOf', { time: updatedAt }) }}</span>
             <button type="button" class="refresh" :disabled="isLoading" @click="loadWeather">
-              {{ isLoading ? '갱신 중' : '새로고침' }}
+              {{ configStore.t(isLoading ? 'home.refreshing' : 'home.refresh') }}
             </button>
           </div>
         </header>
@@ -297,14 +314,14 @@ const handleDetail = (city) => {
         </ul>
 
         <div v-else-if="cityStore.count === 0" class="empty">
-          <p>보고 있는 지역이 없습니다.</p>
-          <p class="dim">아래에서 지역을 추가해 주세요.</p>
+          <p>{{ configStore.t('home.noCity') }}</p>
+          <p class="dim">{{ configStore.t('home.noCityHint') }}</p>
         </div>
 
         <div v-else class="empty">
-          <p>'{{ searchQuery.trim() }}' 와(과) 일치하는 지역이 목록에 없습니다.</p>
+          <p>{{ configStore.t('home.noMatch', { query: searchQuery.trim() }) }}</p>
           <button type="button" class="link" @click="cityStore.requestAdd(searchQuery.trim())">
-            '{{ searchQuery.trim() }}' 추가하기
+            {{ configStore.t('home.addQuery', { query: searchQuery.trim() }) }}
           </button>
         </div>
       </section>

@@ -1,5 +1,7 @@
 import ko from './ko'
 import en from './en'
+import adviceKo from './advice.ko'
+import adviceEn from './advice.en'
 
 /**
  * 아주 작은 번역 함수
@@ -20,7 +22,11 @@ export const LANGS = [
   { id: 'en', label: 'English', short: 'EN' },
 ]
 
-const messages = { ko, en }
+// 판정 문구는 양이 많아 파일을 나눠 두고 여기서 합친다
+const messages = {
+  ko: { ...ko, ...adviceKo },
+  en: { ...en, ...adviceEn },
+}
 
 export const isKnownLang = (id) => LANGS.some((l) => l.id === id)
 

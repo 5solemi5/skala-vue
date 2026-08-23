@@ -32,7 +32,7 @@ const startEdit = (person) => {
 
 const startAdd = () => {
   if (peopleStore.isFull) {
-    message.value = `한 번에 ${MAX_PEOPLE}명까지 볼 수 있습니다. 한 명을 지우고 추가해 주세요.`
+    message.value = configStore.t('edit.fullRemove', { max: MAX_PEOPLE })
     return
   }
   editingId.value = 'new'
@@ -54,13 +54,13 @@ const handleSearch = async () => {
   message.value = ''
   results.value = []
   try {
-    const found = await searchCity(q)
+    const found = await searchCity(q, configStore.lang)
     results.value = found
     if (!found.length)
-      message.value = `'${q}' 로 찾은 지역이 없습니다. 가까운 큰 지역으로 검색해 보세요.`
+      message.value = configStore.t('edit.noResult', { query: q })
   } catch (error) {
     console.error('지역 검색 실패:', error)
-    message.value = '지역을 검색하지 못했습니다. 잠시 후 다시 시도해 주세요.'
+    message.value = configStore.t('edit.searchFail')
   } finally {
     isSearching.value = false
   }
@@ -75,18 +75,18 @@ const pickCity = (city) => {
 const save = () => {
   const who = form.value.who.trim()
   if (!who) {
-    message.value = '어떻게 부를지 적어 주세요. (예: 정비소, 밭, 출퇴근길)'
+    message.value = configStore.t('edit.needWho')
     return
   }
   if (!form.value.city) {
-    message.value = '지역을 골라 주세요.'
+    message.value = configStore.t('edit.needCity')
     return
   }
 
   if (isNew.value) {
     const added = peopleStore.addPerson({ who, modeId: form.value.modeId, city: form.value.city })
     if (!added) {
-      message.value = `한 번에 ${MAX_PEOPLE}명까지 볼 수 있습니다.`
+      message.value = configStore.t('edit.fullShort', { max: MAX_PEOPLE })
       return
     }
   } else {
@@ -118,12 +118,12 @@ const remove = (person) => {
     <div class="head">
       <div>
         <h3>
-          내 사람들 <span class="cnt tnum">{{ peopleStore.count }}/{{ MAX_PEOPLE }}</span>
+          {{ configStore.t('edit.title') }} <span class="cnt tnum">{{ peopleStore.count }}/{{ MAX_PEOPLE }}</span>
         </h3>
-        <p class="hint">챙기고 싶은 사람과 그 사람이 있는 곳을 적어 두세요.</p>
+        <p class="hint">{{ configStore.t('edit.hint') }}</p>
       </div>
       <button type="button" class="ghost" @click="isOpen = !isOpen">
-        {{ isOpen ? '접기' : '고르기' }}
+        {{ configStore.t(isOpen ? 'edit.close' : 'edit.open') }}
       </button>
     </div>
 
@@ -133,19 +133,19 @@ const remove = (person) => {
         <div v-if="editingId !== person.id" class="view">
           <span class="who">{{ person.who }}</span>
           <span class="meta">{{ modeLabel(person.modeId) }} · {{ person.city.name }}</span>
-          <button type="button" class="ghost sm" @click="startEdit(person)">수정</button>
-          <button type="button" class="ghost sm danger" @click="remove(person)">삭제</button>
+          <button type="button" class="ghost sm" @click="startEdit(person)">{{ configStore.t('edit.edit') }}</button>
+          <button type="button" class="ghost sm danger" @click="remove(person)">{{ configStore.t('edit.delete') }}</button>
         </div>
 
         <!-- 편집 중 -->
         <form v-else class="edit" @submit.prevent="save">
           <label class="field">
-            <span>어떻게 부를까요</span>
-            <input v-model="form.who" type="text" placeholder="예: 정비소, 밭, 출퇴근길" />
+            <span>{{ configStore.t('edit.who') }}</span>
+            <input v-model="form.who" type="text" :placeholder="configStore.t('edit.whoPlaceholder')" />
           </label>
 
           <fieldset class="field">
-            <legend>무엇을 하나요</legend>
+            <legend>{{ configStore.t('edit.what') }}</legend>
             <div class="modes">
               <label v-for="mode in configStore.modeList" :key="mode.id" class="radio">
                 <input v-model="form.modeId" type="radio" :value="mode.id" />
@@ -155,21 +155,21 @@ const remove = (person) => {
           </fieldset>
 
           <div class="field">
-            <span class="lb">어디에 있나요</span>
+            <span class="lb">{{ configStore.t('edit.where') }}</span>
             <p v-if="form.city" class="picked">
               {{ form.city.name }}
               <small>{{ form.city.region }}</small>
-              <button type="button" class="ghost sm" @click="form.city = null">바꾸기</button>
+              <button type="button" class="ghost sm" @click="form.city = null">{{ configStore.t('edit.change') }}</button>
             </p>
             <div v-else class="search">
               <input
                 v-model="query"
                 type="text"
-                placeholder="지역 이름 (예: 전주, 철원, 잠실)"
+                :placeholder="configStore.t('edit.cityPlaceholder')"
                 @keydown.enter.prevent="handleSearch"
               />
               <button type="button" class="ghost sm" :disabled="isSearching" @click="handleSearch">
-                {{ isSearching ? '찾는 중' : '검색' }}
+                {{ configStore.t(isSearching ? 'edit.searching' : 'edit.search') }}
               </button>
             </div>
             <ul v-if="results.length" class="results">
@@ -184,8 +184,8 @@ const remove = (person) => {
           <p v-if="message" class="msg">{{ message }}</p>
 
           <div class="actions">
-            <button type="submit" class="primary">저장</button>
-            <button type="button" class="ghost sm" @click="cancel">취소</button>
+            <button type="submit" class="primary">{{ configStore.t('edit.save') }}</button>
+            <button type="button" class="ghost sm" @click="cancel">{{ configStore.t('edit.cancel') }}</button>
           </div>
         </form>
       </li>
@@ -194,12 +194,12 @@ const remove = (person) => {
       <li v-if="isNew" class="item">
         <form class="edit" @submit.prevent="save">
           <label class="field">
-            <span>어떻게 부를까요</span>
-            <input v-model="form.who" type="text" placeholder="예: 정비소, 밭, 출퇴근길" />
+            <span>{{ configStore.t('edit.who') }}</span>
+            <input v-model="form.who" type="text" :placeholder="configStore.t('edit.whoPlaceholder')" />
           </label>
 
           <fieldset class="field">
-            <legend>무엇을 하나요</legend>
+            <legend>{{ configStore.t('edit.what') }}</legend>
             <div class="modes">
               <label v-for="mode in configStore.modeList" :key="mode.id" class="radio">
                 <input v-model="form.modeId" type="radio" :value="mode.id" />
@@ -209,21 +209,21 @@ const remove = (person) => {
           </fieldset>
 
           <div class="field">
-            <span class="lb">어디에 있나요</span>
+            <span class="lb">{{ configStore.t('edit.where') }}</span>
             <p v-if="form.city" class="picked">
               {{ form.city.name }}
               <small>{{ form.city.region }}</small>
-              <button type="button" class="ghost sm" @click="form.city = null">바꾸기</button>
+              <button type="button" class="ghost sm" @click="form.city = null">{{ configStore.t('edit.change') }}</button>
             </p>
             <div v-else class="search">
               <input
                 v-model="query"
                 type="text"
-                placeholder="지역 이름 (예: 전주, 철원, 잠실)"
+                :placeholder="configStore.t('edit.cityPlaceholder')"
                 @keydown.enter.prevent="handleSearch"
               />
               <button type="button" class="ghost sm" :disabled="isSearching" @click="handleSearch">
-                {{ isSearching ? '찾는 중' : '검색' }}
+                {{ configStore.t(isSearching ? 'edit.searching' : 'edit.search') }}
               </button>
             </div>
             <ul v-if="results.length" class="results">
@@ -238,8 +238,8 @@ const remove = (person) => {
           <p v-if="message" class="msg">{{ message }}</p>
 
           <div class="actions">
-            <button type="submit" class="primary">추가</button>
-            <button type="button" class="ghost sm" @click="cancel">취소</button>
+            <button type="submit" class="primary">{{ configStore.t('edit.add') }}</button>
+            <button type="button" class="ghost sm" @click="cancel">{{ configStore.t('edit.cancel') }}</button>
           </div>
         </form>
       </li>
@@ -247,12 +247,12 @@ const remove = (person) => {
 
     <div v-if="isOpen && !isNew" class="foot">
       <button v-if="!peopleStore.isFull" type="button" class="ghost sm" @click="startAdd">
-        + 사람 추가
+        {{ configStore.t('edit.addPerson') }}
       </button>
       <span v-else class="full"
-        >{{ MAX_PEOPLE }}명이 다 찼습니다. 한 명을 지우면 더 넣을 수 있습니다.</span
+        >{{ configStore.t('edit.full', { max: MAX_PEOPLE }) }}</span
       >
-      <button type="button" class="ghost sm dim" @click="resetToSample">예시로 되돌리기</button>
+      <button type="button" class="ghost sm dim" @click="resetToSample">{{ configStore.t('edit.reset') }}</button>
     </div>
   </div>
 </template>

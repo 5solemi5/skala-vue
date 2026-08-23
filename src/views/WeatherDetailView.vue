@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { buildAdvice } from '../utils/adviceRules'
+import { groupOf } from '../utils/weatherCondition'
 import { fetchCityWeather, fetchHourly } from '../api/weatherApi'
 import { useConfigStore } from '@/stores/configStore'
 import { useCityStore } from '@/stores/cityStore'
@@ -29,11 +30,14 @@ const loadCity = async (id) => {
 
   isLoading.value = true
   try {
-    const [current, hourly] = await Promise.all([fetchCityWeather(city), fetchHourly(city)])
+    const [current, hourly] = await Promise.all([
+      fetchCityWeather(city, configStore.lang),
+      fetchHourly(city),
+    ])
     cityData.value = current
     hourlyRows.value = hourly
   } catch (error) {
-    console.error('상세 정보를 불러오지 못했습니다:', error)
+    console.error('상세 정보를 불러오지 못했습니다:', error)  // 개발용 로그
     cityData.value = null
   } finally {
     isLoading.value = false
@@ -54,6 +58,12 @@ watch(
   },
 )
 
+// 날씨 설명은 API 가 언어에 맞춰 주는 값이라 언어가 바뀌면 다시 받아야 한다
+watch(
+  () => configStore.lang,
+  () => loadCity(route.params.cityId),
+)
+
 const order = { stop: 0, warn: 1, info: 2, good: 3 }
 
 // 상세 화면에서만 네 가지 일을 한 번에 비교해 볼 수 있다
@@ -62,9 +72,12 @@ const byMode = computed(() => {
   return configStore.modeList.map((mode) => ({
     id: mode.id,
     label: mode.label,
-    advices: [...buildAdvice(cityData.value, mode.id)].sort(
-      (a, b) => order[a.level] - order[b.level],
-    ),
+    advices: [
+      ...buildAdvice(cityData.value, mode.id, {
+        lang: configStore.lang,
+        unit: configStore.unit,
+      }),
+    ].sort((a, b) => order[a.level] - order[b.level]),
   }))
 })
 
@@ -79,10 +92,10 @@ const displayMin = computed(() =>
 <template>
   <div class="detail">
     <button type="button" class="back" @click="router.push('/')">
-      <span aria-hidden="true">←</span> 전체 지역
+      <span aria-hidden="true">←</span> {{ configStore.t('detail.back') }}
     </button>
 
-    <div v-if="isLoading" class="state">불러오는 중입니다</div>
+    <div v-if="isLoading" class="state">{{ configStore.t('detail.loading') }}</div>
 
     <template v-else-if="cityData">
       <header class="head">
@@ -104,27 +117,27 @@ const displayMin = computed(() =>
 
       <dl class="obs">
         <div>
-          <dt>날씨</dt>
-          <dd>{{ cityData.description ?? cityData.status }}</dd>
+          <dt>{{ configStore.t('detail.weather') }}</dt>
+          <dd>{{ cityData.description ?? configStore.t(`cond.${groupOf(cityData.condition)}`) }}</dd>
         </div>
         <div>
-          <dt>습도</dt>
+          <dt>{{ configStore.t('detail.humidity') }}</dt>
           <dd class="tnum">{{ cityData.humidity }}%</dd>
         </div>
         <div>
-          <dt>강수확률</dt>
+          <dt>{{ configStore.t('detail.rainProb') }}</dt>
           <dd class="tnum">{{ cityData.rainProb }}%</dd>
         </div>
         <div>
-          <dt>최저기온</dt>
+          <dt>{{ configStore.t('detail.minTemp') }}</dt>
           <dd class="tnum">{{ displayMin }}{{ configStore.unitSymbol }}</dd>
         </div>
         <div>
-          <dt>풍속</dt>
+          <dt>{{ configStore.t('detail.wind') }}</dt>
           <dd class="tnum">{{ cityData.wind }}m/s</dd>
         </div>
         <div>
-          <dt>체감</dt>
+          <dt>{{ configStore.t('detail.feelsLike') }}</dt>
           <dd class="tnum">
             {{ configStore.convertTemp(cityData.feelsLike) }}{{ configStore.unitSymbol }}
           </dd>
@@ -136,10 +149,8 @@ const displayMin = computed(() =>
       </section>
 
       <section class="block">
-        <h3>하는 일별 채비</h3>
-        <p class="lead">
-          메인에서는 고른 한 가지만 보이지만 여기서는 네 가지를 나란히 볼 수 있습니다.
-        </p>
+        <h3>{{ configStore.t('detail.byMode') }}</h3>
+        <p class="lead">{{ configStore.t('detail.byModeHint') }}</p>
 
         <div class="modes">
           <article
@@ -162,8 +173,8 @@ const displayMin = computed(() =>
     </template>
 
     <div v-else class="state">
-      <p>내 지역 목록에 없는 곳입니다.</p>
-      <p class="dim">전체 지역 화면에서 먼저 추가해 주세요.</p>
+      <p>{{ configStore.t('detail.notInList') }}</p>
+      <p class="dim">{{ configStore.t('detail.notInListHint') }}</p>
     </div>
   </div>
 </template>
