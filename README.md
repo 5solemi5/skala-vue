@@ -63,17 +63,23 @@ OpenWeatherMap 무료 플랜에 오늘 강수확률과 일 최저기온이 없�
 
 ```
 src/
-├── api/weatherApi.js      두 API 를 합쳐 화면이 쓸 형태로 만든다
-├── utils/adviceRules.js   모드별 판정 규칙
-├── stores/configStore.js  단위(℃/℉), 모드
+├── api/weatherApi.js       두 API 를 합쳐 화면이 쓸 형태로 만든다
+├── utils/
+│   ├── adviceRules.js      하는 일별 판정 규칙
+│   └── hourlyScore.js      시간대별 판정 (위 규칙을 그대로 재사용)
+├── stores/
+│   ├── configStore.js      단위(℃/℉), 하는 일
+│   └── cityStore.js        내 지역 목록
 ├── components/
-│   ├── exercise/          과제용 컴포넌트
-│   ├── practices/         수업 Code Challenge 실습 (수업 때 쓴 그대로 둠)
-│   └── ui/                shadcn-vue 컴포넌트
+│   ├── service/            지금 서비스 화면을 이루는 컴포넌트
+│   ├── exercise/           과제 단계별 결과물 (아카이브에서 그대로 사용)
+│   ├── practices/          수업 Code Challenge 실습 (수업 때 쓴 그대로 둠)
+│   └── ui/                 shadcn-vue 컴포넌트
 └── views/
 ```
 
-`practices/` 는 수업에서 작성한 원본을 유지했다. 과제 쪽만 Tailwind 로 바꿨다.
+`practices/` 와 `exercise/` 는 수업·과제 시점의 코드를 유지했다.
+지금 화면은 `service/` 아래 컴포넌트로 다시 짰다.
 
 ## 과제 대응표
 
