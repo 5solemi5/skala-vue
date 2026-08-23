@@ -1,9 +1,8 @@
 /**
  * 오늘의 채비 판정 규칙
  *
- * 같은 날씨 데이터라도 하는 일에 따라 해야 할 준비가 달라진다.
- * 화면(뷰) 세 곳에서 같은 규칙을 쓰다 보니 로직이 그대로 복사되어 있었다.
- * 규칙을 고칠 때 세 군데를 다 고쳐야 하는 상태라 공용 모듈로 분리했다.
+ * 같은 날씨라도 챙기는 사람에 따라 해야 할 준비가 다르다.
+ * 화면 여러 곳에서 같은 규칙을 쓰기 때문에 한곳에 모아 두었다.
  *
  * level 의미
  *  - stop : 오늘은 하지 마세요
@@ -11,9 +10,12 @@
  *  - info : 참고하세요
  *  - good : 조건이 좋습니다
  */
+
 export const buildAdvice = (item, mode) => {
   const list = []
 
+  // ── 자동차 정비소 ──────────────────────────────
+  // 도장 작업은 온도와 습도에 예민하다. 계절에 따라 몰리는 정비 항목도 다르다.
   if (mode === 'repair') {
     if (item.humidity >= 80) {
       list.push({
@@ -57,6 +59,7 @@ export const buildAdvice = (item, mode) => {
     }
   }
 
+  // ── 농사 ────────────────────────────────────
   if (mode === 'farm') {
     if (item.humidity >= 80 && item.rainProb >= 30) {
       list.push({
@@ -94,63 +97,111 @@ export const buildAdvice = (item, mode) => {
     }
   }
 
-  if (mode === 'site') {
-    if (item.temp >= 33) {
+  // ── 자전거 ───────────────────────────────────
+  // 자전거는 노면과 바람이 안전에 직결된다. 측풍은 넘어질 수 있어 기온보다 위험하다.
+  if (mode === 'bike') {
+    if (item.status === '비' || item.status === '눈' || item.rainProb >= 60) {
       list.push({
         level: 'stop',
-        title: '옥외 작업을 조정하세요',
-        desc: `기온 ${item.temp}℃ — 폭염 구간입니다. 시간당 휴식을 넣으세요`,
+        title: '오늘은 자전거를 두고 가세요',
+        desc: `강수확률 ${item.rainProb}% — 노면이 젖으면 제동 거리가 크게 늘어납니다`,
       })
-    } else if (item.temp >= 31) {
+    } else if (item.rainProb >= 30) {
       list.push({
         level: 'warn',
-        title: '무더위에 주의하세요',
-        desc: `기온 ${item.temp}℃ — 그늘과 식수를 준비하세요`,
+        title: '비를 만날 수 있습니다',
+        desc: `강수확률 ${item.rainProb}% — 우비를 챙기고 무리한 코스는 피하세요`,
       })
     }
-    if (item.rainProb >= 60) {
-      list.push({
-        level: 'warn',
-        title: '고소 작업은 미끄럼에 주의하세요',
-        desc: `강수확률 ${item.rainProb}% — 발판과 안전대를 다시 점검하세요`,
-      })
-    }
-    if (item.status === '비') {
+    if (item.wind !== undefined && item.wind >= 7) {
       list.push({
         level: 'stop',
-        title: '우천 작업은 제한하세요',
-        desc: '감전·추락 위험이 커집니다',
+        title: '바람이 너무 강합니다',
+        desc: `풍속 ${item.wind}m/s — 옆에서 부는 바람에 중심을 잃기 쉽습니다`,
+      })
+    } else if (item.wind !== undefined && item.wind >= 4) {
+      list.push({
+        level: 'warn',
+        title: '맞바람이 셉니다',
+        desc: `풍속 ${item.wind}m/s — 평소보다 힘이 더 듭니다`,
+      })
+    }
+    if (item.temp >= 31) {
+      list.push({
+        level: 'warn',
+        title: '한낮은 피하세요',
+        desc: `기온 ${item.temp}℃ — 물을 자주 마시고 이른 아침이나 해 진 뒤에 타세요`,
+      })
+    }
+    if (item.minTemp <= 3) {
+      list.push({
+        level: 'info',
+        title: '장갑을 챙기세요',
+        desc: `최저 ${item.minTemp}℃ — 손이 먼저 시립니다`,
+      })
+    }
+    if (
+      item.temp >= 12 &&
+      item.temp <= 26 &&
+      item.rainProb < 30 &&
+      (item.wind === undefined || item.wind < 4)
+    ) {
+      list.push({
+        level: 'good',
+        title: '타기 좋은 날입니다',
+        desc: `${item.temp}℃ · 바람 약함 — 오래 달려도 무리가 없습니다`,
       })
     }
   }
 
-  if (mode === 'sport') {
+  // ── 야구 ────────────────────────────────────
+  // 야구는 비에 가장 약하다. 그라운드가 젖으면 경기가 열리지 않는다.
+  if (mode === 'baseball') {
+    if (item.status === '비' || item.status === '눈') {
+      list.push({
+        level: 'stop',
+        title: '경기가 취소될 수 있습니다',
+        desc: `${item.status} — 출발 전에 구단 공지를 확인하세요`,
+      })
+    } else if (item.rainProb >= 60) {
+      list.push({
+        level: 'stop',
+        title: '우천 취소 가능성이 높습니다',
+        desc: `강수확률 ${item.rainProb}% — 표를 미리 취소할지 정해 두세요`,
+      })
+    } else if (item.rainProb >= 30) {
+      list.push({
+        level: 'warn',
+        title: '중간에 비가 올 수 있습니다',
+        desc: `강수확률 ${item.rainProb}% — 우비를 챙기세요 (구장 우산 반입 제한)`,
+      })
+    }
     if (item.temp >= 31) {
       list.push({
         level: 'warn',
-        title: '한낮 러닝은 피하세요',
-        desc: `기온 ${item.temp}℃ — 이른 아침이나 해 진 뒤가 낫습니다`,
+        title: '관중석이 덥습니다',
+        desc: `기온 ${item.temp}℃ — 모자와 물을 챙기고 그늘 좌석을 고르세요`,
       })
     }
-    if (item.humidity >= 80) {
-      list.push({
-        level: 'warn',
-        title: '땀이 잘 안 마릅니다',
-        desc: `습도 ${item.humidity}% — 체감이 높으니 수분을 자주 보충하세요`,
-      })
-    }
-    if (item.rainProb >= 60) {
+    if (item.minTemp <= 8) {
       list.push({
         level: 'info',
-        title: '실내 운동을 권합니다',
-        desc: `강수확률 ${item.rainProb}%`,
+        title: '해가 지면 쌀쌀합니다',
+        desc: `최저 ${item.minTemp}℃ — 야간 경기라면 겉옷을 챙기세요`,
       })
     }
-    if (item.temp >= 15 && item.temp <= 24 && item.humidity < 70 && item.rainProb < 40) {
+    if (item.wind !== undefined && item.wind >= 7) {
+      list.push({
+        level: 'info',
+        title: '바람이 강합니다',
+        desc: `풍속 ${item.wind}m/s — 뜬공 판단이 어려운 날입니다`,
+      })
+    }
+    if (item.rainProb < 30 && item.temp >= 15 && item.temp <= 28) {
       list.push({
         level: 'good',
-        title: '뛰기 딱 좋은 날입니다',
-        desc: `${item.temp}℃ · 습도 ${item.humidity}% — 컨디션 좋은 구간입니다`,
+        title: '경기 보기 좋은 날입니다',
+        desc: `${item.temp}℃ · 강수확률 ${item.rainProb}% — 야외 관람에 무리가 없습니다`,
       })
     }
   }

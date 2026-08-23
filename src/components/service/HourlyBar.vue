@@ -48,9 +48,9 @@ const summary = computed(() => {
     </div>
 
     <p v-if="!compact" class="legend">
-      <span class="key good">양호</span>
+      <span class="key good">괜찮음</span>
       <span class="key warn">주의</span>
-      <span class="key stop">중지</span>
+      <span class="key stop">피하기</span>
       <span class="note">아래 숫자는 기온</span>
     </p>
   </figure>

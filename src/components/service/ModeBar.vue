@@ -4,14 +4,11 @@ defineProps({
   currentMode: { type: String, required: true },
 })
 defineEmits(['change-mode'])
-
-// 라벨에서 이모지를 떼고 글자만 쓴다
-const plain = (label) => label.replace(/[^가-힣a-zA-Z]/g, '')
 </script>
 
 <template>
   <div class="modebar">
-    <p class="eyebrow">오늘 나는</p>
+    <p class="eyebrow">누구의 오늘</p>
     <div class="seg" role="tablist" aria-label="하는 일 선택">
       <button
         v-for="mode in modeList"
@@ -23,7 +20,8 @@ const plain = (label) => label.replace(/[^가-힣a-zA-Z]/g, '')
         :class="{ on: currentMode === mode.id }"
         @click="$emit('change-mode', mode.id)"
       >
-        {{ plain(mode.label) }}
+        <span class="who">{{ mode.who }}</span>
+        <span class="what">{{ mode.label }}</span>
       </button>
     </div>
   </div>
@@ -32,12 +30,12 @@ const plain = (label) => label.replace(/[^가-힣a-zA-Z]/g, '')
 <style scoped>
 .modebar {
   display: flex;
-  align-items: baseline;
-  gap: 16px;
+  align-items: flex-end;
+  gap: 20px;
   flex-wrap: wrap;
 }
 .eyebrow {
-  margin: 0;
+  margin: 0 0 10px;
   font-size: 12px;
   letter-spacing: 0.14em;
   color: var(--color-ink-3);
@@ -49,16 +47,31 @@ const plain = (label) => label.replace(/[^가-힣a-zA-Z]/g, '')
 }
 .seg-item {
   position: relative;
-  padding: 6px 2px 10px;
-  margin-right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px 10px;
+  margin-right: 24px;
   font-family: inherit;
-  font-size: 16px;
-  font-weight: 500;
+  text-align: left;
   color: var(--color-ink-3);
   background: none;
   border: 0;
   cursor: pointer;
   transition: color 0.15s ease;
+}
+.who {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-4);
+}
+.what {
+  font-size: 15px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.seg-item.on .who {
+  color: var(--color-ink-3);
 }
 .seg-item:last-child {
   margin-right: 0;
@@ -66,7 +79,7 @@ const plain = (label) => label.replace(/[^가-힣a-zA-Z]/g, '')
 .seg-item:hover {
   color: var(--color-ink-2);
 }
-.seg-item.on {
+.seg-item.on .what {
   color: var(--color-ink);
   font-weight: 600;
 }

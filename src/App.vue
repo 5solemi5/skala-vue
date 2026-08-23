@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
 import UnitToggler from './components/exercise/UnitToggler.vue'
+import BrandMark from './components/service/BrandMark.vue'
 
 const navList = [
   { to: '/', label: '오늘의 채비' },
@@ -20,8 +21,11 @@ const courseLinks = [
     <header class="site-header">
       <div class="inner">
         <RouterLink to="/" class="brand">
-          <span class="brand-name">오늘의 채비</span>
-          <span class="brand-sub">날씨를 할 일로 옮겨 드립니다</span>
+          <BrandMark :size="30" />
+          <span class="brand-text">
+            <span class="brand-name">오늘의 채비</span>
+            <span class="brand-sub">같은 하늘, 다른 하루</span>
+          </span>
         </RouterLink>
 
         <nav class="nav" aria-label="주요 메뉴">
@@ -91,10 +95,15 @@ const courseLinks = [
 }
 .brand {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
   color: inherit;
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 .brand-name {
   font-size: 15px;

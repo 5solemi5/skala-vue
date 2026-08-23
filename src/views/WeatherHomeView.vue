@@ -134,9 +134,9 @@ const summaryLine = computed(() => {
   const total = filteredWeatherList.value.length
   if (!total) return ''
   const parts = []
-  if (stopCount.value) parts.push(`${stopCount.value}곳은 작업을 미루시는 편이 낫습니다`)
+  if (stopCount.value) parts.push(`${stopCount.value}곳은 오늘 피하시는 편이 낫습니다`)
   if (warnCount.value) parts.push(`${warnCount.value}곳은 주의가 필요합니다`)
-  if (!parts.length) return `${total}곳 모두 오늘 작업에 무리가 없습니다`
+  if (!parts.length) return `${total}곳 모두 오늘은 괜찮습니다`
   return `${total}곳 중 ${parts.join(', ')}`
 })
 
@@ -150,7 +150,7 @@ watchEffect(() => {
 
 watch(currentMode, (newMode, oldMode) => {
   console.log(`🧰 [watch] 모드 변경: ${oldMode} ➡️ ${newMode} — 채비 기준을 다시 적용합니다.`)
-  selectedCityInfo.value = `${configStore.currentModeLabel.replace(/[^가-힣]/g, '')} 기준으로 오늘의 채비를 다시 계산했습니다.`
+  selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
 })
 
 const handleSelect = (city) => {

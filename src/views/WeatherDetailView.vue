@@ -61,7 +61,7 @@ const byMode = computed(() => {
   if (!cityData.value) return []
   return configStore.modeList.map((mode) => ({
     id: mode.id,
-    label: mode.label.replace(/[^가-힣]/g, ''),
+    label: mode.label,
     advices: [...buildAdvice(cityData.value, mode.id)].sort(
       (a, b) => order[a.level] - order[b.level],
     ),
