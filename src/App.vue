@@ -169,12 +169,15 @@ const courseLinks = computed(() => [
   border-bottom-color: var(--color-ink-3);
 }
 
-/* 보는 방식을 바꾸는 스위치 둘을 한 덩어리로 묶는다 */
+/*
+ * 언어와 단위. 둘 다 보는 방식을 바꾸는 것이지만 생김새를 다르게 뒀다.
+ * 사이를 조금 띄워서 서로 다른 스위치라는 게 먼저 읽히게 한다.
+ */
 .switches {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-left: 4px;
+  gap: 14px;
+  margin-left: 8px;
 }
 
 .site-main {
