@@ -1,4 +1,8 @@
 <script setup>
+// ── 과제 (Hands on) ──
+import WeatherMockup from './components/exercise/WeatherMockup.vue'
+
+// ── 기본 문법 실습 (Code Challenge) ──
 // 1. 학습환경 구성
 import SampleOne from './components/practices/basic/SampleOne.vue'
 import SampleTwo from './components/practices/basic/SampleTwo.vue'
@@ -34,6 +38,14 @@ import StyleScoped from './components/practices/basic/StyleScoped.vue'
 </script>
 
 <template>
+  <!-- 과제 (Hands on) -->
+  <div class="app-container">
+    <h1>⛅ 과제 1: 날씨 (Mockup)</h1>
+    <hr />
+    <WeatherMockup />
+  </div>
+
+  <!-- 기본 문법 실습 (Code Challenge) -->
   <div class="practice-container">
     <h1>1. 학습환경구성</h1>
     <hr />
@@ -76,6 +88,7 @@ import StyleScoped from './components/practices/basic/StyleScoped.vue'
 </template>
 
 <style>
-/* ⚠️ 외부 스타일 파일(예: 버튼 디자인 뭉치)을 이 방 안으로 쏙 가리켜 가져옵니다 */
+/* 과제 화면 공통 레이아웃 / 기본 문법 실습 화면 공통 스타일 */
+@import '@/assets/exercise.css';
 @import '@/assets/practice.css';
 </style>

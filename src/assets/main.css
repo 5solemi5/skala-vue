@@ -21,15 +21,13 @@ a,
   }
 }
 
+/*
+ * 스캐폴드 기본값은 웰컴 화면 전용이라 화면이 넓어지면
+ * #app 을 2단 그리드로 쪼개고 body 를 세로 중앙정렬한다.
+ * 대시보드 레이아웃과 충돌해서 카드가 좁게 찌그러지므로 한 단으로 되돌린다.
+ */
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
     padding: 0 2rem;
   }
 }
