@@ -9,6 +9,25 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't11',
+    title: '배포한 주소가 로그인 화면으로 튕김',
+    date: '배포',
+    symptom:
+      'Vercel 이 배포를 마치고 알려준 주소로 들어가니 사이트 대신 Vercel 로그인 페이지가 떴다. 내 브라우저에서는 잘 보여서 처음엔 알아채지 못했다. 이미 로그인이 되어 있었기 때문이다.',
+    log: `curl -I https://skala-qlrmddl5o-428.vercel.app/
+
+HTTP/2 302
+location: https://vercel.com/sso-api?url=...&nonce=...
+set-cookie: _vercel_sso_nonce=...
+x-robots-tag: noindex`,
+    cause:
+      '주소가 두 종류라는 걸 몰랐다. 빌드마다 새로 생기는 배포 전용 주소는 기본으로 잠겨 있고, 프로젝트에 하나만 붙는 고정 주소는 열려 있다. 내가 확인한 건 잠긴 쪽이었다.',
+    fix: `# 고정 주소 (Settings > Domains)
+curl -o /dev/null -w '%{http_code}' https://skala-vue-seven-alpha.vercel.app/
+200`,
+    note: '내 브라우저에서 열린다고 남도 열리는 게 아니었다. 로그인 상태가 없는 곳에서 확인해야 알 수 있다.',
+  },
+  {
     id: 't10',
     title: '휴대폰에서 화면이 옆으로 밀림',
     date: '내 사람들 화면',
@@ -250,6 +269,18 @@ v-model.trim="userEmail"`,
 ])
 
 const reviewList = ref([
+  {
+    id: 'r15',
+    title: '배포하고 나서야 본 API 키의 자리',
+    when: '배포',
+    why: '환경변수로 빼 뒀으니 키가 안 보이는 줄 알았다. 배포한 번들을 열어 보니 키가 그대로 들어 있었다.',
+    before: `# .env.local 에 두고 코드에서는 이렇게만 썼다
+const OWM_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY`,
+    after: `# 배포된 결과물에서 그대로 찾힌다
+curl -s https://.../assets/index-DoGzl147.js | grep -c '63c09e17'
+1`,
+    note: 'import.meta.env 는 실행 중에 읽는 값이 아니라 빌드할 때 문자열로 바뀌어 박힌다. .env.local 을 Git 에 안 올리는 건 저장소를 지키는 것이지 키를 숨기는 게 아니었다. VITE_ 를 붙인 값은 전부 공개된다고 보는 게 맞고, 진짜 감춰야 하는 키라면 서버를 하나 두고 거기서 불러야 한다. 이번엔 무료 플랜 날씨 키라 그대로 뒀다.',
+  },
   {
     id: 'r14',
     title: '고른 칸을 돋보이게 하려고 나머지를 어둡게 했던 것',
