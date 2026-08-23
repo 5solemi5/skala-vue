@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
+import TwinkleMark from './TwinkleMark.vue'
 
 const configStore = useConfigStore()
 
@@ -31,6 +32,8 @@ const displayTemp = computed(() =>
     :aria-pressed="selected"
     @click="$emit('select', person)"
   >
+    <TwinkleMark v-if="selected" class="spark" :size="20" />
+
     <span class="who">
       <i v-if="lead" class="pip" :class="lead.level" aria-hidden="true"></i>
       {{ person.who }}
@@ -70,12 +73,11 @@ const displayTemp = computed(() =>
   background: var(--color-paper);
   border: 0;
   cursor: pointer;
-  transition: background 0.14s ease;
+  transition:
+    background 0.14s ease,
+    box-shadow 0.16s ease;
 }
 .person:hover {
-  background: var(--color-paper-2);
-}
-.person.on {
   background: var(--color-paper-2);
 }
 
@@ -85,14 +87,88 @@ const displayTemp = computed(() =>
  * 색은 문구에만 남기고 여기서는 작은 점 하나로 알린다.
  */
 
-/* 지금 보고 있는 사람은 왼쪽에 잉크 선으로 표시 */
+/*
+ * 지금 보고 있는 칸.
+ * 처음엔 나머지 칸을 어둡게 눌러서 대비를 줬는데,
+ * 챙기는 사람들인데 고르지 않았다고 흐려지는 게 이상했다.
+ * 나머지는 그대로 두고 고른 칸만 테두리를 둘러 또렷하게 한다.
+ */
+.person.on {
+  background:
+    radial-gradient(120% 90% at 78% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 62%),
+    linear-gradient(168deg, #ffffff 0%, #f7fafb 100%);
+  box-shadow:
+    inset 0 0 0 1.5px var(--color-ink),
+    0 8px 24px -10px rgba(16, 28, 38, 0.32);
+  z-index: 1;
+}
+
+/*
+ * 고른 칸에는 그 사람의 오늘 판정 색을 옅게 깐다.
+ * 색을 넣되 아무 색이나 쓰지 않고 판정 색을 그대로 써서,
+ * 화면이 화사해지면서도 색이 여전히 뜻을 갖게 했다.
+ */
+.person.on.stop {
+  background:
+    radial-gradient(120% 90% at 78% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 62%),
+    linear-gradient(168deg, #ffffff 0%, var(--color-stop-soft) 100%);
+}
+.person.on.warn {
+  background:
+    radial-gradient(120% 90% at 78% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 62%),
+    linear-gradient(168deg, #ffffff 0%, var(--color-warn-soft) 100%);
+}
+.person.on.good {
+  background:
+    radial-gradient(120% 90% at 78% 0%, rgba(255, 255, 255, 0.95) 0%, transparent 62%),
+    linear-gradient(168deg, #ffffff 0%, var(--color-good-soft) 100%);
+}
+
+/* 아래쪽 표시와 반짝임도 판정 색을 따라간다 */
+.person.on.stop::after {
+  background: var(--color-stop);
+}
+.person.on.warn::after {
+  background: var(--color-warn);
+}
+.person.on.good::after {
+  background: var(--color-good);
+}
+.person.on.stop .spark {
+  color: var(--color-stop);
+}
+.person.on.warn .spark {
+  color: var(--color-warn);
+}
+.person.on.good .spark {
+  color: var(--color-good);
+}
+
+/*
+ * 위쪽 빛은 배경 그라디언트로 넣었다.
+ * 처음엔 흰 그라디언트를 가상요소로 덮었는데,
+ * position: absolute 인 가상요소가 일반 콘텐츠 위에 그려져서 이름이 흐려 보였다.
+ */
+
+/* 고른 칸에만 얹히는 반짝임. 제목에 쓴 것과 같은 표시라 서로 이어져 보인다. */
+.spark {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  color: var(--color-ink);
+  opacity: 0.9;
+}
+
+/* 아래 큰 화면이 이 칸의 내용이라는 걸 알리는 표시 */
 .person.on::after {
   content: '';
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
+  left: 50%;
+  bottom: -1px;
+  width: 22px;
+  height: 3px;
+  transform: translateX(-50%);
+  border-radius: 3px 3px 0 0;
   background: var(--color-ink);
 }
 

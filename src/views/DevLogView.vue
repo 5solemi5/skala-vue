@@ -9,6 +9,31 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't9',
+    title: '카드를 고르면 이름이 흐려 보임',
+    date: '내 사람들 화면',
+    symptom:
+      '고른 칸에 위쪽 빛을 넣었더니 그 칸의 이름만 뿌옇게 보였다. 글자 색은 건드린 적이 없는데 흐려졌다.',
+    log: `.person.on::before {
+  position: absolute;
+  top: 1.5px;
+  height: 38%;
+  background: linear-gradient(180deg, rgba(255,255,255,.85), transparent);
+  pointer-events: none;     /* 클릭은 통과하는데 */
+}
+
+getComputedStyle(name).color  →  rgb(44, 62, 80)   /* 색은 그대로였다 */`,
+    cause:
+      'position: absolute 인 가상요소는 위치를 잡지 않은 일반 콘텐츠보다 위에 그려진다. 흰 그라디언트가 이름을 덮고 있었다. pointer-events: none 은 클릭만 통과시킬 뿐 그리는 순서와는 상관이 없다.',
+    fix: `/* 덮지 말고 배경으로 넣는다 */
+.person.on {
+  background:
+    radial-gradient(120% 90% at 78% 0%, rgba(255,255,255,.95), transparent 62%),
+    linear-gradient(168deg, #ffffff, #f7fafb);
+}`,
+    note: '색이 그대로인데 흐려 보이면 글자가 아니라 그 위에 뭐가 덮였는지 봐야 한다.',
+  },
+  {
     id: 't8',
     title: '한 이벤트 핸들러에 두 줄을 넣어 화면이 통째로 안 뜸',
     date: '사람 편집 기능',
@@ -194,6 +219,21 @@ v-model.trim="userEmail"`,
 ])
 
 const reviewList = ref([
+  {
+    id: 'r14',
+    title: '고른 칸을 돋보이게 하려고 나머지를 어둡게 했던 것',
+    when: '내 사람들 화면',
+    why: '고른 칸이 위로 올라와 보이게 하려고 나머지 칸을 한 톤 눌렀다. 대비는 생겼는데, 챙기는 사람들인데 고르지 않았다고 흐려지는 게 이상했다.',
+    before: `.person    { background: var(--color-paper-2); }  /* 나머지를 눌러 두고 */
+.person.on { background: var(--color-paper);   }  /* 고른 칸만 밝게 */`,
+    after: `.person    { background: var(--color-paper); }   /* 모두 그대로 밝게 */
+.person.on {
+  box-shadow: inset 0 0 0 1.5px var(--color-ink),   /* 테두리를 둘러 또렷하게 */
+              0 8px 24px -10px rgba(16,28,38,.32);
+  background: ... var(--color-stop-soft);           /* 그 사람 판정 색을 옅게 */
+}`,
+    note: '빼기(다른 걸 흐리기)가 아니라 더하기(고른 것에 얹기)로 바꿨다. 색은 아무 색이나 쓰지 않고 그날 판정 색을 그대로 써서, 화사해지면서도 색이 여전히 뜻을 갖게 했다.',
+  },
   {
     id: 'r12',
     title: '판정 색을 두 곳에 쓰니 경고판이 됨',

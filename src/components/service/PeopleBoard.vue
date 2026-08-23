@@ -1,5 +1,6 @@
 <script setup>
 import PersonCard from './PersonCard.vue'
+import TwinkleMark from './TwinkleMark.vue'
 
 defineProps({
   people: { type: Array, required: true },
@@ -25,16 +26,7 @@ const countLabel = (n) => `${koCount[n] ?? n} 곳의 하루를 보고 있어요`
           오늘,
           <span class="mark">
             내 사람들
-            <svg class="twinkle" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                class="big"
-                d="M12 1.5c.6 4.6 1.9 5.9 6.5 6.5-4.6.6-5.9 1.9-6.5 6.5-.6-4.6-1.9-5.9-6.5-6.5 4.6-.6 5.9-1.9 6.5-6.5Z"
-              />
-              <path
-                class="small"
-                d="M19 13.5c.3 2.4 1 3.1 3.4 3.4-2.4.3-3.1 1-3.4 3.4-.3-2.4-1-3.1-3.4-3.4 2.4-.3 3.1-1 3.4-3.4Z"
-              />
-            </svg>
+            <TwinkleMark class="spark" :size="22" />
           </span>
         </h2>
         <p class="sub">{{ countLabel(people.length) }}</p>
@@ -95,36 +87,11 @@ h2 {
   white-space: nowrap;
   padding-right: 20px;
 }
-.twinkle {
+.spark {
   position: absolute;
   right: -2px;
   top: -8px;
-  width: 22px;
-  height: 22px;
-  fill: var(--color-ink);
-  overflow: visible;
-}
-.twinkle .big {
-  opacity: 0.9;
-  transform-origin: 12px 8px;
-  animation: twinkle 3.4s ease-in-out infinite;
-}
-.twinkle .small {
-  opacity: 0.55;
-  transform-origin: 19px 17px;
-  animation: twinkle 3.4s ease-in-out infinite 1.1s;
-}
-@keyframes twinkle {
-  0%,
-  70%,
-  100% {
-    opacity: 0.28;
-    transform: scale(0.82);
-  }
-  35% {
-    opacity: 1;
-    transform: scale(1);
-  }
+  color: var(--color-ink);
 }
 
 .sub {
@@ -149,36 +116,43 @@ h2 {
 }
 
 /*
- * 테두리를 1px 그라디언트로 깔아 유리 액자처럼 한쪽에서 빛을 받게 했다.
- * 그 빛이 아주 느리게 테두리를 한 바퀴 도는데,
- * 눈에 띄려고 넣은 게 아니라 가만히 보고 있을 때만 알아채는 정도로 뒀다.
+ * 액자 테두리.
+ * 1px 그라디언트를 깔고 각도를 돌려서 빛이 테두리를 한 바퀴 도는 것처럼 보이게 했다.
+ * 밝은 지점을 두 곳에 둬서 한쪽이 사라질 때 반대쪽이 들어온다.
+ * 속도는 일부러 느리게 뒀다. 눈에 띄려고 넣은 게 아니라
+ * 가만히 보고 있을 때 알아채는 정도가 맞다고 봤다.
  */
+@property --sheen {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
 .frame {
   position: relative;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    var(--color-line) 0%,
-    var(--color-line-2) 22%,
-    #ffffff 38%,
-    var(--color-line-2) 52%,
-    var(--color-line) 74%,
-    var(--color-line-2) 100%
+  padding: 1.5px;
+  border-radius: 13px;
+  background: conic-gradient(
+    from var(--sheen),
+    var(--color-line) 0deg,
+    var(--color-line-2) 40deg,
+    #ffffff 68deg,
+    var(--color-line-2) 96deg,
+    var(--color-line) 150deg,
+    var(--color-line) 210deg,
+    var(--color-line-2) 244deg,
+    #ffffff 272deg,
+    var(--color-line-2) 300deg,
+    var(--color-line) 360deg
   );
-  background-size: 260% 260%;
-  border-radius: 12px;
   box-shadow:
     0 1px 2px rgba(16, 28, 38, 0.04),
     0 10px 28px -14px rgba(16, 28, 38, 0.16);
-  animation: sheen 14s ease-in-out infinite;
+  animation: sheen 9s linear infinite;
 }
 @keyframes sheen {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
+  to {
+    --sheen: 360deg;
   }
 }
 
@@ -186,9 +160,9 @@ h2 {
 .frame::after {
   content: '';
   position: absolute;
-  left: 14px;
-  right: 14px;
-  top: 1px;
+  left: 16px;
+  right: 16px;
+  top: 1.5px;
   height: 1px;
   background: linear-gradient(
     90deg,
@@ -198,14 +172,15 @@ h2 {
     transparent
   );
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
   gap: 1px;
   background: var(--color-line);
-  border-radius: 11px;
+  border-radius: 11.5px;
   overflow: hidden;
 }
 </style>
