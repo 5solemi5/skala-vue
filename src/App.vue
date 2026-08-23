@@ -53,6 +53,8 @@ import WatchersWatchEffect from './components/practices/composition/WatchersWatc
 
 // 8. Component Lifecycle
 import LifecycleParent from './components/practices/component/LifecycleParent.vue'
+// 9. Props & Emits
+import PropsEmitsParent from './components/practices/component/PropsEmitsParent.vue'
 </script>
 
 <template>
@@ -128,6 +130,10 @@ import LifecycleParent from './components/practices/component/LifecycleParent.vu
     <h1>8. Component Lifecycle</h1>
     <hr />
     <LifecycleParent />
+
+    <h1>9. Props &amp; Emits</h1>
+    <hr />
+    <PropsEmitsParent />
   </div>
 </template>
 

@@ -284,6 +284,28 @@ src/
 - `onUpdated` 는 데이터가 바뀌어 화면을 다시 그릴 때마다 실행된다.
   타이머가 도는 동안 3초마다 로그가 계속 찍히는 걸로 확인했다.
 
+
+### Code Challenge 8. Props & Emits (p.172)
+
+| 파일 | 내용 |
+|---|---|
+| `PropsEmitsParent.vue` | 자식에게 데이터를 내려주고(props), 자식이 올린 이벤트를 처리 |
+| `PropsEmitsChild.vue` | `defineProps` 로 수신, `defineEmits` 로 송신 |
+
+**알게 된 점**
+
+- **데이터는 아래로, 이벤트는 위로.** 부모 → 자식은 `props`, 자식 → 부모는 `emit` 이다.
+  자식이 받은 props를 직접 고치는 건 안 되고, "이렇게 바꿔달라"고 **요청만** 보낸다.
+  실제로 값을 바꾸는 건 부모다.
+- **이름 표기가 양쪽에서 다르다.** 자식에서 `parentData` 로 선언한 걸
+  부모 템플릿에서는 `:parent-data` 로 쓴다. HTML 속성은 대소문자를 구분하지 않기 때문에
+  **camelCase ↔ kebab-case** 로 자동 변환된다. 이벤트도 `update-request` 처럼 kebab-case 로 쓴다.
+- `defineProps` 에 `type` 과 `required` 를 적어두면 잘못된 값이 들어올 때 콘솔에 경고가 뜬다.
+  타입을 안 적어도 동작은 하지만, 적어두는 편이 실수를 빨리 잡는다.
+- `emit('update-request', payload)` 처럼 **두 번째 인자로 데이터를 실어 보낼 수 있다.**
+  부모 쪽 핸들러는 그 값을 첫 번째 파라미터로 받는다.
+  → 이 구조가 3일차 과제(컴포넌트 분리)에서 `SearchBar` 가 검색어를 부모에게 올리는 방식 그대로다.
+
 ---
 
 # 과제 (Hands on) 기록
