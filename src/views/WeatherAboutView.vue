@@ -28,6 +28,13 @@ const sameSky = [
       { who: '밭', what: '농사', say: '서리 위험. 오늘 밤 피복하거나 수확을 앞당긴다' },
     ],
   },
+  {
+    weather: '습도 45% · 바람 4m/s',
+    rows: [
+      { who: '베란다', what: '빨래·환기', say: '이불까지 널 만하다. 오늘 안에 다 마른다' },
+      { who: '주말 산행', what: '등산', say: '걷기 편한 조건. 다만 정상은 더 춥다' },
+    ],
+  },
 ]
 
 const goHome = () => router.push('/')

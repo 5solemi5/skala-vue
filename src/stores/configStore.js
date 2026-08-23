@@ -41,8 +41,11 @@ export const useConfigStore = defineStore('config', () => {
   const modeList = ref([
     { id: 'repair', label: '자동차 정비소' },
     { id: 'farm', label: '농사' },
+    { id: 'site', label: '현장 작업' },
     { id: 'bike', label: '자전거' },
+    { id: 'hike', label: '등산' },
     { id: 'baseball', label: '야구' },
+    { id: 'laundry', label: '빨래·환기' },
   ])
   // 저장된 값이 지금 목록에 없는 경우가 있다.
   // 모드를 바꾸거나 이름을 고치면 예전에 저장된 id 가 그대로 남아
