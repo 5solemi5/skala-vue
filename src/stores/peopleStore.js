@@ -4,6 +4,14 @@ import { defineStore } from 'pinia'
 const STORAGE_KEY = 'skala-chaebi-people'
 
 /**
+ * 한 번에 챙길 수 있는 사람 수.
+ * 아침에 한 번 훑어보는 화면이라 한눈에 들어오는 만큼만 둔다.
+ * 더 늘리면 카드가 작아지고 결국 목록을 스크롤하게 되는데,
+ * 그러면 "한눈에 본다" 는 이 화면의 목적이 사라진다.
+ */
+export const MAX_PEOPLE = 8
+
+/**
  * 챙기는 사람 목록.
  *
  * 처음에는 "하는 일"과 "지역"을 따로 골랐다.
@@ -68,7 +76,8 @@ export const usePeopleStore = defineStore('people', () => {
       const ok =
         Array.isArray(parsed) &&
         parsed.every((p) => p?.id && p?.who && p?.modeId && p?.city?.lat !== undefined)
-      return ok ? parsed : structuredClone(DEFAULT_PEOPLE)
+      // 예전에 저장한 목록이 지금 상한보다 길 수도 있어서 잘라 둔다
+      return ok ? parsed.slice(0, MAX_PEOPLE) : structuredClone(DEFAULT_PEOPLE)
     } catch {
       return structuredClone(DEFAULT_PEOPLE)
     }
@@ -97,10 +106,13 @@ export const usePeopleStore = defineStore('people', () => {
   )
 
   const count = computed(() => people.value.length)
+  const isFull = computed(() => people.value.length >= MAX_PEOPLE)
 
   const addPerson = (person) => {
+    if (isFull.value) return false
     people.value.push({ ...person, id: `p_${Date.now()}` })
     markTouched()
+    return true
   }
 
   const updatePerson = (id, patch) => {
@@ -124,5 +136,5 @@ export const usePeopleStore = defineStore('people', () => {
     }
   }
 
-  return { people, count, isSample, addPerson, updatePerson, removePerson, resetPeople }
+  return { people, count, isFull, isSample, addPerson, updatePerson, removePerson, resetPeople }
 })

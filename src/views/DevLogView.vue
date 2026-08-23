@@ -195,6 +195,22 @@ v-model.trim="userEmail"`,
 
 const reviewList = ref([
   {
+    id: 'r9',
+    title: '안내 문구를 빼고 버튼 하나로',
+    when: '사람 편집 기능',
+    why: '예시라는 걸 알리려고 카드 위에 안내 문장을 두 줄 넣었는데, 바로 옆에 "내 사람들로 바꾸기" 버튼이 이미 같은 말을 하고 있었다. 같은 말을 두 번 하면 읽는 사람만 피곤하다.',
+    before: `<button v-if="isSample" class="setup">내 사람들로 바꾸기</button>
+
+<p v-if="isSample" class="sample">
+  아래는 만든 사람의 예시입니다. 챙기고 싶은 사람과
+  그 사람이 있는 지역을 직접 넣어 보세요.
+</p>`,
+    after: `<button class="setup">
+  {{ isSample ? '내 사람들로 바꾸기' : '사람 고치기' }}
+</button>`,
+    note: '문구를 없애는 대신 버튼을 항상 띄웠다. 아직 예시면 "내 사람들로 바꾸기", 한 번이라도 고쳤으면 "사람 고치기" 로 말이 바뀐다. 버튼 하나가 안내와 진입을 같이 한다.',
+  },
+  {
     id: 'r8',
     title: '나만 쓸 수 있는 화면이던 것을 고침',
     when: '사람 편집 기능',

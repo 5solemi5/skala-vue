@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { searchCity } from '@/api/weatherApi'
-import { usePeopleStore } from '@/stores/peopleStore'
+import { usePeopleStore, MAX_PEOPLE } from '@/stores/peopleStore'
 import { useConfigStore } from '@/stores/configStore'
 
 const peopleStore = usePeopleStore()
@@ -31,6 +31,10 @@ const startEdit = (person) => {
 }
 
 const startAdd = () => {
+  if (peopleStore.isFull) {
+    message.value = `한 번에 ${MAX_PEOPLE}명까지 볼 수 있습니다. 한 명을 지우고 추가해 주세요.`
+    return
+  }
   editingId.value = 'new'
   form.value = { who: '', modeId: configStore.modeList[0].id, city: null }
   query.value = ''
@@ -80,7 +84,11 @@ const save = () => {
   }
 
   if (isNew.value) {
-    peopleStore.addPerson({ who, modeId: form.value.modeId, city: form.value.city })
+    const added = peopleStore.addPerson({ who, modeId: form.value.modeId, city: form.value.city })
+    if (!added) {
+      message.value = `한 번에 ${MAX_PEOPLE}명까지 볼 수 있습니다.`
+      return
+    }
   } else {
     peopleStore.updatePerson(editingId.value, {
       who,
@@ -109,10 +117,10 @@ const remove = (person) => {
   <div>
     <div class="head">
       <div>
-        <h3>내 사람들</h3>
-        <p class="hint">
-          챙기고 싶은 사람과 그 사람이 있는 지역을 직접 넣으세요. 지금 보이는 건 예시입니다.
-        </p>
+        <h3>
+          내 사람들 <span class="cnt tnum">{{ peopleStore.count }}/{{ MAX_PEOPLE }}</span>
+        </h3>
+        <p class="hint">챙기고 싶은 사람과 그 사람이 있는 지역을 넣으세요.</p>
       </div>
       <button type="button" class="ghost" @click="isOpen = !isOpen">
         {{ isOpen ? '닫기' : '고치기' }}
@@ -238,7 +246,12 @@ const remove = (person) => {
     </ul>
 
     <div v-if="isOpen && !isNew" class="foot">
-      <button type="button" class="ghost sm" @click="startAdd">+ 사람 추가</button>
+      <button v-if="!peopleStore.isFull" type="button" class="ghost sm" @click="startAdd">
+        + 사람 추가
+      </button>
+      <span v-else class="full"
+        >{{ MAX_PEOPLE }}명이 다 찼습니다. 한 명을 지우면 더 넣을 수 있습니다.</span
+      >
       <button type="button" class="ghost sm dim" @click="resetToSample">예시로 되돌리기</button>
     </div>
   </div>
@@ -411,6 +424,16 @@ input[type='text']:focus {
   gap: 8px;
 }
 
+.cnt {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-ink-4);
+}
+.full {
+  font-size: 11.5px;
+  color: var(--color-ink-3);
+}
 .foot {
   display: flex;
   align-items: center;

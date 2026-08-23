@@ -17,14 +17,11 @@ defineEmits(['select', 'setup'])
   <section class="board">
     <div class="head">
       <p class="eyebrow">오늘, 내 사람들</p>
-      <button v-if="isSample" type="button" class="setup" @click="$emit('setup')">
-        내 사람들로 바꾸기
+      <button type="button" class="setup" @click="$emit('setup')">
+        {{ isSample ? '내 사람들로 바꾸기' : '사람 고치기' }}
       </button>
     </div>
 
-    <p v-if="isSample" class="sample">
-      아래는 만든 사람의 예시입니다. 챙기고 싶은 사람과 그 사람이 있는 지역을 직접 넣어 보세요.
-    </p>
     <div class="grid">
       <PersonCard
         v-for="person in people"
@@ -46,7 +43,7 @@ defineEmits(['select', 'setup'])
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 .setup {
   font-family: inherit;
@@ -60,13 +57,6 @@ defineEmits(['select', 'setup'])
 }
 .setup:hover {
   border-bottom-color: var(--color-ink);
-}
-.sample {
-  margin: 0 0 12px;
-  max-width: 52ch;
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--color-ink-3);
 }
 .eyebrow {
   margin: 0;
