@@ -4,11 +4,6 @@ import WeatherMockup from '../components/exercise/WeatherMockup.vue'
 import WeatherComposition from '../components/exercise/WeatherComposition.vue'
 import WeatherParent from '../components/exercise/WeatherParent.vue'
 
-/**
- * 과제가 단원마다 어떻게 발전했는지 남겨둔 화면.
- * 최종본만 보면 중간에 무엇을 배워서 무엇을 고쳤는지가 사라지기 때문에
- * 각 단계의 결과물을 그대로 보관한다.
- */
 const stageList = ref([
   {
     id: 1,
@@ -16,8 +11,7 @@ const stageList = ref([
     page: 'p.116',
     day: '1일차 · Vue Syntax',
     learned: 'v-for · v-if · :value/@input · 이벤트 수식어',
-    point:
-      '판정 로직을 템플릿에서 함수로 직접 호출했다. 화면이 다시 그려질 때마다 도시 수만큼 재실행된다.',
+    point: '판정을 템플릿에서 함수로 불렀다. 나중에 보니 리렌더링마다 6번씩 돌고 있었음.',
     component: WeatherMockup,
   },
   {
@@ -26,7 +20,7 @@ const stageList = ref([
     page: 'p.145',
     day: '2일차 · Composition API',
     learned: 'computed · watch · watchEffect',
-    point: '함수 호출을 computed 로 바꿔 캐싱했다. 검색 필터링과 모드 전환 감시를 붙였다.',
+    point: '위의 함수 호출을 computed 로 교체. 검색 필터링과 모드 전환 감시 추가.',
     component: WeatherComposition,
   },
   {
@@ -35,7 +29,7 @@ const stageList = ref([
     page: 'p.178',
     day: '3일차 · Vue Components',
     learned: 'props · emits · slot',
-    point: '한 덩어리였던 화면을 6개 컴포넌트로 나눴다. 상태는 부모가, 화면은 자식이 담당한다.',
+    point: '한 덩어리였던 화면을 6개로 분리. 상태는 부모, 화면은 자식.',
     component: WeatherParent,
   },
 ])
@@ -46,10 +40,7 @@ const currentStageId = ref(3)
 <template>
   <div class="archive">
     <h2>🗂️ 과제 진행 아카이브</h2>
-    <p class="lead">
-      최종 화면만 보면 중간에 무엇을 배워 무엇을 고쳤는지가 남지 않습니다. 단원별 과제 결과물을
-      그대로 보관해 두었습니다.
-    </p>
+    <p class="lead">과제가 단원마다 어떻게 바뀌었는지. 단계를 누르면 그때 결과물이 아래에 뜬다.</p>
 
     <ol class="timeline">
       <li
@@ -70,7 +61,7 @@ const currentStageId = ref(3)
         </div>
         <div class="stage-body">
           <p><b>배운 것</b> {{ stage.learned }}</p>
-          <p><b>이 단계의 특징</b> {{ stage.point }}</p>
+          <p><b>메모</b> {{ stage.point }}</p>
         </div>
       </li>
     </ol>

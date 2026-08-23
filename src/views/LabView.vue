@@ -47,11 +47,7 @@ import ElementForm from '../components/practices/library/ElementForm.vue'
 import ElementData from '../components/practices/library/ElementData.vue'
 import ElementFeedback from '../components/practices/library/ElementFeedback.vue'
 
-/**
- * 수업에서 진행한 Code Challenge 결과물을 단원별로 모아둔 화면.
- * 한 번에 다 띄우면 타이머가 도는 컴포넌트까지 전부 살아있게 되므로
- * 선택한 단원만 v-if 로 마운트한다.
- */
+// 한 번에 다 띄우면 타이머 도는 컴포넌트까지 전부 살아있게 돼서 선택한 단원만 마운트한다
 const groupList = ref([
   {
     id: 0,
@@ -154,16 +150,14 @@ const groupList = ref([
 
 const currentGroupId = ref(0)
 const currentGroup = computed(() => groupList.value.find((g) => g.id === currentGroupId.value))
-const totalCount = computed(() => groupList.value.reduce((sum, g) => sum + g.components.length, 0))
 </script>
 
 <template>
   <div class="lab">
     <h2>📚 Vue 문법 실습실</h2>
     <p class="lead">
-      수업에서 진행한 <strong>Code Challenge</strong> 결과물입니다. 교재 순서대로 단원을 나눠
-      두었고, 컴포넌트는 총 <strong>{{ totalCount }}개</strong>입니다. 브라우저 콘솔(F12)을 열어두면
-      <code>watch</code> · <code>watchEffect</code> · 라이프사이클 훅의 로그를 함께 볼 수 있습니다.
+      수업에서 진행한 Code Challenge 결과물. 콘솔(F12)을 열어두면 watch·라이프사이클 로그도 같이
+      보인다.
     </p>
 
     <nav class="tabs">
