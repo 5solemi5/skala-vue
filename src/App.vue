@@ -105,7 +105,8 @@ const courseLinks = computed(() => [
   z-index: 1;
   max-width: 860px;
   margin: 0 auto;
-  padding: 14px 20px;
+  /* 위아래를 넓혀 바탕의 하늘이 보일 자리를 준다 */
+  padding: 22px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -239,6 +240,11 @@ const courseLinks = computed(() => [
 
 @media (max-width: 700px) {
   .inner {
+    /*
+     * 좁은 화면에서는 여백을 늘리지 않는다.
+     * 메뉴가 세 줄로 접혀 이미 높은데 헤더는 붙박이라
+     * 더 키우면 화면의 3할을 계속 차지한다. 하늘 자리는 그 세 줄로 충분하다.
+     */
     padding: 12px 14px;
     gap: 12px;
   }

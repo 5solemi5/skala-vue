@@ -67,7 +67,8 @@ const displayTemp = computed(() =>
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 20px 18px 22px;
+  /* 열두 칸이 한 화면에 들어오도록 여백을 줄였다 */
+  padding: 14px 14px 15px;
   font-family: inherit;
   text-align: left;
   background: var(--color-paper);
@@ -175,8 +176,8 @@ const displayTemp = computed(() =>
 .who {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 16px;
+  gap: 6px;
+  font-size: 14.5px;
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -211,8 +212,8 @@ const displayTemp = computed(() =>
 }
 .place {
   margin-top: 4px;
-  padding-left: 14px;
-  font-size: 11.5px;
+  padding-left: 12px;
+  font-size: 11px;
   font-weight: 500;
   color: var(--color-ink-2);
 }
@@ -230,11 +231,11 @@ const displayTemp = computed(() =>
   display: flex;
   align-items: center;
   gap: 2px;
-  margin: 15px 0 13px;
-  padding-left: 14px;
+  margin: 10px 0 9px;
+  padding-left: 12px;
 }
 .deg {
-  font-size: 29px;
+  font-size: 24px;
   font-weight: 600;
   letter-spacing: -0.04em;
   line-height: 1;
@@ -257,8 +258,8 @@ const displayTemp = computed(() =>
 }
 
 .say {
-  padding-left: 14px;
-  font-size: 13px;
+  padding-left: 12px;
+  font-size: 12.5px;
   font-weight: 500;
   line-height: 1.5;
   color: var(--color-ink-2);
