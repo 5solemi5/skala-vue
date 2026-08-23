@@ -460,6 +460,49 @@ const adviceMap = computed(() => {
 어떻게 써야 하나 한참 고민했다. 결국 **도시별로 따로 만들 게 아니라 전체를 한 덩어리로 계산해서
 객체(map)로 들고 있으면 된다**는 걸 깨달았다. 화면에서는 `adviceMap[item.id]` 로 꺼내 쓴다.
 
+
+## Hands on 4. Weather Component (p.178) — 3일차 과제
+
+### 교재 요구사항 이행 — 기능 변경 없이 컴포넌트 분리
+
+| 요구사항 | 파일 | 역할 |
+|---|---|---|
+| 1 | `WeatherParent.vue` | 모든 반응형 데이터와 computed / watch 를 그대로 보유 |
+| 2 | `BaseDashboardCard.vue` | 검색박스·리스트박스의 공통 디자인. `<slot>` 으로 내용 주입 |
+| 3 | `SearchBar.vue` | 검색어를 props 로 받아 표시, `update-query` 로 부모에 전달 |
+| 4 | `WeatherCard.vue` | 도시 객체를 props 로 받아 표시, `select-card` / `click-detail` emit |
+| 5 | 전 컴포넌트 | 각자 `<style scoped>` 로 디자인 분리 |
+| 7 | 아래 참조 | 추가 컴포넌트 분리 |
+
+### 개인 Customization (요구사항 7번) — 추가 분리한 컴포넌트 2개
+
+| 파일 | 분리한 이유 |
+|---|---|
+| `ModeSelector.vue` | 모드 버튼과 요약 문구가 한 덩어리로 움직여서 따로 뺐다. `change-mode` 이벤트로 부모에 전달 |
+| `AdviceList.vue` | 오늘의 채비 목록은 `WeatherCard` 안에서도 독립적인 관심사라 분리했다. 등급별 아이콘 매핑도 여기로 옮겼다 |
+
+결과적으로 **6개 컴포넌트**로 나뉘었고, 부모는 상태와 로직만, 자식들은 화면만 담당한다.
+
+### 구현하면서 알게 된 점
+
+- **부모가 모든 상태를 쥐고 있어야 한다는 게 왜 중요한지** 알았다.
+  `searchQuery` 를 `SearchBar` 안에 두면 편할 것 같지만, 그러면 부모의 `filteredWeatherList` 가
+  그 값을 알 수 없다. 그래서 값은 부모가 갖고, 자식은 **표시(props)와 요청(emit)** 만 한다.
+- **Slot 으로 넣은 자식도 부모 스코프에서 컴파일된다.**
+  `<BaseDashboardCard><SearchBar :current-query="searchQuery" /></BaseDashboardCard>` 처럼
+  껍데기 안에 넣었는데도 부모 변수인 `searchQuery` 가 그대로 바인딩된다.
+  처음엔 `BaseDashboardCard` 를 한 단계 거치니까 데이터를 다시 넘겨줘야 하는 줄 알았는데
+  아니었다. 시각적 위치와 스코프는 별개다.
+- **아이콘 매핑을 `v-if` 체인에서 객체로 바꿨다.** 2일차에는
+  `v-if="advice.level === 'stop'"` 을 네 번 늘어놓았는데,
+  `AdviceList` 로 분리하면서 `iconMap` 객체를 만들어 `{{ iconMap[advice.level] }}` 한 줄로 줄였다.
+  등급을 추가할 때 템플릿을 안 건드려도 된다.
+
+### 교재와 다르게 한 부분
+
+교재에는 컴포넌트 이름이 `WeatheCard.vue` 로 적혀 있는데 `r` 이 빠진 오타로 보인다.
+강사님 저장소의 실제 파일명이 `WeatherCard.vue` 라서 그쪽을 따랐다.
+
 ---
 
 # 트러블슈팅 기록

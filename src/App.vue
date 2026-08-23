@@ -2,6 +2,7 @@
 // ── 과제 (Hands on) ──
 import WeatherMockup from './components/exercise/WeatherMockup.vue'
 import WeatherComposition from './components/exercise/WeatherComposition.vue'
+import WeatherParent from './components/exercise/WeatherParent.vue'
 
 // ── 1일차: Vue Syntax ──
 // 1. 학습환경 구성
@@ -73,6 +74,12 @@ import SlotScopedParent from './components/practices/component/SlotScopedParent.
     <h1>⛅ 과제 2: 날씨 (컴포지션)</h1>
     <hr />
     <WeatherComposition />
+  </div>
+
+  <div class="app-container">
+    <h1>⛅ 과제 3: 날씨 (컴포넌트 분리)</h1>
+    <hr />
+    <WeatherParent />
   </div>
 
   <!-- 기본 문법 실습 (Code Challenge) -->
