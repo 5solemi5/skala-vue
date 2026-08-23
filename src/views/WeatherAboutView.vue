@@ -21,9 +21,8 @@ const modeExamples = [
     <section class="lead">
       <p class="big">날씨를 숫자가 아니라 <strong>“오늘 뭘 해야 하는지”</strong>로 알려드립니다.</p>
       <p>
-        기존 날씨앱은 “내일 비 20mm”까지만 알려줍니다. 그런데 같은 예보를 보고도
-        정비소 사장님과 농사짓는 분이 준비해야 하는 건 정반대입니다.
-        이 서비스는 그 해석을 대신해 드립니다.
+        기존 날씨앱은 “내일 비 20mm”까지만 알려줍니다. 그런데 같은 예보를 보고도 정비소 사장님과
+        농사짓는 분이 준비해야 하는 건 정반대입니다. 이 서비스는 그 해석을 대신해 드립니다.
       </p>
     </section>
 
@@ -31,7 +30,11 @@ const modeExamples = [
       <h3>같은 날씨, 다른 채비</h3>
       <table class="compare">
         <thead>
-          <tr><th>하는 일</th><th>날씨</th><th>오늘의 채비</th></tr>
+          <tr>
+            <th>하는 일</th>
+            <th>날씨</th>
+            <th>오늘의 채비</th>
+          </tr>
         </thead>
         <tbody>
           <tr v-for="row in modeExamples" :key="row.mode">
@@ -47,16 +50,19 @@ const modeExamples = [
       <h3>만들게 된 이유</h3>
       <p>
         아버지는 자동차 정비소를, 할머니는 농사를 하십니다. 두 분 다 아침마다 날씨를 확인하시는데,
-        어느 앱도 “그래서 오늘 뭘 하시라”는 말은 해주지 않았습니다.
-        그러다 날씨로 일하는 사람이 두 분만은 아니라는 걸 알게 됐고,
-        하는 일을 고르면 그 일에 맞는 채비를 알려주는 화면을 만들기로 했습니다.
+        어느 앱도 “그래서 오늘 뭘 하시라”는 말은 해주지 않았습니다. 그러다 날씨로 일하는 사람이 두
+        분만은 아니라는 걸 알게 됐고, 하는 일을 고르면 그 일에 맞는 채비를 알려주는 화면을 만들기로
+        했습니다.
       </p>
     </section>
 
     <section>
       <h3>사용 기술</h3>
       <ul class="tech">
-        <li><code>Vue 3</code> Composition API — <code>ref</code> / <code>computed</code> / <code>watch</code></li>
+        <li>
+          <code>Vue 3</code> Composition API — <code>ref</code> / <code>computed</code> /
+          <code>watch</code>
+        </li>
         <li><code>Vue Router</code> — 지연 로딩, 동적 경로 매칭, 쿼리 스트링 상태 동기화</li>
         <li><code>components/exercise/</code> 의 독립 부품 컴포넌트 조합</li>
         <li><code>utils/adviceRules.js</code> — 하는 일별 판정 규칙을 한 곳에 모은 모듈</li>

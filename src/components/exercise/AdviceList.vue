@@ -1,6 +1,4 @@
 <script setup>
-import { Badge } from '@/components/ui/badge'
-
 // [요구사항 7] 내가 추가로 분리한 컴포넌트 - 오늘의 채비 목록
 defineProps({
   adviceList: {
@@ -33,7 +31,9 @@ const toneMap = {
       class="mb-1.5 rounded-md border-l-[3px] px-3 py-2"
       :class="toneMap[advice.level]"
     >
-      <p class="text-[13.5px] font-semibold text-foreground">{{ iconMap[advice.level] }} {{ advice.title }}</p>
+      <p class="text-[13.5px] font-semibold text-foreground">
+        {{ iconMap[advice.level] }} {{ advice.title }}
+      </p>
       <p class="mt-0.5 text-xs leading-relaxed text-muted-foreground">{{ advice.desc }}</p>
     </div>
   </div>
