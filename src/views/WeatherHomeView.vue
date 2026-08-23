@@ -6,6 +6,7 @@ import ModeBar from '../components/service/ModeBar.vue'
 import CityHero from '../components/service/CityHero.vue'
 import CityRow from '../components/service/CityRow.vue'
 import PeopleBoard from '../components/service/PeopleBoard.vue'
+import PeopleManager from '../components/service/PeopleManager.vue'
 import CityManager from '../components/exercise/CityManager.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 
@@ -31,6 +32,7 @@ const updatedAt = ref('')
 // 사람마다 지역이 다르므로 각자 자기 지역 날씨를 따로 받는다
 const peopleWeather = ref({})
 const selectedPersonId = ref('')
+const peopleTools = ref(null)
 
 const searchQuery = ref('')
 const selectedCityInfo = ref('목록에서 지역을 누르면 여기가 바뀝니다.')
@@ -114,6 +116,17 @@ watch(
 )
 
 watch(selectedId, () => loadHourly())
+
+// 사람을 고치거나 추가하면 그 사람 지역 날씨를 다시 받는다
+watch(
+  () => peopleStore.people.map((p) => `${p.id}:${p.city.id}:${p.modeId}`).join(','),
+  () => loadPeople(),
+)
+
+// '내 사람들로 바꾸기' 를 누르면 아래 편집 영역으로 데려간다
+const goSetup = () => {
+  peopleTools.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+}
 
 const filteredWeatherList = computed(() => {
   const query = searchQuery.value.trim()
@@ -215,12 +228,14 @@ const handleDetail = (city) => {
 <template>
   <div class="page">
     <PeopleBoard
+      :is-sample="peopleStore.isSample"
       :people="peopleStore.people"
       :weather-by-id="peopleWeather"
       :advice-by-id="peopleAdvice"
       :label-by-id="modeLabelById"
       :selected-id="selectedPersonId"
       @select="handlePersonSelect"
+      @setup="goSetup"
     />
 
     <ModeBar
@@ -287,7 +302,10 @@ const handleDetail = (city) => {
         </div>
       </section>
 
-      <section class="tools">
+      <section ref="peopleTools" class="tools">
+        <div class="tool">
+          <PeopleManager @changed="loadPeople" />
+        </div>
         <div class="tool">
           <SearchBar :current-query="searchQuery" @update-query="(val) => (searchQuery = val)" />
         </div>

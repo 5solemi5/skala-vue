@@ -9,6 +9,29 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't8',
+    title: '한 이벤트 핸들러에 두 줄을 넣어 화면이 통째로 안 뜸',
+    date: '사람 편집 기능',
+    symptom: '컴포넌트를 붙이자마자 화면이 500 으로 죽었다. 파일 하나 때문에 앱 전체가 안 떴다.',
+    log: `GET /src/components/service/PeopleManager.vue  500 (Internal Server Error)
+
+Error parsing JavaScript expression: Unexpected token, expected "," (3:10)
+  238 |   class="ghost sm dim"
+  239 |   @click="
+  240 |     peopleStore.resetPeople()
+      |  ^
+  241 |     emit('changed')`,
+    cause: '@click 안에 문장 두 개를 줄바꿈으로 넣었다. 템플릿 표현식은 한 문장만 받는다.',
+    fix: `const resetToSample = () => {
+  peopleStore.resetPeople()
+  editingId.value = ''
+  emit('changed')
+}
+
+@click="resetToSample"`,
+    note: '템플릿에 로직을 두 줄 이상 쓰고 싶어지면 함수로 빼라는 신호였다.',
+  },
+  {
     id: 't7',
     title: '철원이 검색되지 않음',
     date: '지역 검색',
@@ -171,6 +194,29 @@ v-model.trim="userEmail"`,
 ])
 
 const reviewList = ref([
+  {
+    id: 'r8',
+    title: '나만 쓸 수 있는 화면이던 것을 고침',
+    when: '사람 편집 기능',
+    why: '사람 목록을 코드에 박아 두고 편집 화면을 안 만들었더니, 처음 들어온 사람은 남의 아버지와 남의 할머니를 보게 됐다. 스토어에 추가·수정·삭제 함수는 있었지만 부를 곳이 없어서 사실상 고정이었다.',
+    before: `// stores/peopleStore.js 안에만 있고 화면에서 부르는 곳이 없었다
+const DEFAULT_PEOPLE = [
+  { who: '아버지', modeId: 'repair', city: { name: '전주', ... } },
+  { who: '할머니', modeId: 'farm',   city: { name: '철원', ... } },
+]
+const addPerson = ...    // 호출하는 곳 없음
+const updatePerson = ... // 호출하는 곳 없음`,
+    after: `// PeopleManager.vue - 호칭 입력 + 하는 일 선택 + 지역 검색
+// 한 번이라도 손대면 isSample 이 false 가 되어 안내 문구가 사라진다
+const isSample = ref(localStorage.getItem(STORAGE_KEY) === null)
+
+// 처음 들어온 사람에게는 예시임을 알린다
+<p v-if="isSample" class="sample">
+  아래는 만든 사람의 예시입니다. 챙기고 싶은 사람과
+  그 사람이 있는 지역을 직접 넣어 보세요.
+</p>`,
+    note: '기본값을 아예 비워 둘까도 했는데, 빈 화면으로 시작하면 이 서비스가 무엇인지 알기 어려웠다. 예시를 보여주되 예시라고 밝히고 바꾸는 길을 옆에 두는 쪽으로 정했다.',
+  },
   {
     id: 'r7',
     title: '사람과 지역을 하나로 묶기',

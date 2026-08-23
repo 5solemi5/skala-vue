@@ -76,6 +76,14 @@ export const usePeopleStore = defineStore('people', () => {
 
   const people = ref(load())
 
+  // 한 번도 손대지 않았으면 예시 목록이라는 뜻이다.
+  // 처음 들어온 사람에게 남의 아버지 이야기를 그대로 보여줄 수는 없어서,
+  // 예시임을 알리고 바꾸도록 안내하는 데 쓴다.
+  const isSample = ref(localStorage.getItem(STORAGE_KEY) === null)
+  const markTouched = () => {
+    isSample.value = false
+  }
+
   watch(
     people,
     (list) => {
@@ -92,20 +100,29 @@ export const usePeopleStore = defineStore('people', () => {
 
   const addPerson = (person) => {
     people.value.push({ ...person, id: `p_${Date.now()}` })
+    markTouched()
   }
 
   const updatePerson = (id, patch) => {
     const target = people.value.find((p) => p.id === id)
     if (target) Object.assign(target, patch)
+    markTouched()
   }
 
   const removePerson = (id) => {
     people.value = people.value.filter((p) => p.id !== id)
+    markTouched()
   }
 
   const resetPeople = () => {
     people.value = structuredClone(DEFAULT_PEOPLE)
+    isSample.value = true
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // 저장이 막힌 환경에서는 넘어간다
+    }
   }
 
-  return { people, count, addPerson, updatePerson, removePerson, resetPeople }
+  return { people, count, isSample, addPerson, updatePerson, removePerson, resetPeople }
 })
