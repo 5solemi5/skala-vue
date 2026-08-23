@@ -1,0 +1,146 @@
+/**
+ * English copy
+ *
+ * Keys mirror ko.js one to one. A missing key falls back to Korean
+ * so a half-finished translation never leaves a blank on screen.
+ *
+ * The wording is deliberately not a literal translation. The Korean
+ * verdicts speak the way a person would ("오늘은 아니에요"), so the English
+ * does too instead of turning into "Not recommended today".
+ */
+export default {
+  // ── header / footer ──────────────────────────
+  'brand.name': "Today's Kit",
+  'brand.tagline': 'Same sky, different day',
+  'nav.home': 'Today',
+  'nav.about': 'About',
+  'nav.lab': 'Syntax lab',
+  'nav.archive': 'Assignment archive',
+  'nav.devlog': 'Dev log',
+  'nav.mainAria': 'Main menu',
+  'nav.courseAria': 'Coursework',
+  'foot.credit': 'SKALA Full-Stack Engineering · Frontend framework: Vue.js',
+  'lang.aria': 'Language',
+
+  // ── weather ─────────────────────────────────
+  'cond.clear': 'Clear',
+  'cond.clouds': 'Cloudy',
+  'cond.rain': 'Rain',
+  'cond.snow': 'Snow',
+  'cond.haze': 'Hazy',
+
+  // ── what you look after ─────────────────────
+  'mode.repair': 'Auto repair shop',
+  'mode.farm': 'Farming',
+  'mode.site': 'Site work',
+  'mode.bike': 'Cycling',
+  'mode.hike': 'Hiking',
+  'mode.baseball': 'Baseball',
+  'mode.laundry': 'Laundry & airing',
+  'mode.eyebrow': 'What are we checking',
+  'mode.aria': 'Choose what to check',
+
+  // ── the people you look after ───────────────
+  'people.today': 'Today,',
+  'people.mine': 'my people',
+  'people.count': ({ n }) => `Watching ${n} ${n === 1 ? 'place' : 'places'} today`,
+  'people.setup': 'Add my people',
+  'people.setupMore': 'Add more people',
+  'people.loading': 'Loading',
+
+  // ── verdicts ────────────────────────────────
+  'verdict.stop': 'Not today',
+  'verdict.warn': 'Take care',
+  'verdict.good': "You're good",
+  'verdict.info': 'Worth knowing',
+
+  // ── hero card ───────────────────────────────
+  'hero.humidity': 'Humidity',
+  'hero.rainProb': 'Rain',
+  'hero.hot': '🔥 Hot (25°C and above)',
+  'hero.mild': '❄️ Mild (below 25°C)',
+  'hero.detail': 'See details',
+  'hero.detailAria': ({ name }) => `See details for ${name}`,
+  'hero.rowDetail': 'Details',
+
+  // ── hourly strip ────────────────────────────
+  'hourly.label': 'By hour',
+  'hourly.good': 'Fine',
+  'hourly.warn': 'Care',
+  'hourly.stop': 'Avoid',
+  'hourly.note': 'Numbers below are temperature',
+  'hourly.none': 'No clear window today',
+  'hourly.one': ({ from }) => `${from}:00 is your best hour`,
+  'hourly.range': ({ from, to }) => `${from}:00 to ${to}:00 is your best window`,
+
+  // ── home ────────────────────────────────────
+  'home.hint': 'Pick a place from the list and this panel follows.',
+  'home.modeChanged': ({ mode }) => `Recalculated for ${mode}.`,
+  'home.picked': ({ name }) => `${name} selected.`,
+  'home.loadFail': "Couldn't load the weather.",
+  'home.keyFail': 'The OpenWeatherMap key is not valid. Check the key in .env.local.',
+  'home.loadFailWith': ({ message }) => `Couldn't load the weather. (${message})`,
+  'home.partialFail': ({ names }) => `${names} failed to load. Showing the rest.`,
+  'home.loading': 'Loading',
+  'home.others': 'Other places',
+  'home.asOf': ({ time }) => `as of ${time}`,
+  'home.refreshing': 'Refreshing',
+  'home.refresh': 'Refresh',
+  'home.noCity': 'No places on your list yet.',
+  'home.noCityHint': 'Add one below.',
+  'home.noMatch': ({ query }) => `Nothing on your list matches '${query}'.`,
+  'home.addQuery': ({ query }) => `Add '${query}'`,
+  'home.summaryStop': ({ n }) => `${n} are better skipped today`,
+  'home.summaryWarn': ({ n }) => `${n} need care`,
+  'home.summaryNone': ({ total }) => `All ${total} places look fine today`,
+  'home.summary': ({ total, parts }) => `Of ${total} places, ${parts}`,
+
+  // ── detail ──────────────────────────────────
+  'detail.back': 'All places',
+  'detail.loading': 'Loading',
+  'detail.loadFail': "Couldn't load the details",
+  'detail.weather': 'Weather',
+  'detail.humidity': 'Humidity',
+  'detail.rainProb': 'Chance of rain',
+  'detail.minTemp': 'Low',
+  'detail.wind': 'Wind',
+  'detail.feelsLike': 'Feels like',
+  'detail.byMode': 'Every kind of day',
+  'detail.byModeHint': 'The main screen shows the one you picked. Here they sit side by side.',
+  'detail.notInList': 'This place is not on your list.',
+  'detail.notInListHint': 'Add it from the main screen first.',
+
+  // ── editing people ──────────────────────────
+  'edit.title': 'My people',
+  'edit.hint': 'Write down who you look after and where they are.',
+  'edit.open': 'Open',
+  'edit.close': 'Close',
+  'edit.edit': 'Edit',
+  'edit.delete': 'Delete',
+  'edit.who': 'What do you call them',
+  'edit.whoPlaceholder': 'e.g. the shop, the field, my commute',
+  'edit.what': 'What do they do',
+  'edit.where': 'Where are they',
+  'edit.change': 'Change',
+  'edit.cityPlaceholder': 'City name (e.g. Jeonju, Cheorwon, Jamsil)',
+  'edit.searching': 'Searching',
+  'edit.search': 'Search',
+  'edit.save': 'Save',
+  'edit.cancel': 'Cancel',
+  'edit.add': 'Add',
+  'edit.addPerson': '+ Add a person',
+  'edit.reset': 'Back to the sample list',
+  'edit.full': ({ max }) => `That's all ${max}. Remove someone to add another.`,
+  'edit.fullShort': ({ max }) => `You can watch ${max} places at a time.`,
+  'edit.fullRemove': ({ max }) =>
+    `You can watch ${max} places at a time. Remove one, then add.`,
+  'edit.needWho': 'Give them a name. (e.g. the shop, the field, my commute)',
+  'edit.needCity': 'Pick a place.',
+  'edit.noResult': ({ query }) => `Nothing found for '${query}'. Try a larger city nearby.`,
+  'edit.searchFail': "Couldn't search right now. Please try again shortly.",
+
+  // ── not found ───────────────────────────────
+  'notFound.title': 'Page not found',
+  'notFound.body': "That address doesn't exist,<br />or it isn't built yet.",
+  'notFound.home': 'Back to the weather',
+}
