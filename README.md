@@ -398,6 +398,54 @@ const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 401(키 문제)과 그 외 오류는 사용자가 할 수 있는 조치가 다르다.
 그래서 화면 안에 메시지를 띄우고 401 일 때는 키 활성화 안내를 하도록 했다.
 
+
+### Code Challenge 12~14. Element Plus (p.246~248)
+
+| 파일 | 교재 | 내용 |
+|---|---|---|
+| `ElementForm.vue` | p.246 | `el-input` / `el-switch` / `el-button` + 유효성 검사 |
+| `ElementData.vue` | p.247 | `el-input-number` / `el-rate` |
+| `ElementFeedback.vue` | p.248 | `ElMessageBox.confirm` / `el-progress` |
+
+교재가 세 개의 Code Challenge 로 나눠 놓았으므로 컴포넌트도 셋으로 나눠 작성했다.
+(강사님 저장소에는 `ElementPlus.vue` 한 파일로 합쳐져 있다.)
+
+**알게 된 점**
+
+- `main.js` 에서 `app.use(ElementPlus)` 로 등록하면 **모든 컴포넌트에서 import 없이** 쓸 수 있다.
+  다만 `import 'element-plus/dist/index.css'` 를 빼먹으면 스타일이 하나도 안 먹는다.
+- `ElMessage` 와 `ElMessageBox` 는 태그가 아니라 **함수로 호출**한다.
+  화면에 미리 자리를 만들어 두지 않아도 되고, 필요할 때 코드에서 부르면 나타난다.
+- **`ElMessageBox.confirm` 은 Promise 를 돌려준다.** 확인은 `.then`, 취소는 `.catch` 로 갈라진다.
+  취소를 `.catch` 로 처리하는 게 처음엔 어색했는데,
+  "사용자가 거부했다"를 예외로 보는 방식이라고 이해했다.
+- `el-input-number` 의 `:min` / `:max` 는 화살표 버튼뿐 아니라 **직접 타이핑한 값도 보정**한다.
+  직접 만들면 신경 쓸 게 많은 부분인데 컴포넌트가 알아서 해준다.
+- `el-button` 의 `:loading` 속성을 켜면 스피너가 돌고 버튼이 자동으로 비활성화된다.
+
+**직접 고친 부분 — 진행률 버튼의 조기 반환 오류**
+
+강사님 예제의 다운로드 시작 함수는 이렇게 되어 있다.
+
+```js
+if (isDownloading.value) return (isDownloading.value = true)
+```
+
+`return` 뒤에 대입문이 붙어 있어서, **진행 중일 때 함수를 빠져나가는 동시에
+`isDownloading` 을 다시 `true` 로 설정**한다. 의도한 건 아래처럼 보였다.
+
+```js
+if (isDownloading.value) return
+isDownloading.value = true
+```
+
+원본은 최초 실행 시 `isDownloading` 이 `false` 라 조건문을 통과하는데,
+그러면 `isDownloading = true` 가 되는 줄이 없어 로딩 표시가 켜지지 않는다.
+두 줄로 나눠서 고쳤다.
+
+또 진행률이 도는 중에 다른 탭으로 이동하면 `setInterval` 이 남는다.
+Code Challenge 7 에서 배운 대로 `onUnmounted` 에서 `clearInterval` 로 정리했다.
+
 ---
 
 # 과제 (Hands on) 기록
