@@ -2,6 +2,9 @@
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+
+// 빌드 모드에 따라 어떤 .env 파일이 적용되는지 확인용
+console.log('[env] 현재 API 주소:', import.meta.env.VITE_API_URL, '/ MODE:', import.meta.env.MODE)
 const goHome = () => {
   router.push('/')
 }
