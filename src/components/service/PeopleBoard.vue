@@ -1,11 +1,12 @@
 <script setup>
+import { ref, watch } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
 import PersonCard from './PersonCard.vue'
 import TwinkleMark from './TwinkleMark.vue'
 
 const configStore = useConfigStore()
 
-defineProps({
+const props = defineProps({
   people: { type: Array, required: true },
   isSample: { type: Boolean, default: false },
   weatherById: { type: Object, required: true },
@@ -16,6 +17,28 @@ defineProps({
 
 defineEmits(['select', 'setup'])
 
+/*
+ * 사람이 늘거나 줄면 액자가 한 번 반응한다.
+ * 배경에 계속 움직이는 것을 두는 대신 내가 뭘 했을 때만 반응하게 했다.
+ * 아침에 판정을 읽는 화면이라 시선을 끌고 있으면 안 된다.
+ */
+const stirred = ref(false)
+let timer = null
+
+watch(
+  () => props.people.length,
+  (now, before) => {
+    // 처음 그릴 때는 변화가 아니다
+    if (before === undefined) return
+    stirred.value = false
+    clearTimeout(timer)
+    // 클래스를 뗐다 붙여야 같은 동작을 연달아 다시 재생할 수 있다
+    requestAnimationFrame(() => {
+      stirred.value = true
+      timer = setTimeout(() => (stirred.value = false), 900)
+    })
+  },
+)
 </script>
 
 <template>
@@ -41,8 +64,8 @@ defineEmits(['select', 'setup'])
       각자 다른 곳에 있어도 아침에 한 번은 같이 보는 사람들이라
       카드가 따로 노는 것보다 한 액자에 들어가 있는 편이 맞다.
     -->
-    <div class="frame">
-      <div class="grid">
+    <div class="frame" :class="{ stirred }">
+      <TransitionGroup tag="div" class="grid" name="card">
         <PersonCard
           v-for="person in people"
           :key="person.id"
@@ -53,7 +76,7 @@ defineEmits(['select', 'setup'])
           :selected="person.id === selectedId"
           @select="$emit('select', person)"
         />
-      </div>
+      </TransitionGroup>
     </div>
   </section>
 </template>
@@ -184,10 +207,80 @@ h2 {
   overflow: hidden;
 }
 
+/*
+ * 사람이 들어오고 나가는 움직임.
+ *
+ * 들어올 때는 아래에서 살짝 올라오며 자리를 잡고,
+ * 나갈 때는 그 자리에서 조용히 물러난다.
+ * 물러나는 동안 칸은 자리를 지키고, 다 물러난 뒤에 남은 칸들이 미끄러져 메운다.
+ * 순서를 이렇게 둬야 "빠졌다 -> 메웠다" 로 읽힌다.
+ */
+.card-enter-active {
+  transition:
+    opacity 0.34s ease,
+    transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-leave-active {
+  transition:
+    opacity 0.26s ease,
+    transform 0.26s ease;
+}
+.card-enter-from {
+  opacity: 0;
+  transform: translateY(10px) scale(0.97);
+}
+.card-leave-to {
+  opacity: 0;
+  transform: scale(0.96);
+}
+/* 남은 칸들이 새 자리로 미끄러진다 */
+.card-move {
+  transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * 액자가 한 번 반응한다.
+ * 테두리에서 잉크빛 파문이 한 겹 번졌다 사라진다. 색은 쓰지 않았다.
+ */
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 3;
+}
+.frame.stirred::before {
+  animation: stir 0.85s ease-out;
+}
+@keyframes stir {
+  0% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(16, 28, 38, 0.22);
+  }
+  100% {
+    opacity: 0;
+    box-shadow: 0 0 0 12px rgba(16, 28, 38, 0);
+  }
+}
+
 /* 폭이 좁아도 한 줄에 하나씩 쌓이면 열두 칸이 너무 길어진다. 두 칸씩 붙인다 */
 @media (max-width: 520px) {
   .grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* 움직임을 끈 사람에게는 자리만 바뀌고 동작은 없다 */
+@media (prefers-reduced-motion: reduce) {
+  .card-enter-active,
+  .card-leave-active,
+  .card-move {
+    transition: none;
+  }
+  .frame.stirred::before {
+    animation: none;
   }
 }
 </style>
