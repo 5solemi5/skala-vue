@@ -33,7 +33,10 @@ defineProps({
       </button>
     </div>
     <p class="summary" :class="{ ok: alertCount === 0 }">
-      <span v-if="alertCount > 0">⛔ 지금 보이는 지역 중 <strong>{{ alertCount }}곳</strong>은 오늘 작업을 미루시는 편이 낫습니다.</span>
+      <span v-if="alertCount > 0"
+        >⛔ 지금 보이는 지역 중 <strong>{{ alertCount }}곳</strong>은 오늘 작업을 미루시는 편이
+        낫습니다.</span
+      >
       <span v-else>✅ 지금 보이는 지역은 모두 작업에 무리가 없습니다.</span>
     </p>
   </div>

@@ -9,7 +9,9 @@ import SlotNamedChild from './SlotNamedChild.vue'
       <template v-slot:header>
         <h3>Child 주입 제목</h3>
       </template>
-      <p>이름 없는 기본 슬롯으로 들어가는 본문 영역입니다. header 슬롯과 자리가 나뉘어 배치됩니다.</p>
+      <p>
+        이름 없는 기본 슬롯으로 들어가는 본문 영역입니다. header 슬롯과 자리가 나뉘어 배치됩니다.
+      </p>
     </SlotNamedChild>
   </div>
 </template>

@@ -18,7 +18,9 @@ onMounted(() => {
 
 // 갱신 (Updating) 단계 - count 변수가 바뀌어서 화면이 리렌더링될 때마다 매번 실행된다.
 onUpdated(() => {
-  console.log(`3. [onUpdated] 데이터가 변경되어 화면을 새로 그렸습니다. (현재 count: ${count.value})`)
+  console.log(
+    `3. [onUpdated] 데이터가 변경되어 화면을 새로 그렸습니다. (현재 count: ${count.value})`,
+  )
 })
 
 // 소멸 (Unmounting) 단계 - v-if="false" 등으로 컴포넌트가 화면에서 완전히 파괴될 때 실행된다.

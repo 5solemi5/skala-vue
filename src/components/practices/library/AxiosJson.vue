@@ -103,8 +103,8 @@ onMounted(() => {
 
     <div class="monitor">
       <small style="color: gray">
-        ※ JSONPlaceholder 는 테스트용 가짜 API 라서 POST/PUT/DELETE 응답은 정상으로 오지만
-        서버에 실제로 저장되지는 않는다. 새로고침하면 원래 데이터로 돌아온다.
+        ※ JSONPlaceholder 는 테스트용 가짜 API 라서 POST/PUT/DELETE 응답은 정상으로 오지만 서버에
+        실제로 저장되지는 않는다. 새로고침하면 원래 데이터로 돌아온다.
       </small>
     </div>
   </div>

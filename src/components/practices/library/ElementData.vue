@@ -24,14 +24,16 @@ const productRate = ref(4) // 별점 기본값 (별 4개)
         </div>
 
         <div class="result-preview">
-          🟢 <strong>실시간 요약:</strong> 선택 수량 {{ productQuantity }}개 / 내가 준 점수 {{ productRate }}점
+          🟢 <strong>실시간 요약:</strong> 선택 수량 {{ productQuantity }}개 / 내가 준 점수
+          {{ productRate }}점
         </div>
       </div>
     </el-card>
 
     <div class="monitor">
       <small style="color: gray">
-        ※ el-input-number 는 :min / :max 로 범위를 강제한다. 직접 타이핑해도 범위를 벗어나면 자동 보정된다.
+        ※ el-input-number 는 :min / :max 로 범위를 강제한다. 직접 타이핑해도 범위를 벗어나면 자동
+        보정된다.
       </small>
     </div>
   </div>

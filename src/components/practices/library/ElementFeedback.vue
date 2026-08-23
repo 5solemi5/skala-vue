@@ -60,7 +60,10 @@ onUnmounted(() => {
         </div>
 
         <div class="progress-zone">
-          <el-progress :percentage="downloadProgress" :status="downloadProgress === 100 ? 'success' : ''" />
+          <el-progress
+            :percentage="downloadProgress"
+            :status="downloadProgress === 100 ? 'success' : ''"
+          />
         </div>
       </div>
     </el-card>

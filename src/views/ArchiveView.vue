@@ -16,7 +16,8 @@ const stageList = ref([
     page: 'p.116',
     day: '1일차 · Vue Syntax',
     learned: 'v-for · v-if · :value/@input · 이벤트 수식어',
-    point: '판정 로직을 템플릿에서 함수로 직접 호출했다. 화면이 다시 그려질 때마다 도시 수만큼 재실행된다.',
+    point:
+      '판정 로직을 템플릿에서 함수로 직접 호출했다. 화면이 다시 그려질 때마다 도시 수만큼 재실행된다.',
     component: WeatherMockup,
   },
   {
@@ -46,8 +47,8 @@ const currentStageId = ref(3)
   <div class="archive">
     <h2>🗂️ 과제 진행 아카이브</h2>
     <p class="lead">
-      최종 화면만 보면 중간에 무엇을 배워 무엇을 고쳤는지가 남지 않습니다.
-      단원별 과제 결과물을 그대로 보관해 두었습니다.
+      최종 화면만 보면 중간에 무엇을 배워 무엇을 고쳤는지가 남지 않습니다. 단원별 과제 결과물을
+      그대로 보관해 두었습니다.
     </p>
 
     <ol class="timeline">
@@ -62,7 +63,9 @@ const currentStageId = ref(3)
           <span class="dot"></span>
           <div>
             <p class="day">{{ stage.day }}</p>
-            <p class="title">{{ stage.title }} <span class="page">{{ stage.page }}</span></p>
+            <p class="title">
+              {{ stage.title }} <span class="page">{{ stage.page }}</span>
+            </p>
           </div>
         </div>
         <div class="stage-body">

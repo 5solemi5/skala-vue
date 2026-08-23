@@ -11,12 +11,66 @@ const configStore = useConfigStore()
 
 // 도시 코드에 해당하는 상세 Mock Data
 const mockDetails = {
-  city_01: { name: '서울특별시', temp: 28, status: '맑음', humidity: 55, rainProb: 10, minTemp: 21, wind: 2.1, region: '수도권' },
-  city_02: { name: '경기도 수원시', temp: 24, status: '비', humidity: 88, rainProb: 80, minTemp: 19, wind: 3.4, region: '수도권' },
-  city_03: { name: '부산광역시', temp: 26, status: '구름', humidity: 72, rainProb: 30, minTemp: 22, wind: 5.2, region: '영남권' },
-  city_04: { name: '전라북도 전주시', temp: 33, status: '맑음', humidity: 45, rainProb: 5, minTemp: 24, wind: 1.8, region: '호남권' },
-  city_05: { name: '대구광역시', temp: 21, status: '흐림', humidity: 82, rainProb: 40, minTemp: 2, wind: 0.9, region: '영남권' },
-  city_06: { name: '강원도 강릉시', temp: 18, status: '맑음', humidity: 58, rainProb: 10, minTemp: 12, wind: 4.5, region: '강원권' },
+  city_01: {
+    name: '서울특별시',
+    temp: 28,
+    status: '맑음',
+    humidity: 55,
+    rainProb: 10,
+    minTemp: 21,
+    wind: 2.1,
+    region: '수도권',
+  },
+  city_02: {
+    name: '경기도 수원시',
+    temp: 24,
+    status: '비',
+    humidity: 88,
+    rainProb: 80,
+    minTemp: 19,
+    wind: 3.4,
+    region: '수도권',
+  },
+  city_03: {
+    name: '부산광역시',
+    temp: 26,
+    status: '구름',
+    humidity: 72,
+    rainProb: 30,
+    minTemp: 22,
+    wind: 5.2,
+    region: '영남권',
+  },
+  city_04: {
+    name: '전라북도 전주시',
+    temp: 33,
+    status: '맑음',
+    humidity: 45,
+    rainProb: 5,
+    minTemp: 24,
+    wind: 1.8,
+    region: '호남권',
+  },
+  city_05: {
+    name: '대구광역시',
+    temp: 21,
+    status: '흐림',
+    humidity: 82,
+    rainProb: 40,
+    minTemp: 2,
+    wind: 0.9,
+    region: '영남권',
+  },
+  city_06: {
+    name: '강원도 강릉시',
+    temp: 18,
+    status: '맑음',
+    humidity: 58,
+    rainProb: 10,
+    minTemp: 12,
+    wind: 4.5,
+    region: '강원권',
+  },
 }
 
 const cityData = ref(null)
@@ -54,8 +108,12 @@ const adviceByMode = computed(() => {
 })
 
 // 스토어에 설정된 단위에 맞춰 기온을 변환한다
-const displayTemp = computed(() => (cityData.value ? configStore.convertTemp(cityData.value.temp) : 0))
-const displayMinTemp = computed(() => (cityData.value ? configStore.convertTemp(cityData.value.minTemp) : 0))
+const displayTemp = computed(() =>
+  cityData.value ? configStore.convertTemp(cityData.value.temp) : 0,
+)
+const displayMinTemp = computed(() =>
+  cityData.value ? configStore.convertTemp(cityData.value.minTemp) : 0,
+)
 
 const goHome = () => {
   router.push('/')
@@ -69,7 +127,9 @@ const goHome = () => {
       <h2>{{ cityData.name }}</h2>
 
       <div class="hero">
-        <p class="temp">{{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span></p>
+        <p class="temp">
+          {{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span>
+        </p>
         <div class="hero-meta">
           <p class="status">{{ cityData.status }}</p>
           <span v-if="cityData.temp >= 25" class="badge hot">🔥 더움 (25도 이상)</span>
@@ -79,17 +139,29 @@ const goHome = () => {
 
       <h3>관측값</h3>
       <ul class="metric">
-        <li><span>습도</span><b>{{ cityData.humidity }}%</b></li>
-        <li><span>강수확률</span><b>{{ cityData.rainProb }}%</b></li>
-        <li><span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b></li>
-        <li><span>풍속</span><b>{{ cityData.wind }}m/s</b></li>
+        <li>
+          <span>습도</span><b>{{ cityData.humidity }}%</b>
+        </li>
+        <li>
+          <span>강수확률</span><b>{{ cityData.rainProb }}%</b>
+        </li>
+        <li>
+          <span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b>
+        </li>
+        <li>
+          <span>풍속</span><b>{{ cityData.wind }}m/s</b>
+        </li>
       </ul>
 
       <h3>하는 일별 오늘의 채비</h3>
-      <p class="hint">메인 화면에서는 선택한 한 가지만 보이지만, 여기서는 네 가지를 한눈에 비교할 수 있습니다.</p>
+      <p class="hint">
+        메인 화면에서는 선택한 한 가지만 보이지만, 여기서는 네 가지를 한눈에 비교할 수 있습니다.
+      </p>
       <div class="mode-grid">
         <div v-for="mode in adviceByMode" :key="mode.id" class="mode-column">
-          <p class="mode-label" :class="{ on: mode.id === configStore.currentMode }">{{ mode.label }}</p>
+          <p class="mode-label" :class="{ on: mode.id === configStore.currentMode }">
+            {{ mode.label }}
+          </p>
           <AdviceList :advice-list="mode.advices" />
         </div>
       </div>

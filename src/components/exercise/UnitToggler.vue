@@ -5,7 +5,11 @@ const configStore = useConfigStore()
 </script>
 
 <template>
-  <button class="unit-toggler" :class="{ fahrenheit: configStore.unit === 'fahrenheit' }" @click="configStore.toggleUnit">
+  <button
+    class="unit-toggler"
+    :class="{ fahrenheit: configStore.unit === 'fahrenheit' }"
+    @click="configStore.toggleUnit"
+  >
     <span class="mark">{{ configStore.unitSymbol }}</span>
     <span class="label">{{ configStore.unit === 'celsius' ? '섭씨' : '화씨' }}</span>
   </button>

@@ -35,7 +35,9 @@ const displayMinTemp = computed(() => configStore.convertTemp(props.cityItem.min
   >
     <CardContent class="flex flex-1 flex-col p-5">
       <div class="flex items-start justify-between">
-        <h4 class="text-base font-bold text-foreground">{{ cityItem.name }} ({{ cityItem.status }})</h4>
+        <h4 class="text-base font-bold text-foreground">
+          {{ cityItem.name }} ({{ cityItem.status }})
+        </h4>
         <img
           v-if="cityItem.icon"
           :src="`https://openweathermap.org/img/wn/${cityItem.icon}.png`"
@@ -45,20 +47,32 @@ const displayMinTemp = computed(() => configStore.convertTemp(props.cityItem.min
       </div>
 
       <p class="mt-1 text-3xl font-bold leading-none">
-        {{ displayTemp }}<span class="ml-0.5 text-base font-medium text-muted-foreground">{{ configStore.unitSymbol }}</span>
+        {{ displayTemp
+        }}<span class="ml-0.5 text-base font-medium text-muted-foreground">{{
+          configStore.unitSymbol
+        }}</span>
       </p>
-      <p v-if="cityItem.description" class="mt-1 text-xs text-muted-foreground">{{ cityItem.description }}</p>
+      <p v-if="cityItem.description" class="mt-1 text-xs text-muted-foreground">
+        {{ cityItem.description }}
+      </p>
 
       <div class="mt-3">
         <Badge v-if="cityItem.temp >= 25" variant="hot">🔥 더움 (25도 이상)</Badge>
         <Badge v-else variant="cool">❄️ 선선함 (25도 미만)</Badge>
       </div>
 
-      <ul class="mt-4 space-y-1 border-t border-dashed border-border pt-3 text-xs text-muted-foreground">
-        <li class="flex justify-between"><span>습도</span><b class="text-foreground">{{ cityItem.humidity }}%</b></li>
-        <li class="flex justify-between"><span>강수확률</span><b class="text-foreground">{{ cityItem.rainProb }}%</b></li>
+      <ul
+        class="mt-4 space-y-1 border-t border-dashed border-border pt-3 text-xs text-muted-foreground"
+      >
         <li class="flex justify-between">
-          <span>최저기온</span><b class="text-foreground">{{ displayMinTemp }}{{ configStore.unitSymbol }}</b>
+          <span>습도</span><b class="text-foreground">{{ cityItem.humidity }}%</b>
+        </li>
+        <li class="flex justify-between">
+          <span>강수확률</span><b class="text-foreground">{{ cityItem.rainProb }}%</b>
+        </li>
+        <li class="flex justify-between">
+          <span>최저기온</span
+          ><b class="text-foreground">{{ displayMinTemp }}{{ configStore.unitSymbol }}</b>
         </li>
         <li v-if="cityItem.wind !== undefined" class="flex justify-between">
           <span>풍속</span><b class="text-foreground">{{ cityItem.wind }}m/s</b>

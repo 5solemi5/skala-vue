@@ -53,19 +53,103 @@ import ElementFeedback from '../components/practices/library/ElementFeedback.vue
  * 선택한 단원만 v-if 로 마운트한다.
  */
 const groupList = ref([
-  { id: 0, title: '1. 학습환경구성', day: '1일차 · Vue Syntax', components: [SampleOne, SampleTwo] },
-  { id: 1, title: '2. Vue Directive', day: '1일차 · Vue Syntax', components: [VueHtml, VueHtmlXss, VueText, VueBind, VueBindClass, VueBindStyle, VueBindShorthand, VueIf, VueShow, VueFor, VuePre, VueCloak, VueOnce, VueMemo] },
-  { id: 2, title: '3. Vue Event Handling', day: '1일차 · Vue Syntax', components: [EventBasic, EventObject, EventModifier] },
-  { id: 3, title: '4. Vue Form Handling', day: '1일차 · Vue Syntax', components: [ModelBasic, ModelForm, ModelModifier] },
+  {
+    id: 0,
+    title: '1. 학습환경구성',
+    day: '1일차 · Vue Syntax',
+    components: [SampleOne, SampleTwo],
+  },
+  {
+    id: 1,
+    title: '2. Vue Directive',
+    day: '1일차 · Vue Syntax',
+    components: [
+      VueHtml,
+      VueHtmlXss,
+      VueText,
+      VueBind,
+      VueBindClass,
+      VueBindStyle,
+      VueBindShorthand,
+      VueIf,
+      VueShow,
+      VueFor,
+      VuePre,
+      VueCloak,
+      VueOnce,
+      VueMemo,
+    ],
+  },
+  {
+    id: 2,
+    title: '3. Vue Event Handling',
+    day: '1일차 · Vue Syntax',
+    components: [EventBasic, EventObject, EventModifier],
+  },
+  {
+    id: 3,
+    title: '4. Vue Form Handling',
+    day: '1일차 · Vue Syntax',
+    components: [ModelBasic, ModelForm, ModelModifier],
+  },
   { id: 4, title: '5. Vue Style Handling', day: '1일차 · Vue Syntax', components: [StyleScoped] },
-  { id: 5, title: '6. Reactive State', day: '2일차 · Composition API', components: [ReactiveRef, ReactiveReactive] },
-  { id: 6, title: '7. Computed & Watchers', day: '2일차 · Composition API', components: [ComputedBasic, WatchersBasic, WatchersMulti, WatchersDeep, WatchersReactive, WatchersRefArray, WatchersReactiveArray, WatchersWatchEffect] },
-  { id: 7, title: '8. Component Lifecycle', day: '3일차 · Vue Components', components: [LifecycleParent] },
-  { id: 8, title: '9. Props & Emits', day: '3일차 · Vue Components', components: [PropsEmitsParent] },
-  { id: 9, title: '10. Component Slot', day: '3일차 · Vue Components', components: [SlotDefaultParent, SlotNamedParent, SlotScopedParent] },
-  { id: 10, title: '11. Store (Pinia)', day: '4일차 · 외부 라이브러리', components: [StoreCounter] },
-  { id: 11, title: '12. Axios', day: '4일차 · 외부 라이브러리', components: [AxiosWeather, AxiosJson] },
-  { id: 12, title: '13. Element Plus', day: '4일차 · 외부 라이브러리', components: [ElementForm, ElementData, ElementFeedback] },
+  {
+    id: 5,
+    title: '6. Reactive State',
+    day: '2일차 · Composition API',
+    components: [ReactiveRef, ReactiveReactive],
+  },
+  {
+    id: 6,
+    title: '7. Computed & Watchers',
+    day: '2일차 · Composition API',
+    components: [
+      ComputedBasic,
+      WatchersBasic,
+      WatchersMulti,
+      WatchersDeep,
+      WatchersReactive,
+      WatchersRefArray,
+      WatchersReactiveArray,
+      WatchersWatchEffect,
+    ],
+  },
+  {
+    id: 7,
+    title: '8. Component Lifecycle',
+    day: '3일차 · Vue Components',
+    components: [LifecycleParent],
+  },
+  {
+    id: 8,
+    title: '9. Props & Emits',
+    day: '3일차 · Vue Components',
+    components: [PropsEmitsParent],
+  },
+  {
+    id: 9,
+    title: '10. Component Slot',
+    day: '3일차 · Vue Components',
+    components: [SlotDefaultParent, SlotNamedParent, SlotScopedParent],
+  },
+  {
+    id: 10,
+    title: '11. Store (Pinia)',
+    day: '4일차 · 외부 라이브러리',
+    components: [StoreCounter],
+  },
+  {
+    id: 11,
+    title: '12. Axios',
+    day: '4일차 · 외부 라이브러리',
+    components: [AxiosWeather, AxiosJson],
+  },
+  {
+    id: 12,
+    title: '13. Element Plus',
+    day: '4일차 · 외부 라이브러리',
+    components: [ElementForm, ElementData, ElementFeedback],
+  },
 ])
 
 const currentGroupId = ref(0)
@@ -77,9 +161,9 @@ const totalCount = computed(() => groupList.value.reduce((sum, g) => sum + g.com
   <div class="lab">
     <h2>📚 Vue 문법 실습실</h2>
     <p class="lead">
-      수업에서 진행한 <strong>Code Challenge</strong> 결과물입니다.
-      교재 순서대로 단원을 나눠 두었고, 컴포넌트는 총 <strong>{{ totalCount }}개</strong>입니다.
-      브라우저 콘솔(F12)을 열어두면 <code>watch</code> · <code>watchEffect</code> · 라이프사이클 훅의 로그를 함께 볼 수 있습니다.
+      수업에서 진행한 <strong>Code Challenge</strong> 결과물입니다. 교재 순서대로 단원을 나눠
+      두었고, 컴포넌트는 총 <strong>{{ totalCount }}개</strong>입니다. 브라우저 콘솔(F12)을 열어두면
+      <code>watch</code> · <code>watchEffect</code> · 라이프사이클 훅의 로그를 함께 볼 수 있습니다.
     </p>
 
     <nav class="tabs">

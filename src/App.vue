@@ -40,9 +40,7 @@ const navList = [
       </div>
     </main>
 
-    <footer class="site-footer">
-      SKALA Full-Stack Engineering · Frontend framework: Vue.js
-    </footer>
+    <footer class="site-footer">SKALA Full-Stack Engineering · Frontend framework: Vue.js</footer>
   </div>
 </template>
 

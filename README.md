@@ -446,6 +446,89 @@ isDownloading.value = true
 또 진행률이 도는 중에 다른 탭으로 이동하면 `setInterval` 이 남는다.
 Code Challenge 7 에서 배운 대로 `onUnmounted` 에서 `clearInterval` 로 정리했다.
 
+
+### Code Challenge 15. ESLint (p.270)
+
+**커스텀 규칙 설정**
+
+```js
+// eslint.config.js
+{
+  name: 'app/custom-rules',
+  rules: {
+    eqeqeq: ['error', 'always'],   // 엄격한 비교 연산자 강제
+    'no-console': 'off',           // 실습 중 console.log 허용
+  },
+}
+```
+
+**적용 확인** — 교재 지시대로 `if (userAge == 20)` 을 삽입하고 `npm run lint` 를 실행했다.
+
+```
+src/views/WeatherAboutView.vue
+  11:13  error  Expected '===' and instead saw '=='  eqeqeq
+```
+
+에디터에서도 해당 줄에 물결선이 뜨고 툴팁으로 같은 메시지가 나왔다. 확인 후 검증용 코드는 지웠다.
+
+**같이 잡힌 실제 문제 4건**
+
+규칙을 켜고 돌려보니 의도한 위반 말고도 진짜 문제가 나왔다.
+
+| 파일 | 내용 |
+|---|---|
+| `AdviceList.vue` | `'Badge' is defined but never used` |
+| `ui/badge`·`ui/button`·`ui/card` | `Component name should always be multi-word` |
+
+첫 번째는 Tailwind 로 전환하면서 `Badge` 사용을 뺐는데 **import 문만 남아 있던 것**이다.
+눈으로는 못 찾았을 코드였다. 지웠다.
+
+나머지 셋은 shadcn-vue 의 관례(`Button` / `Card` / `Badge` 처럼 단어 하나짜리 이름)와
+Vue 스타일 가이드가 충돌하는 경우다. 이름을 바꾸면 라이브러리 규약에서 벗어나므로
+**해당 폴더에 한해서만** 규칙을 껐다.
+
+```js
+{
+  name: 'app/shadcn-ui',
+  files: ['src/components/ui/**/*.vue'],
+  rules: { 'vue/multi-word-component-names': 'off' },
+}
+```
+
+전체를 끄지 않고 폴더를 지정한 이유는, 내가 직접 만드는 컴포넌트에는 규칙이 계속 살아있어야 하기 때문이다.
+
+**알게 된 점** — 린트를 "잔소리"로 생각했는데, 실제로 돌려보니 죽은 코드를 잡아줬다.
+규칙을 끌 때는 전역이 아니라 필요한 범위만 끄는 게 중요하다는 것도 알았다.
+
+### Code Challenge 16. Prettier (p.271)
+
+교재 지시대로 정렬이 엉망인 코드를 넣고 `npm run format` 을 실행했다.
+
+```js
+// 저장 직후
+const     myRegion   = `Suwon` ;
+const regionGreeting = `웰컴 투 ${myRegion}`;
+
+// npm run format 실행 후
+const myRegion = `Suwon`
+const regionGreeting = `웰컴 투 ${myRegion}`
+```
+
+**관찰한 것**
+
+- 변수명 앞뒤의 불규칙한 공백이 한 칸으로 정리됐다.
+- **세미콜론이 사라졌다.** `.prettierrc.json` 에 `"semi": false` 로 되어 있어서다.
+- **백틱은 그대로 유지됐다.** 교재는 "백틱 기호가 어떻게 자동 변환되었는지 확인"하라고 하는데,
+  실제로 바뀐 건 공백과 세미콜론뿐이었다.
+  `myRegion` 은 보간(`${}`)이 없으니 작은따옴표로 바뀔 법도 한데 그러지 않았다.
+  Prettier 는 템플릿 리터럴을 따옴표로 바꾸지 않는다.
+- 설정 파일에 `"singleQuote": true`, `"printWidth": 100` 이 있어서
+  문자열 따옴표와 줄바꿈 폭도 프로젝트 전체가 같은 기준으로 맞춰진다.
+
+**알게 된 점** — ESLint 와 Prettier 는 역할이 다르다.
+ESLint 는 **코드가 옳은지**(버그·안티패턴), Prettier 는 **보기 좋은지**(줄바꿈·공백·따옴표)를 본다.
+`eslint-config-prettier` 가 설정에 들어있는 이유도 두 도구가 서식 문제로 싸우지 않게 하려는 것이다.
+
 ---
 
 # 과제 (Hands on) 기록

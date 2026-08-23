@@ -22,7 +22,9 @@ defineProps({
       @input="$emit('update-query', $event.target.value)"
     />
     <p class="search-result">
-      <span v-if="currentQuery">검색 중인 도시: <strong>{{ currentQuery }}</strong></span>
+      <span v-if="currentQuery"
+        >검색 중인 도시: <strong>{{ currentQuery }}</strong></span
+      >
       <span v-else class="dim">검색어를 입력하면 여기에 표시됩니다.</span>
     </p>
   </div>

@@ -29,11 +29,19 @@ const handleRegister = () => {
       <div class="card-body">
         <div class="input-group">
           <span>이메일 주소:</span>
-          <el-input v-model="userForm.email" placeholder="example@email.com" clearable style="width: 300px" />
+          <el-input
+            v-model="userForm.email"
+            placeholder="example@email.com"
+            clearable
+            style="width: 300px"
+          />
         </div>
 
         <div class="input-group">
-          <el-switch v-model="userForm.agree" active-text="개인정보 수집 및 필수 이용약관에 동의합니다." />
+          <el-switch
+            v-model="userForm.agree"
+            active-text="개인정보 수집 및 필수 이용약관에 동의합니다."
+          />
         </div>
 
         <el-button type="success" @click="handleRegister">🚀 회원가입하기</el-button>

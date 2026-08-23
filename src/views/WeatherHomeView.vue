@@ -39,7 +39,8 @@ const loadWeather = async () => {
   } catch (error) {
     console.error('날씨 데이터를 불러오지 못했습니다:', error)
     if (error.response?.status === 401) {
-      errorMessage.value = 'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
+      errorMessage.value =
+        'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
     } else {
       errorMessage.value = `날씨 데이터를 불러오지 못했습니다. (${error.message})`
     }
@@ -84,7 +85,9 @@ const adviceMap = computed(() => {
 })
 
 const alertCityCount = computed(() => {
-  return filteredWeatherList.value.filter((item) => adviceMap.value[item.id].some((a) => a.level === 'stop')).length
+  return filteredWeatherList.value.filter((item) =>
+    adviceMap.value[item.id].some((a) => a.level === 'stop'),
+  ).length
 })
 
 watch(selectedCityInfo, (newInfo, oldInfo) => {
@@ -135,11 +138,17 @@ const handleDetailJump = (cityName) => {
         </div>
       </div>
 
-      <div v-if="errorMessage" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div
+        v-if="errorMessage"
+        class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+      >
         ⚠️ {{ errorMessage }}
       </div>
 
-      <div v-else-if="isLoading && weatherList.length === 0" class="py-12 text-center text-sm text-muted-foreground">
+      <div
+        v-else-if="isLoading && weatherList.length === 0"
+        class="py-12 text-center text-sm text-muted-foreground"
+      >
         실시간 날씨를 불러오는 중입니다...
       </div>
 
@@ -153,7 +162,9 @@ const handleDetailJump = (cityName) => {
           @click-detail="handleDetailJump"
         />
       </div>
-      <p v-if="filteredWeatherList.length === 0" class="empty">😭 검색 결과와 일치하는 도시가 없습니다.</p>
+      <p v-if="filteredWeatherList.length === 0" class="empty">
+        😭 검색 결과와 일치하는 도시가 없습니다.
+      </p>
     </BaseDashboardCard>
 
     <div class="status-bar">📍 {{ selectedCityInfo }}</div>
