@@ -2,7 +2,7 @@
 
 > 같은 하늘, 다른 하루
 
-**배포** : (준비 중)
+**배포** : https://skala-vue-seven-alpha.vercel.app
 
 ---
 
@@ -104,7 +104,7 @@
 | 경로               | 설명                                    |
 | ------------------ | --------------------------------------- |
 | `/`                | 지역별 날씨 + 모드별 오늘의 채비        |
-| `/weather/:cityId` | 지역 상세 (네 가지 모드를 한 번에 비교) |
+| `/weather/:cityId` | 지역 상세 (일곱 가지 일을 한 번에 비교)|
 | `/about`           | 서비스 소개                             |
 | `/lab`             | 수업 Code Challenge 결과물 모음         |
 | `/archive`         | 과제가 단계별로 어떻게 바뀌었는지       |
@@ -126,6 +126,31 @@ OpenWeatherMap 키가 필요하다. 루트에 `.env.local` 을 만들고 넣는�
 ```
 VITE_OPENWEATHER_API_KEY=발급받은키
 ```
+
+## 배포
+
+Vercel 에 올렸다. `main` 에 푸시하면 자동으로 다시 빌드된다.
+
+배포하면서 두 가지를 맞춰야 했다.
+
+**하위 주소로 바로 들어오면 404 가 났다.**
+라우터가 history 모드라 주소창에 `/dev-log` 를 직접 치면 브라우저가 서버에
+그 경로를 그대로 요청한다. 서버에는 그런 파일이 없다. 개발 서버는 알아서
+`index.html` 을 돌려주는데 배포 서버는 그렇지 않았다. `vercel.json` 에
+모든 요청을 `index.html` 로 보내는 규칙을 넣어서 라우팅은 브라우저가 하게 했다.
+
+```json
+{ "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }] }
+```
+
+**환경변수는 빌드 전에 넣어야 한다.**
+`import.meta.env.VITE_...` 는 실행 중에 읽는 값이 아니라 빌드할 때 문자열로
+바뀌어 들어간다. 배포한 다음에 키를 등록하면 이미 만들어진 번들에는 반영되지
+않아서 다시 빌드해야 한다.
+
+그래서 키가 결과물 안에 그대로 들어간다. 개발자 도구로 보면 찾을 수 있다.
+`VITE_` 를 붙인 값은 전부 공개된다고 보는 게 맞고, 감춰야 하는 키라면
+서버를 하나 두고 거기서 부르는 게 맞다. 이번엔 무료 플랜 날씨 키라 그대로 뒀다.
 
 ## 사용한 것
 
@@ -173,6 +198,7 @@ src/
 | 6. Store       | `configStore.js`           | 모드 state·getter·action, `convertTemp`             |
 | 7. Axios       | `api/weatherApi.js`        | Open-Meteo 추가                                     |
 | 8. UI Library  | 전역                       | Tailwind + shadcn-vue 선정                          |
+| 9. 배포        | `vercel.json`              | SPA rewrite, 빌드 시점 환경변수 주입                |
 
 ## 기록
 
