@@ -1,57 +1,45 @@
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
 const configStore = useConfigStore()
 
-// 같은 날씨가 사람마다 어떻게 다르게 읽히는지 보여주는 예시
-const sameSky = [
-  {
-    weather: '습도 88%',
-    rows: [
-      { who: '정비소', what: '자동차 정비소', say: '도장 걸면 백화가 생긴다. 오늘은 미룬다' },
-      { who: '밭', what: '농사', say: '잎에 물기가 오래 남는다. 곰팡이병 조심' },
-    ],
-  },
-  {
-    weather: '강수확률 70%',
-    rows: [
-      { who: '출퇴근길', what: '자전거', say: '노면이 젖으면 제동 거리가 늘어난다. 두고 간다' },
-      { who: '주말 경기', what: '야구', say: '우천 취소 가능성. 표를 미리 정리한다' },
-    ],
-  },
-  {
-    weather: '최저 2℃',
-    rows: [
-      { who: '정비소', what: '자동차 정비소', say: '배터리 방전 출동이 몰린다. 재고 확인' },
-      { who: '밭', what: '농사', say: '서리 위험. 오늘 밤 피복하거나 수확을 앞당긴다' },
-    ],
-  },
-  {
-    weather: '습도 45% · 바람 4m/s',
-    rows: [
-      { who: '베란다', what: '빨래·환기', say: '이불까지 널 만하다. 오늘 안에 다 마른다' },
-      { who: '주말 산행', what: '등산', say: '걷기 편한 조건. 다만 정상은 더 춥다' },
-    ],
-  },
-]
+// 같은 날씨가 사람마다 어떻게 다르게 읽히는지 보여주는 예시.
+// 문구는 언어 파일에 있고 여기서는 어떤 키를 어떤 순서로 놓을지만 정한다.
+const sameSky = computed(() =>
+  [1, 2, 3, 4].map((n) => ({
+    weather: configStore.t(`about.case${n}.w`),
+    rows: ['a', 'b'].map((side) => ({
+      who: configStore.t(`about.case${n}.${side}.who`),
+      what: configStore.t(`mode.${CASE_MODES[n][side]}`),
+      say: configStore.t(`about.case${n}.${side}.say`),
+    })),
+  })),
+)
+
+// 예시마다 어떤 일을 견주는지. 하는 일 이름은 모드 목록과 같은 것을 쓴다.
+const CASE_MODES = {
+  1: { a: 'repair', b: 'farm' },
+  2: { a: 'bike', b: 'baseball' },
+  3: { a: 'repair', b: 'farm' },
+  4: { a: 'laundry', b: 'hike' },
+}
 
 const goHome = () => router.push('/')
 </script>
 
 <template>
   <div class="about">
-    <p class="eyebrow">서비스 소개</p>
-    <h2>같은 하늘,<br />다른 하루</h2>
+    <p class="eyebrow">{{ configStore.t('about.eyebrow') }}</p>
+    <!-- eslint-disable-next-line vue/no-v-html -- 줄바꿈 한 곳뿐이고 문구는 코드 안에 있다 -->
+    <h2 v-html="configStore.t('about.title')"></h2>
 
-    <p class="lead">
-      날씨앱은 “내일 비 20mm”까지만 알려줍니다. 그다음은 각자 알아서 판단해야 합니다. 그런데 같은
-      예보를 보고도 준비해야 하는 건 사람마다 다릅니다.
-    </p>
+    <p class="lead">{{ configStore.t('about.lead') }}</p>
 
     <section class="block">
-      <h3>같은 숫자, 다른 결론</h3>
+      <h3>{{ configStore.t('about.casesTitle') }}</h3>
       <div class="cases">
         <article v-for="c in sameSky" :key="c.weather" class="case">
           <p class="w">{{ c.weather }}</p>
@@ -67,46 +55,33 @@ const goHome = () => router.push('/')
     </section>
 
     <section class="block">
-      <h3>왜 만들었나</h3>
-      <p class="body">
-        가까운 분들 중에 날씨로 하루가 달라지는 일을 하시는 분들이 있습니다. 두 분 다 아침마다
-        날씨를 확인하시는데, 어느 앱도 “그래서 오늘 뭘 하시라”는 말은 해주지 않았습니다. 매일 전화로
-        물어볼 수도 없어서, 대신 봐 주는 화면을 만들기로 했습니다.
-      </p>
-      <p class="body">
-        만들다 보니 날씨로 하루가 바뀌는 사람이 두 분만은 아니었습니다. 자전거를 타는 저도, 주말에
-        야구를 보러 가는 것도 마찬가지였습니다. 그래서 챙길 대상을 넷으로 늘렸습니다.
-      </p>
+      <h3>{{ configStore.t('about.whyTitle') }}</h3>
+      <p class="body">{{ configStore.t('about.why1') }}</p>
+      <p class="body">{{ configStore.t('about.why2') }}</p>
     </section>
 
     <section class="block">
-      <h3>지금 볼 수 있는 것</h3>
+      <h3>{{ configStore.t('about.featTitle') }}</h3>
       <ul class="feat">
         <li v-for="mode in configStore.modeList" :key="mode.id">
           <span>{{ mode.label }}</span>
         </li>
       </ul>
-      <p class="note">
-        챙길 곳은 이름과 하는 일, 지역을 넣어 열두 개까지 등록할 수 있습니다. 등록한 목록과 단위
-        설정은 저장돼서 다음에 들어와도 그대로입니다.
-      </p>
+      <p class="note">{{ configStore.t('about.featNote') }}</p>
     </section>
 
     <section class="block">
-      <h3>데이터</h3>
+      <h3>{{ configStore.t('about.dataTitle') }}</h3>
       <dl class="src">
         <dt>OpenWeatherMap</dt>
-        <dd>현재 기온, 날씨 상태, 습도, 풍속, 지역 검색</dd>
+        <dd>{{ configStore.t('about.dataOwm') }}</dd>
         <dt>Open-Meteo</dt>
-        <dd>오늘 최저기온, 강수확률, 시간대별 예보</dd>
+        <dd>{{ configStore.t('about.dataMeteo') }}</dd>
       </dl>
-      <p class="note">
-        OpenWeatherMap 무료 플랜에는 오늘 강수확률과 일 최저기온이 없습니다. 그 두 값이 없으면
-        방제·서리 판정을 할 수 없어서 Open-Meteo 를 함께 부릅니다.
-      </p>
+      <p class="note">{{ configStore.t('about.dataNote') }}</p>
     </section>
 
-    <button type="button" class="home" @click="goHome">오늘의 채비 보기</button>
+    <button type="button" class="home" @click="goHome">{{ configStore.t('about.home') }}</button>
   </div>
 </template>
 
