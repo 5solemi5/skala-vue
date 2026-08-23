@@ -9,6 +9,37 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't10',
+    title: '휴대폰에서 화면이 옆으로 밀림',
+    date: '내 사람들 화면',
+    symptom:
+      '등록 상한을 열둘로 올리고 375px 로 줄여봤더니 화면이 오른쪽으로 밀렸다. 사람 카드는 이미 좁은 폭을 처리해 뒀는데도 밀렸다.',
+    log: `// 어느 요소가 튀어나왔는지 폭을 직접 재봤다
+const w = document.documentElement.clientWidth   // 360
+document.querySelectorAll('*').forEach((el) => {
+  const r = el.getBoundingClientRect()
+  if (r.right > w) console.log(el.className, Math.round(r.right))
+})
+
+// seg      541    ← 하는 일 고르는 줄
+// track    586    ← 시간대 막대 (overflow: auto 안이라 정상)
+
+document.documentElement.scrollWidth  //  541
+document.documentElement.clientWidth  //  360`,
+    cause:
+      '하는 일이 넷일 때는 한 줄에 들어갔는데 일곱으로 늘리면서 넘쳤다. .seg 는 flex 한 줄이고 각 항목의 글자에 white-space: nowrap 이 걸려 있어서, 줄어들 곳이 없으니 부모 폭을 넘겨 밀어냈다. 시간대 막대는 overflow-x: auto 컨테이너 안이라 잘려서 문제가 아니었다.',
+    fix: `.seg {
+  display: flex;
+  flex-wrap: wrap;   /* 안 들어가면 다음 줄로 */
+}
+
+@media (max-width: 560px) {
+  .seg-item { margin-right: 16px; }
+  .what { font-size: 14px; }
+}`,
+    note: '항목 수를 늘릴 때는 그 줄이 접힐 수 있는지 같이 봐야 한다. scrollWidth 와 clientWidth 를 비교하면 밀린 건 바로 알 수 있지만, 범인은 결국 요소를 하나씩 재봐야 나왔다.',
+  },
+  {
     id: 't9',
     title: '카드를 고르면 이름이 흐려 보임',
     date: '내 사람들 화면',
