@@ -8,17 +8,21 @@ import ModeSelector from '../components/exercise/ModeSelector.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { buildAdvice } from '../utils/adviceRules'
 import { fetchAllWeather } from '../api/weatherApi'
+import { useCityStore } from '@/stores/cityStore'
+import CityManager from '../components/exercise/CityManager.vue'
 import { Button } from '@/components/ui/button'
 import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
 const route = useRoute()
 const configStore = useConfigStore()
+const cityStore = useCityStore()
 
 // 실제 API 에서 받아온 날씨 데이터가 담긴다 (Hands on 7 이전에는 목업 배열이었다)
 const weatherList = ref([])
 const isLoading = ref(false)
 const errorMessage = ref('')
+const failedCities = ref([])
 const updatedAt = ref('')
 
 const searchQuery = ref('')
@@ -33,9 +37,11 @@ const loadWeather = async () => {
   isLoading.value = true
   errorMessage.value = ''
   try {
-    weatherList.value = await fetchAllWeather()
+    const { list, failed } = await fetchAllWeather(cityStore.cities)
+    weatherList.value = list
+    failedCities.value = failed.map((f) => f.city.name)
     updatedAt.value = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-    console.log('🌤️ [API] 전체 지역 날씨를 불러왔습니다.', weatherList.value)
+    console.log('🌤️ [API] 지역 날씨를 불러왔습니다.', list)
   } catch (error) {
     console.error('날씨 데이터를 불러오지 못했습니다:', error)
     if (error.response?.status === 401) {
@@ -90,6 +96,12 @@ const alertCityCount = computed(() => {
   ).length
 })
 
+// 지역을 추가하거나 빼면 그 지역만 다시 불러온다
+watch(
+  () => cityStore.cities.map((c) => c.id).join(','),
+  () => loadWeather(),
+)
+
 watch(selectedCityInfo, (newInfo, oldInfo) => {
   console.log(`👁️ [watch] 상태바 문구 변경: "${oldInfo}" ➡️ "${newInfo}"`)
 })
@@ -116,6 +128,10 @@ const handleDetailJump = (cityName) => {
   <div class="dashboard-wrapper">
     <BaseDashboardCard>
       <SearchBar :current-query="searchQuery" @update-query="(val) => (searchQuery = val)" />
+    </BaseDashboardCard>
+
+    <BaseDashboardCard>
+      <CityManager />
     </BaseDashboardCard>
 
     <BaseDashboardCard>
@@ -152,6 +168,13 @@ const handleDetailJump = (cityName) => {
         실시간 날씨를 불러오는 중입니다...
       </div>
 
+      <p
+        v-if="!errorMessage && failedCities.length"
+        class="mb-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800"
+      >
+        {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
+      </p>
+
       <div v-else class="card-grid">
         <WeatherCard
           v-for="item in filteredWeatherList"
@@ -162,9 +185,18 @@ const handleDetailJump = (cityName) => {
           @click-detail="handleDetailJump"
         />
       </div>
-      <p v-if="filteredWeatherList.length === 0" class="empty">
-        😭 검색 결과와 일치하는 도시가 없습니다.
+      <p v-if="cityStore.count === 0" class="empty">
+        보고 있는 지역이 없습니다. 위에서 지역을 추가해 주세요.
       </p>
+
+      <div v-else-if="filteredWeatherList.length === 0" class="empty">
+        <p class="mb-3">
+          😭 내 지역 목록에 '{{ searchQuery.trim() }}' 와(과) 일치하는 곳이 없습니다.
+        </p>
+        <Button variant="outline" size="sm" @click="cityStore.requestAdd(searchQuery.trim())">
+          '{{ searchQuery.trim() }}' 지역 추가하기
+        </Button>
+      </div>
     </BaseDashboardCard>
 
     <div class="status-bar">📍 {{ selectedCityInfo }}</div>

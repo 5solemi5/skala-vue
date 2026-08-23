@@ -1,14 +1,25 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 
+const STORAGE_KEY = 'skala-chaebi-config'
+
+const loadSaved = () => {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}')
+  } catch {
+    return {}
+  }
+}
+
 export const useConfigStore = defineStore('config', () => {
+  const saved = loadSaved()
   // ─────────────────────────────────────────────
   // [교재 요구사항] 날씨 단위 설정
   // ─────────────────────────────────────────────
 
   // state: 단위를 저장하는 변수 (초기값은 'celsius')
   // 값은 오직 'celsius' 또는 'fahrenheit' 두 가지만 가진다.
-  const unit = ref('celsius')
+  const unit = ref(saved.unit ?? 'celsius')
 
   // getters: 현재 단위 상태에 맞춰 화면에 뿌릴 기호(℃ / ℉)를 실시간 리턴
   const unitSymbol = computed(() => {
@@ -33,7 +44,7 @@ export const useConfigStore = defineStore('config', () => {
     { id: 'site', label: '🏗️ 현장' },
     { id: 'sport', label: '🏃 운동' },
   ])
-  const currentMode = ref('repair')
+  const currentMode = ref(saved.currentMode ?? 'repair')
 
   // getter: 현재 모드의 표시용 이름
   const currentModeLabel = computed(() => {
@@ -52,6 +63,15 @@ export const useConfigStore = defineStore('config', () => {
   // 메인과 상세 양쪽에서 같은 변환식이 필요해서 스토어의 action 으로 뺐다.
   // (교재에서는 각 컴포넌트의 computed 로 두고 Composable 은 범위 제외로 안내되어 있다)
   // ─────────────────────────────────────────────
+  // 단위와 모드는 다시 들어왔을 때도 그대로여야 한다
+  watch([unit, currentMode], ([u, m]) => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ unit: u, currentMode: m }))
+    } catch {
+      // 저장이 막힌 환경에서는 넘어간다
+    }
+  })
+
   function convertTemp(celsius) {
     if (unit.value === 'fahrenheit') {
       return Math.round((celsius * 9) / 5 + 32) // 화씨 변환 연산

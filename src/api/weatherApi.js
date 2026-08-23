@@ -15,9 +15,10 @@ import axios from 'axios'
 const OWM_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 const OWM_URL = 'https://api.openweathermap.org/data/2.5/weather'
 const METEO_URL = 'https://api.open-meteo.com/v1/forecast'
+const GEO_URL = 'https://api.openweathermap.org/geo/1.0/direct'
 
-// 과제에서 다루는 지역 (교재 지정 3곳 + 개인 추가 3곳)
-export const CITY_LIST = [
+// 처음 접속했을 때 보여줄 기본 지역 (교재 지정 3곳 + 개인 추가 3곳)
+export const DEFAULT_CITIES = [
   { id: 'city_01', name: '서울', lat: 37.5665, lon: 126.978, region: '수도권' },
   { id: 'city_02', name: '수원', lat: 37.2636, lon: 127.0286, region: '수도권' },
   { id: 'city_03', name: '부산', lat: 35.1796, lon: 129.0756, region: '영남권' },
@@ -84,7 +85,37 @@ export const fetchCityWeather = async (city) => {
   return { id: city.id, name: city.name, region: city.region, ...current, ...daily }
 }
 
-/** 전체 도시를 한 번에 불러온다 */
-export const fetchAllWeather = async () => {
-  return Promise.all(CITY_LIST.map((city) => fetchCityWeather(city)))
+/**
+ * 목록에 있는 도시를 한 번에 불러온다.
+ * Promise.all 은 하나만 실패해도 전부 버려서, 도시 한 곳 때문에 화면이 통째로 비어버린다.
+ * allSettled 로 바꿔서 성공한 것만 모으고 실패한 도시는 따로 알려준다.
+ */
+export const fetchAllWeather = async (cities) => {
+  const results = await Promise.allSettled(cities.map((city) => fetchCityWeather(city)))
+  const ok = []
+  const failed = []
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') ok.push(r.value)
+    else failed.push({ city: cities[i], reason: r.reason })
+  })
+  return { list: ok, failed }
+}
+
+/**
+ * 도시 이름으로 좌표를 찾는다 (OpenWeatherMap Geocoding API).
+ * 한글로 검색해도 되고, local_names.ko 로 한글 지명을 돌려준다.
+ * '광주' 처럼 같은 이름이 여러 곳이면 여러 개가 나오므로 사용자가 고르게 한다.
+ */
+export const searchCity = async (query) => {
+  const { data } = await axios.get(GEO_URL, {
+    params: { q: query, limit: 5, appid: OWM_KEY },
+  })
+  return data.map((c) => ({
+    id: `geo_${c.lat.toFixed(4)}_${c.lon.toFixed(4)}`,
+    name: c.local_names?.ko ?? c.name,
+    originalName: c.name,
+    region: c.state ?? c.country,
+    lat: c.lat,
+    lon: c.lon,
+  }))
 }
