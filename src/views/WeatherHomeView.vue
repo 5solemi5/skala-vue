@@ -7,9 +7,11 @@ import SearchBar from '../components/exercise/SearchBar.vue'
 import ModeSelector from '../components/exercise/ModeSelector.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { buildAdvice } from '../utils/adviceRules'
+import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
 const route = useRoute()
+const configStore = useConfigStore()
 
 const weatherList = ref([
   { id: 'city_01', name: '서울', temp: 28, status: '맑음', humidity: 55, rainProb: 10, minTemp: 21 },
@@ -23,13 +25,9 @@ const weatherList = ref([
 const searchQuery = ref('')
 const selectedCityInfo = ref('카드를 클릭하거나 검색해 보세요.')
 
-const modeList = ref([
-  { id: 'repair', label: '🔧 정비' },
-  { id: 'farm', label: '🌾 농사' },
-  { id: 'site', label: '🏗️ 현장' },
-  { id: 'sport', label: '🏃 운동' },
-])
-const currentMode = ref('repair')
+// 모드는 상세 화면과도 공유해야 하므로 스토어에서 가져온다
+const modeList = computed(() => configStore.modeList)
+const currentMode = computed(() => configStore.currentMode)
 
 // 초기 진입 시 주소창의 쿼리 스트링을 읽어 상태를 복원한다
 onMounted(() => {
@@ -37,7 +35,7 @@ onMounted(() => {
     searchQuery.value = route.query.search
   }
   if (route.query.mode) {
-    currentMode.value = route.query.mode
+    configStore.setMode(route.query.mode)
   }
 })
 
@@ -79,9 +77,8 @@ watchEffect(() => {
 })
 
 watch(currentMode, (newMode, oldMode) => {
-  const label = modeList.value.find((m) => m.id === newMode)?.label
   console.log(`🧰 [watch] 모드 변경: ${oldMode} ➡️ ${newMode} — 채비 기준을 다시 적용합니다.`)
-  selectedCityInfo.value = `${label} 기준으로 오늘의 채비를 다시 계산했습니다.`
+  selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
 })
 
 // 상세보기는 alert 대신 라우터 이동으로 처리한다
@@ -104,7 +101,7 @@ const handleDetailJump = (cityName) => {
         :mode-list="modeList"
         :current-mode="currentMode"
         :alert-count="alertCityCount"
-        @change-mode="(id) => (currentMode = id)"
+        @change-mode="(id) => configStore.setMode(id)"
       />
     </BaseDashboardCard>
 

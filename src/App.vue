@@ -1,5 +1,6 @@
 <script setup>
 import { RouterLink, RouterView } from 'vue-router'
+import UnitToggler from './components/exercise/UnitToggler.vue'
 
 const navList = [
   { to: '/', label: '오늘의 채비', icon: '⛅' },
@@ -27,6 +28,7 @@ const navList = [
           <RouterLink v-for="item in navList" :key="item.to" :to="item.to" class="nav-item">
             <span aria-hidden="true">{{ item.icon }}</span> {{ item.label }}
           </RouterLink>
+          <UnitToggler />
         </nav>
       </div>
     </header>
@@ -100,6 +102,7 @@ const navList = [
 .nav {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 4px;
 }
 .nav-item {

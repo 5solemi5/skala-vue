@@ -1,8 +1,12 @@
 <script setup>
+import { computed } from 'vue'
 import AdviceList from './AdviceList.vue'
+import { useConfigStore } from '@/stores/configStore'
+
+const configStore = useConfigStore()
 
 // 부모로부터 선택된 도시 객체와 그 도시의 채비 목록을 전달받는다
-defineProps({
+const props = defineProps({
   cityItem: {
     type: Object,
     required: true,
@@ -15,13 +19,17 @@ defineProps({
 
 // 카드 선택과 상세보기를 부모에게 알린다
 defineEmits(['select-card', 'click-detail'])
+
+// 스토어에 설정된 단위에 맞춰 기온을 변환해서 보여준다
+const displayTemp = computed(() => configStore.convertTemp(props.cityItem.temp))
+const displayMinTemp = computed(() => configStore.convertTemp(props.cityItem.minTemp))
 </script>
 
 <template>
   <div class="weather-card" @click="$emit('select-card', `${cityItem.name}이 선택되었습니다.`)">
     <h4>{{ cityItem.name }} ({{ cityItem.status }})</h4>
 
-    <p class="temp">{{ cityItem.temp }}<span class="unit">℃</span></p>
+    <p class="temp">{{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span></p>
 
     <span v-if="cityItem.temp >= 25" class="badge hot">🔥 더움 (25도 이상)</span>
     <span v-else class="badge cool">❄️ 선선함 (25도 미만)</span>
@@ -29,7 +37,7 @@ defineEmits(['select-card', 'click-detail'])
     <ul class="metric">
       <li><span>습도</span><b>{{ cityItem.humidity }}%</b></li>
       <li><span>강수확률</span><b>{{ cityItem.rainProb }}%</b></li>
-      <li><span>최저기온</span><b>{{ cityItem.minTemp }}℃</b></li>
+      <li><span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b></li>
     </ul>
 
     <AdviceList :advice-list="adviceList" />

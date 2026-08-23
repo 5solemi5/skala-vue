@@ -3,9 +3,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { buildAdvice } from '../utils/adviceRules'
 import AdviceList from '../components/exercise/AdviceList.vue'
+import { useConfigStore } from '@/stores/configStore'
 
 const route = useRoute()
 const router = useRouter()
+const configStore = useConfigStore()
 
 // 도시 코드에 해당하는 상세 Mock Data
 const mockDetails = {
@@ -17,15 +19,7 @@ const mockDetails = {
   city_06: { name: '강원도 강릉시', temp: 18, status: '맑음', humidity: 58, rainProb: 10, minTemp: 12, wind: 4.5, region: '강원권' },
 }
 
-const modeList = [
-  { id: 'repair', label: '🔧 정비' },
-  { id: 'farm', label: '🌾 농사' },
-  { id: 'site', label: '🏗️ 현장' },
-  { id: 'sport', label: '🏃 운동' },
-]
-
 const cityData = ref(null)
-const currentMode = ref('repair')
 
 // 동적 경로의 cityId 로 Mock Data 에서 도시 객체를 선택한다
 const loadCity = (id) => {
@@ -36,7 +30,7 @@ const loadCity = (id) => {
 onMounted(() => {
   loadCity(route.params.cityId)
   if (route.query.mode) {
-    currentMode.value = route.query.mode
+    configStore.setMode(route.query.mode)
   }
 })
 
@@ -53,11 +47,15 @@ watch(
 // 모든 모드의 채비를 한 번에 보여준다 (상세 페이지에서만 제공하는 정보)
 const adviceByMode = computed(() => {
   if (!cityData.value) return []
-  return modeList.map((mode) => ({
+  return configStore.modeList.map((mode) => ({
     ...mode,
     advices: buildAdvice(cityData.value, mode.id),
   }))
 })
+
+// 스토어에 설정된 단위에 맞춰 기온을 변환한다
+const displayTemp = computed(() => (cityData.value ? configStore.convertTemp(cityData.value.temp) : 0))
+const displayMinTemp = computed(() => (cityData.value ? configStore.convertTemp(cityData.value.minTemp) : 0))
 
 const goHome = () => {
   router.push('/')
@@ -71,7 +69,7 @@ const goHome = () => {
       <h2>{{ cityData.name }}</h2>
 
       <div class="hero">
-        <p class="temp">{{ cityData.temp }}<span class="unit">℃</span></p>
+        <p class="temp">{{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span></p>
         <div class="hero-meta">
           <p class="status">{{ cityData.status }}</p>
           <span v-if="cityData.temp >= 25" class="badge hot">🔥 더움 (25도 이상)</span>
@@ -83,7 +81,7 @@ const goHome = () => {
       <ul class="metric">
         <li><span>습도</span><b>{{ cityData.humidity }}%</b></li>
         <li><span>강수확률</span><b>{{ cityData.rainProb }}%</b></li>
-        <li><span>최저기온</span><b>{{ cityData.minTemp }}℃</b></li>
+        <li><span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b></li>
         <li><span>풍속</span><b>{{ cityData.wind }}m/s</b></li>
       </ul>
 
@@ -91,7 +89,7 @@ const goHome = () => {
       <p class="hint">메인 화면에서는 선택한 한 가지만 보이지만, 여기서는 네 가지를 한눈에 비교할 수 있습니다.</p>
       <div class="mode-grid">
         <div v-for="mode in adviceByMode" :key="mode.id" class="mode-column">
-          <p class="mode-label">{{ mode.label }}</p>
+          <p class="mode-label" :class="{ on: mode.id === configStore.currentMode }">{{ mode.label }}</p>
           <AdviceList :advice-list="mode.advices" />
         </div>
       </div>
@@ -203,6 +201,10 @@ h3 {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+  color: #adb5bd;
+}
+/* 지금 선택되어 있는 모드를 강조한다 */
+.mode-label.on {
   color: #35495e;
 }
 .not-found {

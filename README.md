@@ -578,6 +578,78 @@ Hands on 2 → 3 → 4 결과물을 그대로 보관했다.
 - **스캐폴드 잔재 정리.** 더 이상 라우팅되지 않는 `HomeView` / `AboutView` /
   `HelloWorld` / `TheWelcome` / `WelcomeItem` / `icons` 를 삭제했다.
 
+
+## Hands on 6. Weather Store (p.212) — 4일차 과제
+
+### 교재 요구사항 이행
+
+**`stores/configStore.js` — 날씨 단위 세팅**
+
+| 구분 | 이름 | 설명 |
+|---|---|---|
+| state | `unit` | 단위를 저장하는 변수 (초기값 `celsius`) |
+| getters | `unitSymbol` | 현재 단위에 맞는 기호 (℃ / ℉) |
+| actions | `toggleUnit` | `celsius` ↔ `fahrenheit` 토글 |
+
+| 요구사항 | 구현 |
+|---|---|
+| 1. `UnitToggler.vue` | 현재 단위 기호와 이름을 표시하는 토글 버튼 |
+| 2. Navigation Bar 옆 배치 | `App.vue` 내비게이션 바 우측에 배치 |
+| 3. 메인·상세에 단위 적용 | 카드의 기온·최저기온, 상세 화면의 기온이 모두 변환됨 |
+| 4. 본인 추가 | 아래 참조 |
+
+### 개인 Customization (요구사항 4번)
+
+**① 추가 state / getter / action — 모드를 스토어로 이동**
+
+| 구분 | 이름 | 설명 |
+|---|---|---|
+| state | `modeList`, `currentMode` | 하는 일 목록과 현재 선택된 모드 |
+| getters | `currentModeLabel` | 현재 모드의 표시용 이름 |
+| actions | `setMode` | 모드 변경 (목록에 없는 값은 무시) |
+
+모드는 원래 `WeatherHomeView` 안의 `ref` 였다. 그런데 상세 화면에서도
+"지금 어느 모드로 보고 있는지"를 알아야 해서, 두 화면이 함께 보는 값이 됐다.
+라우터로 화면이 바뀌면 컴포넌트가 새로 생기기 때문에 `ref` 로는 값이 유지되지 않는다.
+**단위와 똑같은 성격의 값**이라 같은 스토어로 옮겼다.
+
+**② 온도 변환을 스토어 action 으로**
+
+교재는 각 컴포넌트에서 `computed` 로 변환식을 쓰는 방식을 안내하고,
+"유사한 코드가 중복됨 → Composable 로 해결 가능(범위 제외)" 이라고 되어 있다.
+실제로 `WeatherCard` 와 `WeatherDetailView` 두 곳에서 같은 식이 필요했다.
+Composable 은 범위 밖이라, 이미 쓰고 있는 스토어에 `convertTemp(celsius)` action 을 두어
+양쪽이 같은 함수를 부르도록 했다.
+
+```js
+function convertTemp(celsius) {
+  if (unit.value === 'fahrenheit') {
+    return Math.round((celsius * 9) / 5 + 32)
+  }
+  return celsius
+}
+```
+
+### 확인한 동작
+
+| 확인 | 결과 |
+|---|---|
+| 섭씨 → 화씨 | 서울 `28℃` → `82℉` |
+| 최저기온도 함께 변환 | `21℃` → `70℉` |
+| 메인 → 상세 이동 후 단위 유지 | 대구 `70℉` |
+| 메인에서 고른 모드가 상세에 반영 | 상세 화면에서 🌾 농사가 강조 표시 |
+
+### 알게 된 점
+
+- **props / emit 으로는 안 되는 자리가 있다.** 내비게이션 바의 토글 버튼과
+  카드 안의 온도는 컴포넌트 트리에서 한참 떨어져 있다. props 로 내리려면
+  `App.vue` → `RouterView` → 각 View → `WeatherCard` 까지 값을 계속 넘겨야 한다.
+  스토어는 이 계층을 건너뛴다.
+- **화면이 바뀌어도 값이 살아남는다.** 라우터로 이동하면 컴포넌트는 파괴되지만
+  스토어는 앱이 살아있는 동안 유지된다. 그래서 상세 페이지에서도 단위와 모드가 그대로였다.
+- `setMode` 에 목록 검사를 넣어뒀다. 주소창에 `?mode=아무거나` 를 넣어도
+  스토어가 걸러내므로 화면이 깨지지 않는다.
+
 ---
 
 # 트러블슈팅 기록
