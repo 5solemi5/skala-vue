@@ -20,9 +20,9 @@ import VueOnce from './components/practices/basic/VueOnce.vue'
 import VueMemo from './components/practices/basic/VueMemo.vue'
 
 // 3. Vue Event Handling
-// import EventBasic from './components/practices/basic/EventBasic.vue'
-// import EventObject from './components/practices/basic/EventObject.vue'
-// import EventModifier from './components/practices/basic/EventModifier.vue'
+import EventBasic from './components/practices/basic/EventBasic.vue'
+import EventObject from './components/practices/basic/EventObject.vue'
+import EventModifier from './components/practices/basic/EventModifier.vue'
 
 // 4. Vue Form Handling
 // import ModelBasic from './components/practices/basic/ModelBasic.vue'
@@ -57,13 +57,14 @@ import VueMemo from './components/practices/basic/VueMemo.vue'
     <VueOnce />
     <VueMemo />
 
-    <!-- 진도 나갈 때 해당 블록의 import와 태그 주석을 함께 해제한다 -->
-    <!--
     <h1>3. Vue Event Handling</h1>
     <hr />
     <EventBasic />
     <EventObject />
     <EventModifier />
+
+    <!-- 진도 나갈 때 해당 블록의 import와 태그 주석을 함께 해제한다 -->
+    <!--
     <h1>4. Vue Form Handling</h1>
     <hr />
     <ModelBasic />
