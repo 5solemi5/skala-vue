@@ -42,6 +42,7 @@ defineEmits(['change-mode'])
 }
 .seg {
   display: flex;
+  flex-wrap: wrap;
   gap: 2px;
 }
 .seg-item {
@@ -83,5 +84,16 @@ defineEmits(['change-mode'])
   bottom: 0;
   height: 2px;
   background: var(--color-ink);
+}
+
+/* 일곱 가지가 한 줄에 안 들어가는 폭에서는 간격을 좁혀 두 줄로 접는다 */
+@media (max-width: 560px) {
+  .seg-item {
+    margin-right: 16px;
+    padding-bottom: 8px;
+  }
+  .what {
+    font-size: 14px;
+  }
 }
 </style>

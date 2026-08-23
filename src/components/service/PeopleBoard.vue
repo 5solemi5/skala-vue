@@ -14,7 +14,21 @@ defineProps({
 defineEmits(['select', 'setup'])
 
 // 숫자보다 우리말이 따뜻하게 읽힌다
-const koCount = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟']
+const koCount = [
+  '',
+  '한',
+  '두',
+  '세',
+  '네',
+  '다섯',
+  '여섯',
+  '일곱',
+  '여덟',
+  '아홉',
+  '열',
+  '열한',
+  '열두',
+]
 const countLabel = (n) => `${koCount[n] ?? n} 곳의 하루를 보고 있어요`
 </script>
 
@@ -182,5 +196,12 @@ h2 {
   background: var(--color-line);
   border-radius: 11.5px;
   overflow: hidden;
+}
+
+/* 폭이 좁아도 한 줄에 하나씩 쌓이면 열두 칸이 너무 길어진다. 두 칸씩 붙인다 */
+@media (max-width: 520px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 </style>

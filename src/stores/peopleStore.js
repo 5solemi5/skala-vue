@@ -4,12 +4,10 @@ import { defineStore } from 'pinia'
 const STORAGE_KEY = 'skala-chaebi-people'
 
 /**
- * 한 번에 챙길 수 있는 사람 수.
- * 아침에 한 번 훑어보는 화면이라 한눈에 들어오는 만큼만 둔다.
- * 더 늘리면 카드가 작아지고 결국 목록을 스크롤하게 되는데,
- * 그러면 "한눈에 본다" 는 이 화면의 목적이 사라진다.
+ * 한 번에 챙길 수 있는 곳의 수.
+ * 아침에 한 번 훑어보는 화면이라 스크롤 없이 들어오는 만큼으로 잡았다.
  */
-export const MAX_PEOPLE = 8
+export const MAX_PEOPLE = 12
 
 /**
  * 챙기는 대상 목록.
