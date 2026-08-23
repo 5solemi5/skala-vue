@@ -1,6 +1,7 @@
 <script setup>
 // ── 과제 (Hands on) ──
 import WeatherMockup from './components/exercise/WeatherMockup.vue'
+import WeatherComposition from './components/exercise/WeatherComposition.vue'
 
 // ── 1일차: Vue Syntax ──
 // 1. 학습환경 구성
@@ -57,6 +58,12 @@ import WatchersWatchEffect from './components/practices/composition/WatchersWatc
     <h1>⛅ 과제 1: 날씨 (Mockup)</h1>
     <hr />
     <WeatherMockup />
+  </div>
+
+  <div class="app-container">
+    <h1>⛅ 과제 2: 날씨 (컴포지션)</h1>
+    <hr />
+    <WeatherComposition />
   </div>
 
   <!-- 기본 문법 실습 (Code Challenge) -->

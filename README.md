@@ -321,6 +321,73 @@ src/
 - **교재 요구사항과 내 추가분을 코드에서 구분했다.** 주석에 `[교재 요구사항 N]` / `[요구사항 5]` 를
   표시해서 어디까지가 지정 사항이고 어디부터가 내 확장인지 알아볼 수 있게 했다.
 
+
+## Hands on 3. Weather Composition (p.145) — 2일차 과제
+
+### 교재 요구사항 이행
+
+| 요구사항 | 구현 |
+|---|---|
+| 1. 반응형 상태 관리 | `searchQuery` · `selectedCityInfo` · `weatherList` |
+| 2. 검색 도시 (`computed`) | `filteredWeatherList` — 검색어가 도시 이름에 포함된 항목만 필터링 |
+| 3. 변화 감시 | `watch(selectedCityInfo)` 로 상태바 변경 로그 / `watchEffect` 로 검색어 추적 로그 |
+| 4. 검색 결과 표시 | 검색어 없음 → 원본 / 일치 → 해당 도시 / 불일치 → 안내 문구 |
+| 5. 본인 추가 | 아래 참조 |
+
+### 개인 Customization (요구사항 5번)
+
+**① 추가 반응형 상태** — `currentMode` (정비 / 농사 / 현장 / 운동)
+
+**② 추가 computed 2개**
+
+| 이름 | 역할 |
+|---|---|
+| `adviceMap` | 도시 전체의 채비를 `{ 도시id: 조언배열 }` 형태로 한 번에 계산 |
+| `alertCityCount` | 지금 보이는 지역 중 `⛔` 판정을 받은 곳이 몇 곳인지 |
+
+**③ 추가 watcher** — `watch(currentMode)` 로 모드 전환을 감지해 로그를 남기고 상태바 문구를 갱신
+
+### 1일차 코드를 고친 부분 — 함수 호출을 computed 로
+
+1일차(Hands on 2)에서는 조언을 만드는 `getAdviceList(item)` 를 **템플릿에서 직접 호출**했다.
+
+```html
+<!-- 1일차: 화면이 다시 그려질 때마다 도시 수만큼 재실행됨 -->
+<div v-for="advice in getAdviceList(item)">
+```
+
+Code Challenge 6 에서 `computed` 의 캐싱을 배우고 나서 이게 문제라는 걸 알았다.
+템플릿에서 괄호를 붙여 호출한 함수는 **리렌더링될 때마다 조건 없이 재실행**된다.
+카드가 6개니까 화면이 한 번 갱신될 때마다 판정 로직이 6번 돈다.
+
+그래서 2일차에는 전체 결과를 미리 계산해 두는 `computed` 로 바꿨다.
+
+```js
+const adviceMap = computed(() => {
+  const map = {}
+  weatherList.value.forEach((item) => {
+    map[item.id] = buildAdvice(item, currentMode.value)
+  })
+  return map
+})
+```
+
+```html
+<!-- 2일차: weatherList 나 currentMode 가 바뀔 때만 재계산 -->
+<div v-for="advice in adviceMap[item.id]">
+```
+
+`computed` 안에 콘솔로그를 넣고 확인해 보니 차이가 분명했다.
+
+| 동작 | 재계산 로그 |
+|---|---|
+| 모드 전환 (의존성 변경) | ✅ 찍힘 |
+| 카드 클릭 (무관한 상태 변경) | 안 찍힘 — 캐싱된 값 재사용 |
+
+**막혔던 점.** `computed` 는 인자를 받을 수 없어서 처음엔 `computed(() => buildAdvice(item))` 같은 걸
+어떻게 써야 하나 한참 고민했다. 결국 **도시별로 따로 만들 게 아니라 전체를 한 덩어리로 계산해서
+객체(map)로 들고 있으면 된다**는 걸 깨달았다. 화면에서는 `adviceMap[item.id]` 로 꺼내 쓴다.
+
 ---
 
 # 트러블슈팅 기록
