@@ -2,7 +2,7 @@
 // ── 과제 (Hands on) ──
 import WeatherMockup from './components/exercise/WeatherMockup.vue'
 
-// ── 기본 문법 실습 (Code Challenge) ──
+// ── 1일차: Vue Syntax ──
 // 1. 학습환경 구성
 import SampleOne from './components/practices/basic/SampleOne.vue'
 import SampleTwo from './components/practices/basic/SampleTwo.vue'
@@ -35,6 +35,11 @@ import ModelModifier from './components/practices/basic/ModelModifier.vue'
 
 // 5. Vue Style Handling
 import StyleScoped from './components/practices/basic/StyleScoped.vue'
+
+// ── 2일차: Composition API ──
+// 6. Reactive State
+import ReactiveRef from './components/practices/composition/ReactiveRef.vue'
+import ReactiveReactive from './components/practices/composition/ReactiveReactive.vue'
 </script>
 
 <template>
@@ -84,6 +89,11 @@ import StyleScoped from './components/practices/basic/StyleScoped.vue'
     <h1>5. Vue Style Handling</h1>
     <hr />
     <StyleScoped />
+
+    <h1>6. Reactive State</h1>
+    <hr />
+    <ReactiveRef />
+    <ReactiveReactive />
   </div>
 </template>
 

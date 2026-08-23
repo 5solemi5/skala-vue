@@ -170,6 +170,38 @@ src/
 그대로 두니 `typeof`가 계속 `string`으로만 나와서 수식어 효과를 확인할 수 없었다.
 `v-model.number`, `v-model.trim`으로 고쳐서 동작을 확인했다.
 
+
+## 2일차 — Composition API
+
+### Code Challenge 5. Reactive State (p.126)
+
+| 파일 | 내용 |
+|---|---|
+| `ReactiveRef.vue` | `ref()` 로 원시값·배열·객체를 반응형으로 만들기 |
+| `ReactiveReactive.vue` | `reactive()` 의 객체·배열 처리와 반응성이 끊기는 경우 |
+
+강사님 저장소의 `practices/composition/` 폴더는 비어 있었다.
+1일차 `basic/` 은 예제가 다 들어있었는데 2일차부터는 직접 채우는 구조라,
+교재 본문(p.121~125)을 보고 작성했다.
+
+**알게 된 점**
+
+- `ref()` 는 원시값이든 객체든 다 감쌀 수 있다. `<script>` 안에서는 `count.value` 로,
+  템플릿에서는 `.value` 없이 `{{ count }}` 로 쓴다. 이 비대칭이 처음엔 계속 헷갈렸다.
+- 객체를 `ref` 로 감싸면 `user.value.name = '장보고'` 처럼 **`.value` 를 한 번 거친 뒤**
+  속성에 접근해야 한다. 눌러보니 화면이 바로 바뀌는 걸 확인했다.
+- `reactive()` 는 `.value` 가 없어서 편한데, **통째로 갈아끼우면 반응성이 끊긴다.**
+  ```js
+  let state = reactive({ count: 0 })
+  state = { count: 5 }   // ❌ 연결 끊김
+  state.count = 5        // 🟢 이렇게 해야 한다
+  ```
+  배열도 마찬가지라서 `push` / `splice` 로만 건드려야 한다.
+  실제로 `splice(0, 1)` 로 '사과'를 지우니 화면에서 사라지는 걸 확인했다.
+- 교재에 "현업에서는 객체·배열도 그냥 `ref()` 로 통일하는 추세"라고 적혀 있다.
+  `reactive` 의 이 제약을 겪어보니 왜 그런지 납득이 됐다.
+  앞으로 과제 코드에서는 `ref()` 로 통일해서 쓰기로 했다.
+
 ---
 
 # 과제 (Hands on) 기록
