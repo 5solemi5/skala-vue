@@ -9,6 +9,28 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't5',
+    title: '실습용 CSS 가 과제 화면 버튼까지 덮음',
+    date: '4일차',
+    symptom:
+      'Element Plus 전역 등록을 걷어내고 나니 과제 화면의 [상세보기] 버튼이 초록에서 회색으로 바뀌어 있었다. Tailwind 로 bg-primary 를 줬는데 안 먹었다.',
+    log: `개발자 도구에서 실제 적용값을 찍어봤다
+  background-color: rgb(241, 243, 245)   ← #f1f3f5
+
+/* src/assets/practice.css */
+button {
+  background-color: #f1f3f5;
+  ...
+}`,
+    cause:
+      'practice.css 의 전역 button 규칙이 이겼다. 클래스(.bg-primary)가 요소(button)보다 우선순위가 높은데도 진 이유는 Tailwind v4 가 유틸리티를 @layer 안에 넣기 때문이다. 레이어에 속하지 않은 규칙은 레이어에 속한 규칙을 항상 이긴다.',
+    fix: `/* 실습 화면 전용 스타일을 그 영역 안으로 한정 */
+.practice-container button { ... }
+.practice-container input  { ... }
+.practice-container h1, h2, h3, hr { ... }`,
+    note: '우선순위 계산만 생각하다가 한참 못 찾았다. 캐스케이드 레이어가 우선순위보다 먼저 비교된다는 걸 이번에 알았다.',
+  },
+  {
     id: 't1',
     title: 'npm run dev 가 안 됨 — vite: command not found',
     date: '1일차',

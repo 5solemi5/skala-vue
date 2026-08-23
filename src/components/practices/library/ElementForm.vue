@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElCard, ElInput, ElSwitch, ElButton } from 'element-plus'
+import 'element-plus/dist/index.css'
 
 const userForm = ref({
   email: '',

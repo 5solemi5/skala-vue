@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onUnmounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox, ElCard, ElButton, ElProgress } from 'element-plus'
+import 'element-plus/dist/index.css'
 
 const downloadProgress = ref(0)
 const isDownloading = ref(false)

@@ -2,11 +2,9 @@
 // preflight(기본 스타일 초기화)가 뒤따르는 실습용 CSS 를 덮어쓰지 않도록 순서가 중요하다.
 import './assets/tailwind.css'
 import './assets/main.css'
-import 'element-plus/dist/index.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
 
 import App from './App.vue'
 import router from './router'
@@ -15,6 +13,5 @@ const app = createApp(App)
 
 app.use(createPinia())
 app.use(router)
-app.use(ElementPlus)
 
 app.mount('#app')

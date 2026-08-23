@@ -1,5 +1,7 @@
 <script setup>
 import { ref } from 'vue'
+import { ElCard, ElInputNumber, ElRate } from 'element-plus'
+import 'element-plus/dist/index.css'
 
 const productQuantity = ref(1) // 수량 카운터 기본값
 const productRate = ref(4) // 별점 기본값 (별 4개)
