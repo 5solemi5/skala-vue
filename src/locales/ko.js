@@ -61,8 +61,8 @@ export default {
   // ── 오늘의 채비 (큰 카드) ───────────────────────
   'hero.humidity': '습도',
   'hero.rainProb': '강수확률',
-  'hero.hot': '🔥 더움 (25도 이상)',
-  'hero.mild': '❄️ 선선함 (25도 미만)',
+  'hero.hot': '더움 (25도 이상)',
+  'hero.mild': '선선함 (25도 미만)',
   'hero.detail': '상세보기',
   'hero.detailAria': ({ name }) => `${name} 상세보기`,
   'hero.rowDetail': '상세',

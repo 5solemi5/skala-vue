@@ -57,8 +57,8 @@ export default {
   // ── hero card ───────────────────────────────
   'hero.humidity': 'Humidity',
   'hero.rainProb': 'Rain',
-  'hero.hot': '🔥 Hot (25°C and above)',
-  'hero.mild': '❄️ Mild (below 25°C)',
+  'hero.hot': 'Hot (25°C and above)',
+  'hero.mild': 'Mild (below 25°C)',
   'hero.detail': 'See details',
   'hero.detailAria': ({ name }) => `See details for ${name}`,
   'hero.rowDetail': 'Details',

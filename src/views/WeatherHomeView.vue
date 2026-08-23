@@ -208,15 +208,15 @@ const summaryLine = computed(() => {
 })
 
 watch(selectedCityInfo, (newInfo, oldInfo) => {
-  console.log(`👁️ [watch] 상태바 문구 변경: "${oldInfo}" ➡️ "${newInfo}"`)
+  console.log(`[watch] 상태바 문구 변경: "${oldInfo}" -> "${newInfo}"`)
 })
 
 watchEffect(() => {
-  console.log(`🤖 [watchEffect] 현재 검색어 '${searchQuery.value}' 로 목록을 필터링합니다.`)
+  console.log(`[watchEffect] 현재 검색어 '${searchQuery.value}' 로 목록을 필터링합니다.`)
 })
 
 watch(currentMode, (newMode, oldMode) => {
-  console.log(`🧰 [watch] 모드 변경: ${oldMode} ➡️ ${newMode} — 채비 기준을 다시 적용합니다.`)
+  console.log(`[watch] 모드 변경: ${oldMode} -> ${newMode} — 채비 기준을 다시 적용합니다.`)
   selectedCityInfo.value = configStore.t('home.modeChanged', { mode: configStore.currentModeLabel })
 })
 
