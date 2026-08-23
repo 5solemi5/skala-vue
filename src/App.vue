@@ -40,6 +40,15 @@ import StyleScoped from './components/practices/basic/StyleScoped.vue'
 // 6. Reactive State
 import ReactiveRef from './components/practices/composition/ReactiveRef.vue'
 import ReactiveReactive from './components/practices/composition/ReactiveReactive.vue'
+// 7. Computed & Watchers
+import ComputedBasic from './components/practices/composition/ComputedBasic.vue'
+import WatchersBasic from './components/practices/composition/WatchersBasic.vue'
+import WatchersMulti from './components/practices/composition/WatchersMulti.vue'
+import WatchersDeep from './components/practices/composition/WatchersDeep.vue'
+import WatchersReactive from './components/practices/composition/WatchersReactive.vue'
+import WatchersRefArray from './components/practices/composition/WatchersRefArray.vue'
+import WatchersReactiveArray from './components/practices/composition/WatchersReactiveArray.vue'
+import WatchersWatchEffect from './components/practices/composition/WatchersWatchEffect.vue'
 </script>
 
 <template>
@@ -94,6 +103,17 @@ import ReactiveReactive from './components/practices/composition/ReactiveReactiv
     <hr />
     <ReactiveRef />
     <ReactiveReactive />
+
+    <h1>7. Computed &amp; Watchers</h1>
+    <hr />
+    <ComputedBasic />
+    <WatchersBasic />
+    <WatchersMulti />
+    <WatchersDeep />
+    <WatchersReactive />
+    <WatchersRefArray />
+    <WatchersReactiveArray />
+    <WatchersWatchEffect />
   </div>
 </template>
 
