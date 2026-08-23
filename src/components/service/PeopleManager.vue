@@ -120,10 +120,10 @@ const remove = (person) => {
         <h3>
           내 사람들 <span class="cnt tnum">{{ peopleStore.count }}/{{ MAX_PEOPLE }}</span>
         </h3>
-        <p class="hint">챙기고 싶은 사람과 그 사람이 있는 지역을 넣으세요.</p>
+        <p class="hint">챙기고 싶은 사람과 그 사람이 있는 곳을 적어 두세요.</p>
       </div>
       <button type="button" class="ghost" @click="isOpen = !isOpen">
-        {{ isOpen ? '닫기' : '고치기' }}
+        {{ isOpen ? '접기' : '고르기' }}
       </button>
     </div>
 

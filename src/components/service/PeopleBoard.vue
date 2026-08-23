@@ -18,7 +18,7 @@ defineEmits(['select', 'setup'])
     <div class="head">
       <p class="eyebrow">오늘, 내 사람들</p>
       <button type="button" class="setup" @click="$emit('setup')">
-        {{ isSample ? '내 사람들로 바꾸기' : '사람 고치기' }}
+        {{ isSample ? '내 사람들 챙기기' : '내 사람들 더 챙기기' }}
       </button>
     </div>
 
