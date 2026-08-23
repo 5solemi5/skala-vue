@@ -154,6 +154,14 @@ const handleDetailJump = (cityName) => {
         </div>
       </div>
 
+      <!-- 일부 지역만 실패한 경우: 나머지 카드는 그대로 두고 안내만 얹는다 -->
+      <p
+        v-if="!errorMessage && failedCities.length"
+        class="mb-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800"
+      >
+        {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
+      </p>
+
       <div
         v-if="errorMessage"
         class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
@@ -167,13 +175,6 @@ const handleDetailJump = (cityName) => {
       >
         실시간 날씨를 불러오는 중입니다...
       </div>
-
-      <p
-        v-if="!errorMessage && failedCities.length"
-        class="mb-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800"
-      >
-        {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
-      </p>
 
       <div v-else class="card-grid">
         <WeatherCard
@@ -216,7 +217,7 @@ h3 {
 }
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
   gap: 16px;
 }
 .empty {

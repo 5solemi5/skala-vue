@@ -24,3 +24,15 @@
   border-top: 2px solid #e9ecef;
   margin-bottom: 24px;
 }
+
+/* 좁은 화면에서는 바깥 여백을 줄여 콘텐츠 폭을 확보한다 */
+@media (max-width: 640px) {
+  .app-container {
+    margin: 16px 0;
+    padding: 20px 16px;
+    border-radius: 10px;
+  }
+  .app-container h1 {
+    font-size: 1.25rem;
+  }
+}

@@ -9,6 +9,25 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't6',
+    title: '모바일에서 가로 스크롤이 생김',
+    date: '4일차',
+    symptom:
+      '아이폰 크기(375px)로 줄여보니 화면 아래에 가로 스크롤바가 생겼다. 콘텐츠가 화면보다 4px 넓었다.',
+    log: `// 넘치는 요소를 찾아봤다
+document.querySelectorAll('*').forEach(el => {
+  const r = el.getBoundingClientRect()
+  if (r.right > document.documentElement.clientWidth) console.log(el)
+})
+
+뷰포트 375 / 문서폭 379
+넘침: div.rounded-lg (width 270, right 379)   ← 날씨 카드`,
+    cause:
+      '카드 그리드를 minmax(270px, 1fr) 로 잡아뒀는데, 375px 화면에서 바깥 여백을 다 빼면 쓸 수 있는 폭이 223px 밖에 안 된다. 그런데 270px 을 최소값으로 강제하고 있어서 화면 밖으로 밀려났다.',
+    fix: `grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));`,
+    note: 'min(270px, 100%) 로 감싸면 부모가 270px 보다 좁을 때는 부모 폭을 따라간다. 모바일 여백도 함께 줄였다.',
+  },
+  {
     id: 't5',
     title: '실습용 CSS 가 과제 화면 버튼까지 덮음',
     date: '4일차',
@@ -133,6 +152,26 @@ v-model.trim="userEmail"`,
 ])
 
 const reviewList = ref([
+  {
+    id: 'r4',
+    title: 'Promise.all 을 allSettled 로',
+    when: '지역 추가 기능',
+    why: '사용자가 지역을 직접 추가할 수 있게 되니, 그중 한 곳이라도 응답이 실패하면 Promise.all 이 전부 버려서 화면이 통째로 비어버린다. 잘 되는 다섯 곳까지 못 보게 되는 셈이다.',
+    before: `export const fetchAllWeather = async (cities) => {
+  return Promise.all(cities.map((city) => fetchCityWeather(city)))
+}
+// 한 곳만 실패해도 catch 로 빠져서 전체가 에러 화면`,
+    after: `const results = await Promise.allSettled(cities.map((c) => fetchCityWeather(c)))
+const ok = [], failed = []
+results.forEach((r, i) => {
+  if (r.status === 'fulfilled') ok.push(r.value)
+  else failed.push({ city: cities[i], reason: r.reason })
+})
+return { list: ok, failed }
+
+// 성공한 곳은 보여주고, 실패한 곳만 따로 안내`,
+    note: '고정된 6개 도시일 때는 문제가 안 보였다. 사용자가 값을 넣을 수 있게 되면서 드러났다.',
+  },
   {
     id: 'r1',
     title: '템플릿에서 함수 호출하던 걸 computed 로',
@@ -358,7 +397,7 @@ pre.fix {
 }
 .diff {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: 12px;
   margin: 16px 0;
 }

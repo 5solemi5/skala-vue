@@ -141,6 +141,22 @@ const courseLinks = [
   flex: 1;
   padding: 0 20px;
 }
+@media (max-width: 640px) {
+  .inner {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .site-main {
+    padding: 0 12px;
+  }
+  .brand-text b {
+    font-size: 14px;
+  }
+  .nav-item {
+    padding: 5px 10px;
+    font-size: 12.5px;
+  }
+}
 .site-footer {
   margin-top: 40px;
   padding: 26px 20px 44px;

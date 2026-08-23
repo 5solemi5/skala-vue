@@ -236,7 +236,7 @@ h3 {
 }
 .metric {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
   gap: 8px 20px;
   margin: 0;
   padding: 0;
@@ -260,7 +260,7 @@ h3 {
 }
 .mode-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
   gap: 16px;
 }
 .mode-column {
