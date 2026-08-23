@@ -1,6 +1,9 @@
 <script setup>
+import { useConfigStore } from '@/stores/configStore'
 import PersonCard from './PersonCard.vue'
 import TwinkleMark from './TwinkleMark.vue'
+
+const configStore = useConfigStore()
 
 defineProps({
   people: { type: Array, required: true },
@@ -13,23 +16,6 @@ defineProps({
 
 defineEmits(['select', 'setup'])
 
-// 숫자보다 우리말이 따뜻하게 읽힌다
-const koCount = [
-  '',
-  '한',
-  '두',
-  '세',
-  '네',
-  '다섯',
-  '여섯',
-  '일곱',
-  '여덟',
-  '아홉',
-  '열',
-  '열한',
-  '열두',
-]
-const countLabel = (n) => `${koCount[n] ?? n} 곳의 하루를 보고 있어요`
 </script>
 
 <template>
@@ -37,16 +23,16 @@ const countLabel = (n) => `${koCount[n] ?? n} 곳의 하루를 보고 있어요`
     <div class="head">
       <div class="title">
         <h2>
-          오늘,
+          {{ configStore.t('people.today') }}
           <span class="mark">
-            내 사람들
+            {{ configStore.t('people.mine') }}
             <TwinkleMark class="spark" :size="22" />
           </span>
         </h2>
-        <p class="sub">{{ countLabel(people.length) }}</p>
+        <p class="sub">{{ configStore.t('people.count', { n: people.length }) }}</p>
       </div>
       <button type="button" class="setup" @click="$emit('setup')">
-        {{ isSample ? '내 사람들 챙기기' : '내 사람들 더 챙기기' }}
+        {{ configStore.t(isSample ? 'people.setup' : 'people.setupMore') }}
       </button>
     </div>
 

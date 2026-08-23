@@ -55,7 +55,7 @@ const displayTemp = computed(() =>
         :alt="weather.description"
       />
     </span>
-    <span v-else class="now dim">불러오는 중</span>
+    <span v-else class="now dim">{{ configStore.t('people.loading') }}</span>
 
     <span v-if="lead" class="say">{{ lead.title }}</span>
   </button>

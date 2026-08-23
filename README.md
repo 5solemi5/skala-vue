@@ -70,6 +70,12 @@
 
 **7. 단위 전환**
 헤더의 ℃ / ℉ 토글. 메인·목록·상세·시간대 막대에 한꺼번에 반영되고 저장된다.
+판정 근거 문장의 기온도 같이 바뀐다. 화씨로 보는데 근거만 섭씨면 앞뒤가 안 맞는다.
+
+**8. 한국어 / English**
+같은 자리의 `한` / `EN` 토글. 화면 문구와 판정 문구 전부가 바뀐다.
+날씨 설명(`튼구름` / `broken clouds`)은 API 가 언어에 맞춰 주는 값이라
+언어를 바꾸면 날씨를 다시 받아 온다. 선택한 언어는 저장된다.
 
 ---
 
@@ -79,6 +85,11 @@
 브랜드 색을 따로 두면 화면에 색이 두 종류로 섞여서, 색이 보여도 그게 서비스 색인지
 주의하라는 뜻인지 알 수 없다. 기본은 무채색(짙은 남색 잉크 + 차가운 회청 지면)으로 두고
 색은 판정 세 가지에만 썼다. 화면에서 색이 보이는 곳 = 신경 쓸 곳.
+
+**문구는 규칙에서 떼어 냈다.**
+처음에는 판정 규칙 파일에 조건과 문장이 같이 있었다. 언어가 둘이 되니
+규칙 하나에 문장이 둘씩 붙어서 조건이 안 보였다. 규칙은 어떤 문구인지 키만 넘기고
+문장은 언어 파일에서 찾아 쓰게 했다.
 
 **판정은 아이콘이 아니라 글자로.**
 아이콘만으로는 "하지 마세요"와 "조심하세요"가 구분되지 않는다. 테두리 친 글자로 표시했다.
@@ -170,11 +181,13 @@ OpenWeatherMap 무료 플랜에 오늘 강수확률과 일 최저기온이 없�
 ```
 src/
 ├── api/weatherApi.js       두 API 를 합쳐 화면이 쓸 형태로 만든다
+├── locales/                화면·판정 문구 (ko / en)
 ├── utils/
-│   ├── adviceRules.js      하는 일별 판정 규칙
+│   ├── adviceRules.js      하는 일별 판정 규칙 (조건만, 문장은 locales)
+│   ├── weatherCondition.js 날씨 상태 코드 (판정에 쓰는 값)
 │   └── hourlyScore.js      시간대별 판정 (위 규칙을 그대로 재사용)
 ├── stores/
-│   ├── configStore.js      단위(℃/℉), 하는 일
+│   ├── configStore.js      단위(℃/℉), 하는 일, 언어
 │   └── cityStore.js        내 지역 목록
 ├── components/
 │   ├── service/            지금 서비스 화면을 이루는 컴포넌트
@@ -195,7 +208,7 @@ src/
 | 3. Composition | `WeatherComposition.vue`   | `adviceMap` / `alertCityCount` computed, 모드 watch |
 | 4. Component   | `WeatherParent.vue` 외 5개 | `ModeSelector` / `AdviceList` 추가 분리             |
 | 5. Router      | `views/`                   | `/lab` `/archive` `/dev-log` 추가                   |
-| 6. Store       | `configStore.js`           | 모드 state·getter·action, `convertTemp`             |
+| 6. Store       | `configStore.js`           | 모드·언어 state·getter·action, `convertTemp`        |
 | 7. Axios       | `api/weatherApi.js`        | Open-Meteo 추가                                     |
 | 8. UI Library  | 전역                       | Tailwind + shadcn-vue 선정                          |
 | 9. 배포        | `vercel.json`              | SPA rewrite, 빌드 시점 환경변수 주입                |

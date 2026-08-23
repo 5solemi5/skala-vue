@@ -35,10 +35,10 @@ const lead = computed(
     <button
       type="button"
       class="detail"
-      :aria-label="`${city.name} 상세보기`"
+      :aria-label="configStore.t('hero.detailAria', { name: city.name })"
       @click.stop="$emit('open-detail', city)"
     >
-      상세
+      {{ configStore.t('hero.rowDetail') }}
     </button>
   </li>
 </template>

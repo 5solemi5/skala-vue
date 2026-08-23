@@ -1,3 +1,6 @@
+import { translate } from '@/locales'
+import { groupOf, isPrecipitating } from './weatherCondition'
+
 /**
  * 오늘의 채비 판정 규칙
  *
@@ -9,345 +12,147 @@
  *  - warn : 주의가 필요합니다
  *  - info : 참고하세요
  *  - good : 조건이 좋습니다
+ *
+ * 이 파일에는 조건만 두고 문구는 locales/advice.*.js 로 옮겼다.
+ * 처음에는 규칙과 문장이 같이 있었는데 화면을 한국어·영어로 나누면서
+ * 규칙 하나에 언어 수만큼 문장이 붙어 조건이 안 보이게 됐다.
  */
 
-export const buildAdvice = (item, mode) => {
+const LEVEL_ORDER = { stop: 0, warn: 1, info: 2, good: 3 }
+
+/**
+ * @param item  도시 한 곳의 날씨 (temp, minTemp, humidity, wind, rainProb, condition)
+ * @param mode  하는 일 id
+ * @param opts  { lang, unit } — 문구를 만들 때만 쓴다. 판정 자체는 언제나 섭씨 기준.
+ */
+export const buildAdvice = (item, mode, opts = {}) => {
+  const { lang = 'ko', unit = 'celsius' } = opts
   const list = []
+
+  // 기준값은 섭씨로 두고 보여줄 때만 바꾼다.
+  // 화씨로 보고 있는데 근거 문장만 섭씨로 나오면 앞뒤가 안 맞는다.
+  const deg = (celsius) =>
+    unit === 'fahrenheit' ? `${Math.round((celsius * 9) / 5 + 32)}℉` : `${celsius}℃`
+
+  const say = (level, key, values = {}) => {
+    list.push({
+      level,
+      key,
+      title: translate(lang, `advice.${key}.title`, values),
+      desc: translate(lang, `advice.${key}.desc`, values),
+    })
+  }
+
+  // 문구에서 자주 쓰는 값들을 미리 만들어 둔다
+  const v = {
+    humidity: item.humidity,
+    rainProb: item.rainProb,
+    wind: item.wind,
+    temp: deg(item.temp),
+    minTemp: deg(item.minTemp),
+    cond: translate(lang, `cond.${groupOf(item.condition)}`),
+  }
+  const wet = isPrecipitating(item.condition)
 
   // ── 자동차 정비소 ──────────────────────────────
   // 도장 작업은 온도와 습도에 예민하다. 계절에 따라 몰리는 정비 항목도 다르다.
   if (mode === 'repair') {
-    if (item.humidity >= 80) {
-      list.push({
-        level: 'stop',
-        title: '도장 작업은 미루세요',
-        desc: `습도 ${item.humidity}% — 도막에 수분이 물려 백화가 생깁니다`,
-      })
-    } else if (item.humidity >= 60) {
-      list.push({
-        level: 'warn',
-        title: '도장 건조 시간을 넉넉히 잡으세요',
-        desc: `습도 ${item.humidity}% — 평소보다 경화가 느립니다`,
-      })
-    } else {
-      list.push({
-        level: 'good',
-        title: '도장 작업하기 좋은 날입니다',
-        desc: `습도 ${item.humidity}% — 건조 조건이 안정적입니다`,
-      })
-    }
-    if (item.temp >= 30) {
-      list.push({
-        level: 'info',
-        title: '에어컨 가스 충전 문의가 몰립니다',
-        desc: `낮 기온 ${item.temp}℃ — 냉매 재고를 확인해 두세요`,
-      })
-    }
-    if (item.minTemp <= 3) {
-      list.push({
-        level: 'info',
-        title: '배터리 방전 출동이 늘어납니다',
-        desc: `최저 ${item.minTemp}℃ — 배터리와 부동액 재고를 확인하세요`,
-      })
-    }
-    if (item.status === '비' || item.status === '눈') {
-      list.push({
-        level: 'info',
-        title: '사고 입고가 늘어납니다',
-        desc: `${item.status} 예보 — 판금·도색 일정에 여유를 두세요`,
-      })
-    }
+    if (item.humidity >= 80) say('stop', 'repair.paintStop', v)
+    else if (item.humidity >= 60) say('warn', 'repair.paintSlow', v)
+    else say('good', 'repair.paintGood', v)
+
+    if (item.temp >= 30) say('info', 'repair.aircon', v)
+    if (item.minTemp <= 3) say('info', 'repair.battery', v)
+    if (wet) say('info', 'repair.crash', v)
   }
 
   // ── 농사 ────────────────────────────────────
   if (mode === 'farm') {
-    if (item.humidity >= 80 && item.rainProb >= 30) {
-      list.push({
-        level: 'stop',
-        title: '오늘 방제는 하지 마세요',
-        desc: `습도 ${item.humidity}% · 강수확률 ${item.rainProb}% — 약제가 씻겨 내려갑니다`,
-      })
-    } else if (item.humidity >= 80) {
-      list.push({
-        level: 'warn',
-        title: '곰팡이병이 번지기 쉬운 날입니다',
-        desc: `습도 ${item.humidity}% — 잎에 물기가 오래 남습니다`,
-      })
-    }
-    if (item.minTemp <= 3) {
-      list.push({
-        level: 'stop',
-        title: '서리가 내릴 수 있습니다',
-        desc: `최저 ${item.minTemp}℃ — 오늘 밤 피복하거나 수확을 앞당기세요`,
-      })
-    }
-    if (item.temp >= 31) {
-      list.push({
-        level: 'warn',
-        title: '한낮 밭일은 피하세요',
-        desc: `낮 기온 ${item.temp}℃ — 12~16시는 온열질환 위험 구간입니다`,
-      })
-    }
-    if (item.rainProb <= 20 && item.humidity < 60) {
-      list.push({
-        level: 'info',
-        title: '물 주는 날입니다',
-        desc: `강수확률 ${item.rainProb}% · 습도 ${item.humidity}% — 당분간 비 소식이 없습니다`,
-      })
-    }
+    if (item.humidity >= 80 && item.rainProb >= 30) say('stop', 'farm.sprayStop', v)
+    else if (item.humidity >= 80) say('warn', 'farm.mold', v)
+
+    if (item.minTemp <= 3) say('stop', 'farm.frost', v)
+    if (item.temp >= 31) say('warn', 'farm.heat', v)
+    if (item.rainProb <= 20 && item.humidity < 60) say('info', 'farm.water', v)
   }
 
   // ── 자전거 ───────────────────────────────────
   // 자전거는 노면과 바람이 안전에 직결된다. 측풍은 넘어질 수 있어 기온보다 위험하다.
   if (mode === 'bike') {
-    if (item.status === '비' || item.status === '눈' || item.rainProb >= 60) {
-      list.push({
-        level: 'stop',
-        title: '오늘은 자전거를 두고 가세요',
-        desc: `강수확률 ${item.rainProb}% — 노면이 젖으면 제동 거리가 크게 늘어납니다`,
-      })
-    } else if (item.rainProb >= 30) {
-      list.push({
-        level: 'warn',
-        title: '비를 만날 수 있습니다',
-        desc: `강수확률 ${item.rainProb}% — 우비를 챙기고 무리한 코스는 피하세요`,
-      })
-    }
-    if (item.wind !== undefined && item.wind >= 7) {
-      list.push({
-        level: 'stop',
-        title: '바람이 너무 강합니다',
-        desc: `풍속 ${item.wind}m/s — 옆에서 부는 바람에 중심을 잃기 쉽습니다`,
-      })
-    } else if (item.wind !== undefined && item.wind >= 4) {
-      list.push({
-        level: 'warn',
-        title: '맞바람이 셉니다',
-        desc: `풍속 ${item.wind}m/s — 평소보다 힘이 더 듭니다`,
-      })
-    }
-    if (item.temp >= 31) {
-      list.push({
-        level: 'warn',
-        title: '한낮은 피하세요',
-        desc: `기온 ${item.temp}℃ — 물을 자주 마시고 이른 아침이나 해 진 뒤에 타세요`,
-      })
-    }
-    if (item.minTemp <= 3) {
-      list.push({
-        level: 'info',
-        title: '장갑을 챙기세요',
-        desc: `최저 ${item.minTemp}℃ — 손이 먼저 시립니다`,
-      })
-    }
+    if (wet || item.rainProb >= 60) say('stop', 'bike.rainStop', v)
+    else if (item.rainProb >= 30) say('warn', 'bike.rainWarn', v)
+
+    if (item.wind !== undefined && item.wind >= 7) say('stop', 'bike.windStop', v)
+    else if (item.wind !== undefined && item.wind >= 4) say('warn', 'bike.windWarn', v)
+
+    if (item.temp >= 31) say('warn', 'bike.heat', v)
+    if (item.minTemp <= 3) say('info', 'bike.gloves', v)
+
     if (
       item.temp >= 12 &&
       item.temp <= 26 &&
       item.rainProb < 30 &&
       (item.wind === undefined || item.wind < 4)
     ) {
-      list.push({
-        level: 'good',
-        title: '타기 좋은 날입니다',
-        desc: `${item.temp}℃ · 바람 약함 — 오래 달려도 무리가 없습니다`,
-      })
+      say('good', 'bike.good', v)
     }
   }
 
   // ── 야구 ────────────────────────────────────
   // 야구는 비에 가장 약하다. 그라운드가 젖으면 경기가 열리지 않는다.
   if (mode === 'baseball') {
-    if (item.status === '비' || item.status === '눈') {
-      list.push({
-        level: 'stop',
-        title: '경기가 취소될 수 있습니다',
-        desc: `${item.status} — 출발 전에 구단 공지를 확인하세요`,
-      })
-    } else if (item.rainProb >= 60) {
-      list.push({
-        level: 'stop',
-        title: '우천 취소 가능성이 높습니다',
-        desc: `강수확률 ${item.rainProb}% — 표를 미리 취소할지 정해 두세요`,
-      })
-    } else if (item.rainProb >= 30) {
-      list.push({
-        level: 'warn',
-        title: '중간에 비가 올 수 있습니다',
-        desc: `강수확률 ${item.rainProb}% — 우비를 챙기세요 (구장 우산 반입 제한)`,
-      })
-    }
-    if (item.temp >= 31) {
-      list.push({
-        level: 'warn',
-        title: '관중석이 덥습니다',
-        desc: `기온 ${item.temp}℃ — 모자와 물을 챙기고 그늘 좌석을 고르세요`,
-      })
-    }
-    if (item.minTemp <= 8) {
-      list.push({
-        level: 'info',
-        title: '해가 지면 쌀쌀합니다',
-        desc: `최저 ${item.minTemp}℃ — 야간 경기라면 겉옷을 챙기세요`,
-      })
-    }
-    if (item.wind !== undefined && item.wind >= 7) {
-      list.push({
-        level: 'info',
-        title: '바람이 강합니다',
-        desc: `풍속 ${item.wind}m/s — 뜬공 판단이 어려운 날입니다`,
-      })
-    }
-    if (item.rainProb < 30 && item.temp >= 15 && item.temp <= 28) {
-      list.push({
-        level: 'good',
-        title: '경기 보기 좋은 날입니다',
-        desc: `${item.temp}℃ · 강수확률 ${item.rainProb}% — 야외 관람에 무리가 없습니다`,
-      })
-    }
+    if (wet) say('stop', 'baseball.precipStop', v)
+    else if (item.rainProb >= 60) say('stop', 'baseball.rainHigh', v)
+    else if (item.rainProb >= 30) say('warn', 'baseball.rainMid', v)
+
+    if (item.temp >= 31) say('warn', 'baseball.hot', v)
+    if (item.minTemp <= 8) say('info', 'baseball.night', v)
+    if (item.wind !== undefined && item.wind >= 7) say('info', 'baseball.wind', v)
+    if (item.rainProb < 30 && item.temp >= 15 && item.temp <= 28) say('good', 'baseball.good', v)
   }
 
   // ── 현장 작업 ─────────────────────────────────
   // 산업안전보건법의 폭염·강풍 작업 조정 기준을 참고했다.
   if (mode === 'site') {
-    if (item.temp >= 33) {
-      list.push({
-        level: 'stop',
-        title: '옥외 작업을 조정하세요',
-        desc: `기온 ${item.temp}℃ — 폭염 구간입니다. 시간당 휴식을 넣으세요`,
-      })
-    } else if (item.temp >= 31) {
-      list.push({
-        level: 'warn',
-        title: '무더위에 주의하세요',
-        desc: `기온 ${item.temp}℃ — 그늘과 식수를 미리 준비하세요`,
-      })
-    }
-    if (item.wind !== undefined && item.wind >= 10) {
-      list.push({
-        level: 'stop',
-        title: '고소 작업을 중지하세요',
-        desc: `풍속 ${item.wind}m/s — 크레인과 비계 작업이 위험한 구간입니다`,
-      })
-    } else if (item.wind !== undefined && item.wind >= 7) {
-      list.push({
-        level: 'warn',
-        title: '자재가 날릴 수 있습니다',
-        desc: `풍속 ${item.wind}m/s — 적재물과 가설물을 다시 고정하세요`,
-      })
-    }
-    if (item.status === '비' || item.status === '눈') {
-      list.push({
-        level: 'stop',
-        title: '우천 작업은 제한하세요',
-        desc: '감전과 추락 위험이 커집니다',
-      })
-    } else if (item.rainProb >= 60) {
-      list.push({
-        level: 'warn',
-        title: '오후에 비가 올 수 있습니다',
-        desc: `강수확률 ${item.rainProb}% — 발판 미끄럼과 자재 덮개를 점검하세요`,
-      })
-    }
-    if (item.minTemp <= 0) {
-      list.push({
-        level: 'warn',
-        title: '노면이 얼 수 있습니다',
-        desc: `최저 ${item.minTemp}℃ — 이른 시간 이동과 콘크리트 양생에 주의하세요`,
-      })
-    }
+    if (item.temp >= 33) say('stop', 'site.heatStop', v)
+    else if (item.temp >= 31) say('warn', 'site.heatWarn', v)
+
+    if (item.wind !== undefined && item.wind >= 10) say('stop', 'site.windStop', v)
+    else if (item.wind !== undefined && item.wind >= 7) say('warn', 'site.windWarn', v)
+
+    if (wet) say('stop', 'site.precipStop', v)
+    else if (item.rainProb >= 60) say('warn', 'site.rainWarn', v)
+
+    if (item.minTemp <= 0) say('warn', 'site.freeze', v)
   }
 
   // ── 등산 ────────────────────────────────────
   // 산은 아래보다 기온이 낮고 바람이 세다. 해가 지면 체온이 빠르게 떨어진다.
   if (mode === 'hike') {
-    if (item.status === '비' || item.status === '눈' || item.rainProb >= 60) {
-      list.push({
-        level: 'stop',
-        title: '오늘 산행은 미루세요',
-        desc: `강수확률 ${item.rainProb}% — 젖은 바위와 낙엽에서 미끄러지기 쉽습니다`,
-      })
-    } else if (item.rainProb >= 30) {
-      list.push({
-        level: 'warn',
-        title: '비를 만날 수 있습니다',
-        desc: `강수확률 ${item.rainProb}% — 방수 겉옷을 챙기고 짧은 코스로 잡으세요`,
-      })
-    }
-    if (item.wind !== undefined && item.wind >= 9) {
-      list.push({
-        level: 'stop',
-        title: '능선 바람이 위험합니다',
-        desc: `풍속 ${item.wind}m/s — 산 위는 이보다 더 셉니다`,
-      })
-    }
-    if (item.minTemp <= 0) {
-      list.push({
-        level: 'warn',
-        title: '정상은 영하일 수 있습니다',
-        desc: `최저 ${item.minTemp}℃ — 고도가 100m 오를 때마다 기온이 더 떨어집니다`,
-      })
-    }
-    if (item.temp >= 30) {
-      list.push({
-        level: 'warn',
-        title: '이른 아침에 오르세요',
-        desc: `기온 ${item.temp}℃ — 한낮에는 물을 평소보다 넉넉히 챙기세요`,
-      })
-    }
-    if (item.temp >= 8 && item.temp <= 22 && item.rainProb < 30) {
-      list.push({
-        level: 'good',
-        title: '산에 오르기 좋은 날입니다',
-        desc: `${item.temp}℃ · 강수확률 ${item.rainProb}% — 걷기 편한 조건입니다`,
-      })
-    }
+    if (wet || item.rainProb >= 60) say('stop', 'hike.rainStop', v)
+    else if (item.rainProb >= 30) say('warn', 'hike.rainWarn', v)
+
+    if (item.wind !== undefined && item.wind >= 9) say('stop', 'hike.ridgeWind', v)
+    if (item.minTemp <= 0) say('warn', 'hike.summitCold', v)
+    if (item.temp >= 30) say('warn', 'hike.heat', v)
+    if (item.temp >= 8 && item.temp <= 22 && item.rainProb < 30) say('good', 'hike.good', v)
   }
 
   // ── 빨래·환기 ────────────────────────────────
   // 습도가 높으면 아무리 널어도 마르지 않고, 바람이 있으면 빨리 마른다.
   if (mode === 'laundry') {
-    if (item.status === '비' || item.status === '눈' || item.rainProb >= 50) {
-      list.push({
-        level: 'stop',
-        title: '밖에 널지 마세요',
-        desc: `강수확률 ${item.rainProb}% — 걷으러 나가야 할 수 있습니다`,
-      })
-    } else if (item.humidity >= 80) {
-      list.push({
-        level: 'stop',
-        title: '오늘은 잘 마르지 않습니다',
-        desc: `습도 ${item.humidity}% — 널어도 눅눅해지고 냄새가 납니다`,
-      })
-    } else if (item.humidity >= 65) {
-      list.push({
-        level: 'warn',
-        title: '마르는 데 오래 걸립니다',
-        desc: `습도 ${item.humidity}% — 두꺼운 옷은 다음으로 미루세요`,
-      })
-    }
+    if (wet || item.rainProb >= 50) say('stop', 'laundry.rainStop', v)
+    else if (item.humidity >= 80) say('stop', 'laundry.humidStop', v)
+    else if (item.humidity >= 65) say('warn', 'laundry.humidWarn', v)
 
     // 바람이 너무 세면 빨래가 날아간다
-    if (item.wind !== undefined && item.wind >= 8) {
-      list.push({
-        level: 'warn',
-        title: '집게를 단단히 물리세요',
-        desc: `바람 ${item.wind}m/s — 가벼운 옷은 날아갑니다`,
-      })
-    }
+    if (item.wind !== undefined && item.wind >= 8) say('warn', 'laundry.windy', v)
 
     if (item.temp <= 5) {
       // 추운 날에도 환기는 해야 하지만 오래 열어두면 난방이 다 날아간다
-      list.push({
-        level: 'info',
-        title: '짧게 자주 환기하세요',
-        desc: `기온 ${item.temp}℃ — 5분씩 몇 번이면 충분합니다`,
-      })
+      say('info', 'laundry.coldAir', v)
     } else if (item.humidity < 60 && item.rainProb < 30) {
-      list.push({
-        level: 'good',
-        title: '환기하기 좋습니다',
-        desc: `습도 ${item.humidity}% · 강수확률 ${item.rainProb}% — 창문을 열어 두세요`,
-      })
+      say('good', 'laundry.airGood', v)
     }
 
     if (
@@ -358,28 +163,15 @@ export const buildAdvice = (item, mode) => {
       item.wind >= 3 &&
       item.wind < 8
     ) {
-      list.push({
-        level: 'good',
-        title: '이불까지 널 만합니다',
-        desc: `습도 ${item.humidity}% · 바람 ${item.wind}m/s — 오늘 안에 다 마릅니다`,
-      })
+      say('good', 'laundry.bedding', v)
     }
 
-    if (item.minTemp <= 0) {
-      list.push({
-        level: 'info',
-        title: '밤새 얼 수 있습니다',
-        desc: `최저 ${item.minTemp}℃ — 해 지기 전에 걷으세요`,
-      })
-    }
+    if (item.minTemp <= 0) say('info', 'laundry.freeze', v)
   }
 
-  if (list.length === 0) {
-    list.push({
-      level: 'good',
-      title: '특별히 신경 쓸 것이 없습니다',
-      desc: '평소대로 하셔도 괜찮은 날씨입니다',
-    })
-  }
+  if (list.length === 0) say('good', 'common.nothing', v)
   return list
 }
+
+/** 가장 무거운 판정이 앞에 오도록 정렬한다. 여러 화면이 같은 순서를 쓴다 */
+export const byWeight = (a, b) => LEVEL_ORDER[a.level] - LEVEL_ORDER[b.level]

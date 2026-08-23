@@ -23,17 +23,19 @@ const scored = computed(() =>
 const best = computed(() => findBestWindow(props.rows, props.mode))
 
 const summary = computed(() => {
-  if (!best.value) return '오늘은 여유로운 시간대가 없습니다'
+  if (!best.value) return configStore.t('hourly.none')
   const from = String(best.value.from).padStart(2, '0')
   const to = String(best.value.to).padStart(2, '0')
-  return from === to ? `${from}시가 가장 낫습니다` : `${from}시 ~ ${to}시가 낫습니다`
+  return from === to
+    ? configStore.t('hourly.one', { from })
+    : configStore.t('hourly.range', { from, to })
 })
 </script>
 
 <template>
   <figure class="hourly" :class="{ compact }">
     <figcaption class="cap">
-      <span class="label">시간대</span>
+      <span class="label">{{ configStore.t('hourly.label') }}</span>
       <span class="best">{{ summary }}</span>
     </figcaption>
 
@@ -48,10 +50,10 @@ const summary = computed(() => {
     </div>
 
     <p v-if="!compact" class="legend">
-      <span class="key good">괜찮음</span>
-      <span class="key warn">주의</span>
-      <span class="key stop">피하기</span>
-      <span class="note">아래 숫자는 기온</span>
+      <span class="key good">{{ configStore.t('hourly.good') }}</span>
+      <span class="key warn">{{ configStore.t('hourly.warn') }}</span>
+      <span class="key stop">{{ configStore.t('hourly.stop') }}</span>
+      <span class="note">{{ configStore.t('hourly.note') }}</span>
     </p>
   </figure>
 </template>

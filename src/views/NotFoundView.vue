@@ -1,6 +1,8 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useConfigStore } from '@/stores/configStore'
 
+const configStore = useConfigStore()
 const router = useRouter()
 const goHome = () => {
   router.push({ name: 'WeatherHome' })
@@ -9,9 +11,10 @@ const goHome = () => {
 
 <template>
   <div class="not-found">
-    <h2>페이지를 찾을 수 없습니다</h2>
-    <p>요청하신 주소가 존재하지 않거나,<br />아직 만들어지지 않았습니다.</p>
-    <button class="home-btn" @click="goHome">날씨 메인으로 이동</button>
+    <h2>{{ configStore.t('notFound.title') }}</h2>
+    <!-- eslint-disable-next-line vue/no-v-html -- 줄바꿈 한 곳뿐이고 문구는 코드 안에 있다 -->
+    <p v-html="configStore.t('notFound.body')"></p>
+    <button class="home-btn" @click="goHome">{{ configStore.t('notFound.home') }}</button>
   </div>
 </template>
 
