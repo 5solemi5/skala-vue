@@ -356,6 +356,48 @@ src/
   서로 멀리 떨어진 컴포넌트가 같은 상태를 봐야 할 때 쓸 자리다.
 - Vue Devtools 의 Pinia 탭에서 state 를 직접 고치면 화면이 바로 따라 바뀌는 것도 확인했다.
 
+
+### Code Challenge 11. Axios (p.229)
+
+| 파일 | 내용 |
+|---|---|
+| `AxiosWeather.vue` | OpenWeatherMap 실시간 날씨 조회 (GET) |
+| `AxiosJson.vue` | JSONPlaceholder 로 GET / POST / PUT / DELETE 전부 실습 |
+
+**알게 된 점**
+
+- `fetch` 와 달리 **`.json()` 변환 단계가 없다.** `response.data` 에 결과가 바로 담긴다.
+- **에러 처리가 자동이다.** `fetch` 는 404 나 500 이 와도 `catch` 로 안 가고 `response.ok` 를
+  직접 확인해야 하는데, axios 는 4xx·5xx 를 그냥 예외로 던져줘서 `try/catch` 로 잡힌다.
+- `axios.get(URL, { params: { _limit: 3 } })` 처럼 **쿼리 스트링을 객체로 넘길 수 있다.**
+  문자열을 직접 이어붙이지 않아도 되고, 값에 특수문자가 있어도 알아서 인코딩된다.
+- `finally` 블록에 `isLoading = false` 를 넣으면 성공하든 실패하든 로딩 표시가 확실히 꺼진다.
+- JSONPlaceholder 는 테스트용이라 POST / PUT / DELETE 응답은 정상으로 오지만
+  **실제로 저장되지는 않는다.** 새로고침하면 원래 데이터로 돌아온다.
+
+**직접 고친 부분 — API 키를 소스에서 분리**
+
+강사님 예제는 API 키가 소스에 그대로 적혀 있다.
+
+```js
+const API_KEY = '8964edc63b366d27b5b728b7976570b7'   // 소스에 노출
+```
+
+이대로 커밋하면 저장소가 Public 이라 키가 그대로 공개된다.
+Hands on 9 요구사항이 **"API 키는 환경 변수로 조정하고 Git 에 업로드 되지 않도록 한다"** 이므로
+처음부터 환경 변수로 작성했다.
+
+```js
+const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+```
+
+키는 `.env.local` 에 넣었고, `.gitignore` 의 `*.local` 규칙에 걸려 저장소에 올라가지 않는다.
+`git check-ignore -v .env.local` 로 실제로 무시되는지 확인했다.
+
+**에러 처리를 상태 코드별로 나눴다.** 예제는 `alert` 하나로 끝내는데,
+401(키 문제)과 그 외 오류는 사용자가 할 수 있는 조치가 다르다.
+그래서 화면 안에 메시지를 띄우고 401 일 때는 키 활성화 안내를 하도록 했다.
+
 ---
 
 # 과제 (Hands on) 기록

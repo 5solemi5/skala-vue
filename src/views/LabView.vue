@@ -41,6 +41,8 @@ import SlotDefaultParent from '../components/practices/component/SlotDefaultPare
 import SlotNamedParent from '../components/practices/component/SlotNamedParent.vue'
 import SlotScopedParent from '../components/practices/component/SlotScopedParent.vue'
 import StoreCounter from '../components/practices/library/StoreCounter.vue'
+import AxiosWeather from '../components/practices/library/AxiosWeather.vue'
+import AxiosJson from '../components/practices/library/AxiosJson.vue'
 
 /**
  * 수업에서 진행한 Code Challenge 결과물을 단원별로 모아둔 화면.
@@ -59,6 +61,7 @@ const groupList = ref([
   { id: 8, title: '9. Props & Emits', day: '3일차 · Vue Components', components: [PropsEmitsParent] },
   { id: 9, title: '10. Component Slot', day: '3일차 · Vue Components', components: [SlotDefaultParent, SlotNamedParent, SlotScopedParent] },
   { id: 10, title: '11. Store (Pinia)', day: '4일차 · 외부 라이브러리', components: [StoreCounter] },
+  { id: 11, title: '12. Axios', day: '4일차 · 외부 라이브러리', components: [AxiosWeather, AxiosJson] },
 ])
 
 const currentGroupId = ref(0)
