@@ -270,6 +270,26 @@ v-model.trim="userEmail"`,
 
 const reviewList = ref([
   {
+    id: 'r16',
+    title: '판정 규칙이 한글 날씨 이름을 직접 비교하던 것',
+    when: '한/영 전환',
+    why: '화면을 영어로도 볼 수 있게 만들다가 발견했다. 판정 규칙 여섯 곳이 날씨를 \'비\' 라는 한글 글자로 비교하고 있었다. 화면에 뿌리려고 붙인 이름인데 판단까지 그 이름에 매여 있어서, 표기를 바꾸면 규칙이 조용히 어긋난다.',
+    before: `// API 의 영문 코드를 한글로 바꿔서 넘기고
+status: toStatusLabel(data.weather[0].main)   // 'Rain' -> '비'
+
+// 규칙은 그 한글을 비교했다
+if (item.status === '비' || item.status === '눈') { ... }`,
+    after: `// 판단에 쓰는 값과 보여주는 글자를 나눴다
+condition: data.weather[0].main               // 'Rain' 그대로
+
+// 규칙은 코드로 묻는다
+if (isPrecipitating(item.condition)) { ... }
+
+// 한글·영문 이름은 화면에 뿌릴 때만 붙인다
+t(\`cond.\${groupOf(item.condition)}\`)          // '비' / 'Rain'`,
+    note: '언어를 넣지 않았어도 고쳤어야 할 자리였다. 보여주려고 만든 값을 판단에 쓰면, 글자를 손볼 때마다 규칙이 같이 흔들린다.',
+  },
+  {
     id: 'r15',
     title: '배포하고 나서야 본 API 키의 자리',
     when: '배포',
