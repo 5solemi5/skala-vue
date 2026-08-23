@@ -7,20 +7,19 @@ import SearchBar from '../components/exercise/SearchBar.vue'
 import ModeSelector from '../components/exercise/ModeSelector.vue'
 import WeatherCard from '../components/exercise/WeatherCard.vue'
 import { buildAdvice } from '../utils/adviceRules'
+import { fetchAllWeather } from '../api/weatherApi'
+import { Button } from '@/components/ui/button'
 import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
 const route = useRoute()
 const configStore = useConfigStore()
 
-const weatherList = ref([
-  { id: 'city_01', name: '서울', temp: 28, status: '맑음', humidity: 55, rainProb: 10, minTemp: 21 },
-  { id: 'city_02', name: '수원', temp: 24, status: '비', humidity: 88, rainProb: 80, minTemp: 19 },
-  { id: 'city_03', name: '부산', temp: 26, status: '구름', humidity: 72, rainProb: 30, minTemp: 22 },
-  { id: 'city_04', name: '전주', temp: 33, status: '맑음', humidity: 45, rainProb: 5, minTemp: 24 },
-  { id: 'city_05', name: '대구', temp: 21, status: '흐림', humidity: 82, rainProb: 40, minTemp: 2 },
-  { id: 'city_06', name: '강릉', temp: 18, status: '맑음', humidity: 58, rainProb: 10, minTemp: 12 },
-])
+// 실제 API 에서 받아온 날씨 데이터가 담긴다 (Hands on 7 이전에는 목업 배열이었다)
+const weatherList = ref([])
+const isLoading = ref(false)
+const errorMessage = ref('')
+const updatedAt = ref('')
 
 const searchQuery = ref('')
 const selectedCityInfo = ref('카드를 클릭하거나 검색해 보세요.')
@@ -30,6 +29,25 @@ const modeList = computed(() => configStore.modeList)
 const currentMode = computed(() => configStore.currentMode)
 
 // 초기 진입 시 주소창의 쿼리 스트링을 읽어 상태를 복원한다
+const loadWeather = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  try {
+    weatherList.value = await fetchAllWeather()
+    updatedAt.value = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+    console.log('🌤️ [API] 전체 지역 날씨를 불러왔습니다.', weatherList.value)
+  } catch (error) {
+    console.error('날씨 데이터를 불러오지 못했습니다:', error)
+    if (error.response?.status === 401) {
+      errorMessage.value = 'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
+    } else {
+      errorMessage.value = `날씨 데이터를 불러오지 못했습니다. (${error.message})`
+    }
+  } finally {
+    isLoading.value = false
+  }
+}
+
 onMounted(() => {
   if (route.query.search) {
     searchQuery.value = route.query.search
@@ -37,6 +55,7 @@ onMounted(() => {
   if (route.query.mode) {
     configStore.setMode(route.query.mode)
   }
+  loadWeather()
 })
 
 // 검색어와 모드를 주소창에 반영해 두면 링크를 그대로 공유할 수 있다
@@ -106,8 +125,25 @@ const handleDetailJump = (cityName) => {
     </BaseDashboardCard>
 
     <BaseDashboardCard>
-      <h3>🏙️ 지역별 날씨 현황</h3>
-      <div class="card-grid">
+      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h3>🏙️ 지역별 날씨 현황</h3>
+        <div class="flex items-center gap-2">
+          <span v-if="updatedAt" class="text-xs text-muted-foreground">{{ updatedAt }} 기준</span>
+          <Button variant="outline" size="sm" :disabled="isLoading" @click="loadWeather">
+            {{ isLoading ? '불러오는 중...' : '새로고침' }}
+          </Button>
+        </div>
+      </div>
+
+      <div v-if="errorMessage" class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        ⚠️ {{ errorMessage }}
+      </div>
+
+      <div v-else-if="isLoading && weatherList.length === 0" class="py-12 text-center text-sm text-muted-foreground">
+        실시간 날씨를 불러오는 중입니다...
+      </div>
+
+      <div v-else class="card-grid">
         <WeatherCard
           v-for="item in filteredWeatherList"
           :key="item.id"
