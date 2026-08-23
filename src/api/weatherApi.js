@@ -17,6 +17,7 @@ const OWM_URL = 'https://api.openweathermap.org/data/2.5/weather'
 const METEO_URL = 'https://api.open-meteo.com/v1/forecast'
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0/direct'
 const METEO_GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search'
+const REVERSE_GEO_URL = 'https://api.openweathermap.org/geo/1.0/reverse'
 
 // 처음 접속했을 때 보여줄 기본 지역 (교재 지정 3곳 + 개인 추가 3곳)
 export const DEFAULT_CITIES = [
@@ -145,6 +146,27 @@ export const searchCity = async (query, lang = 'ko') => {
     seen.add(c.id)
     return true
   })
+}
+
+/**
+ * 좌표로 지역 이름을 찾는다 (OpenWeatherMap 역지오코딩).
+ *
+ * 브라우저가 주는 건 위도·경도뿐이라 화면에 "37.5665, 126.978" 이라고 쓸 수는 없다.
+ * 좌표를 사람이 아는 이름으로 바꿔야 "지금 계신 곳: 서울" 이 된다.
+ */
+export const reverseGeocode = async (lat, lon, lang = 'ko') => {
+  const { data } = await axios.get(REVERSE_GEO_URL, {
+    params: { lat, lon, limit: 1, appid: OWM_KEY },
+  })
+  const found = data?.[0]
+  if (!found) return null
+  return {
+    id: `geo_${lat.toFixed(3)}_${lon.toFixed(3)}`,
+    name: lang === 'en' ? found.name : (found.local_names?.ko ?? found.name),
+    region: found.state ?? found.country ?? '',
+    lat,
+    lon,
+  }
 }
 
 /**

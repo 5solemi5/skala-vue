@@ -4,6 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 import { useConfigStore } from '@/stores/configStore'
 import UnitToggler from './components/exercise/UnitToggler.vue'
 import LangToggler from './components/service/LangToggler.vue'
+import HereWeather from './components/service/HereWeather.vue'
 import BrandMark from './components/service/BrandMark.vue'
 
 const configStore = useConfigStore()
@@ -44,6 +45,8 @@ const courseLinks = computed(() => [
           <RouterLink v-for="item in courseLinks" :key="item.to" :to="item.to" class="sub-item">
             {{ item.label }}
           </RouterLink>
+
+          <HereWeather class="here" />
 
           <div class="switches">
             <LangToggler />
@@ -178,6 +181,11 @@ const courseLinks = computed(() => [
   align-items: center;
   gap: 14px;
   margin-left: 8px;
+}
+
+/* 지금 있는 곳. 메뉴와 스위치 사이에 둬서 둘 중 어느 쪽도 아니라는 걸 보인다 */
+.here {
+  margin-left: 2px;
 }
 
 .site-main {

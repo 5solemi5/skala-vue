@@ -22,6 +22,17 @@ export default {
   'foot.credit': 'SKALA Full-Stack Engineering · Frontend framework: Vue.js',
   'lang.aria': 'Language',
 
+  // ── where you are ──
+  'here.ask': 'My location',
+  'here.askTitle': "See the weather where you are",
+  'here.loading': 'Finding',
+  'here.goTitle': ({ name }) => `See today's kit for ${name}`,
+  'here.denied': 'Location unavailable',
+  'here.deniedTitle': 'Your browser is blocking location access',
+  'here.failed': 'Retry',
+  'here.failedTitle': "Found you, but the weather didn't load. Tap to try again",
+  'here.unnamed': 'Where you are',
+
   // ── weather ─────────────────────────────────
   'cond.clear': 'Clear',
   'cond.clouds': 'Cloudy',
