@@ -293,14 +293,36 @@ const walkers = computed(() => {
     <div class="switcher" role="group" :aria-label="configStore.t('yard.aria')">
       <button
         type="button"
+        class="arrow"
         :aria-label="configStore.t('yard.prev')"
         :title="configStore.t('yard.prev')"
         @click="stepTheme(-1)"
       >
         <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M7.5 2.5 4 6l3.5 3.5" /></svg>
       </button>
+
+      <!--
+        점 다섯 개.
+        화살표만 있으면 누를 수 있는 것도, 바꿀 게 몇 개인지도 알 수 없었다.
+        점을 두니 "다섯 중 지금 여기" 가 한눈에 보이고 눌러서 바로 갈 수도 있다.
+      -->
+      <span class="dots">
+        <button
+          v-for="item in configStore.yardList"
+          :key="item.id"
+          type="button"
+          class="dot"
+          :class="{ on: configStore.yardTheme === item.id }"
+          :aria-label="item.label"
+          :title="item.label"
+          :aria-pressed="configStore.yardTheme === item.id"
+          @click="configStore.setYardTheme(item.id)"
+        ></button>
+      </span>
+
       <button
         type="button"
+        class="arrow"
         :aria-label="configStore.t('yard.next')"
         :title="configStore.t('yard.next')"
         @click="stepTheme(1)"
@@ -580,31 +602,44 @@ const walkers = computed(() => {
 
 /*
  * 배경 고르기.
- * 마당 안에 뒀더니 휴대폰에서 마당 폭의 절반을 넘게 차지해 무대를 가렸다.
- * 밖으로 빼고 앞뒤로 한 칸씩 넘기는 방식으로 바꿨다.
- * 이름은 적지 않는다. 무대를 보면 어디인지 알 수 있다.
+ *
+ * 처음엔 마당 안에 이름 다섯 개를 늘어놓았는데 휴대폰에서 마당 폭의
+ * 절반을 넘게 차지해 무대를 가렸다. 밖으로 빼고 화살표만 남겼더니
+ * 이번엔 누를 수 있는 것인지조차 알 수 없었다.
+ * 테두리를 둘러 버튼처럼 보이게 하고, 가운데에 점을 놓아
+ * 바꿀 게 다섯 개라는 것과 지금 어디인지를 함께 보이게 했다.
  */
 .switcher {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 10px;
 }
-.switcher button {
+
+.arrow {
   display: inline-flex;
-  padding: 3px;
-  color: var(--color-ink-4);
-  background: none;
-  border: 0;
-  border-radius: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: var(--color-ink-3);
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 50%;
   cursor: pointer;
-  transition: color 0.12s ease;
+  transition:
+    color 0.12s ease,
+    border-color 0.12s ease;
 }
-.switcher button:hover {
+.arrow:hover {
   color: var(--color-ink);
+  border-color: var(--color-line-2);
 }
-.switcher svg {
+.arrow:active {
+  background: var(--color-paper-2);
+}
+.arrow svg {
   width: 12px;
   height: 12px;
   fill: none;
@@ -613,6 +648,32 @@ const walkers = computed(() => {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+.dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  padding: 0;
+  background: var(--color-line-2);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    background 0.14s ease,
+    transform 0.14s ease;
+}
+.dot:hover {
+  background: var(--color-ink-3);
+}
+.dot.on {
+  background: var(--color-ink);
+  transform: scale(1.35);
+}
+
 /* ── 걸어다니는 사람들 ── */
 
 /*
@@ -757,6 +818,9 @@ const walkers = computed(() => {
  * 다만 지우지는 않는다. 마당에 챙기는 수만큼 서 있는 것으로 뜻은 남는다.
  */
 @media (prefers-reduced-motion: reduce) {
+  .dot {
+    transition: none;
+  }
   .walker,
   .figure,
   .leg,

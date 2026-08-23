@@ -87,7 +87,8 @@ watch(
 
 <style scoped>
 .board {
-  margin-bottom: 4px;
+  /* 아래 '무엇을 볼까요' 와 붙어 있으면 마당이 그쪽에 딸린 것처럼 보인다 */
+  margin-bottom: 30px;
 }
 .head {
   display: flex;
