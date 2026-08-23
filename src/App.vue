@@ -5,6 +5,7 @@ import { useConfigStore } from '@/stores/configStore'
 import UnitToggler from './components/exercise/UnitToggler.vue'
 import LangToggler from './components/service/LangToggler.vue'
 import HereWeather from './components/service/HereWeather.vue'
+import HeaderSky from './components/service/HeaderSky.vue'
 import BrandMark from './components/service/BrandMark.vue'
 
 const configStore = useConfigStore()
@@ -26,6 +27,9 @@ const courseLinks = computed(() => [
 <template>
   <div class="site">
     <header class="site-header">
+      <!-- 지금 시각과 내 위치 날씨가 비치는 바탕. 글자 뒤에 깔린다 -->
+      <HeaderSky />
+
       <div class="inner">
         <RouterLink to="/" class="brand">
           <BrandMark :size="30" />
@@ -91,11 +95,14 @@ const courseLinks = computed(() => [
   position: sticky;
   top: 0;
   z-index: 10;
+  isolation: isolate;
   background: color-mix(in srgb, var(--color-paper) 92%, transparent);
   backdrop-filter: blur(10px) saturate(120%);
   border-bottom: 1px solid var(--color-line);
 }
 .inner {
+  position: relative;
+  z-index: 1;
   max-width: 860px;
   margin: 0 auto;
   padding: 14px 20px;
