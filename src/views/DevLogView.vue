@@ -195,6 +195,44 @@ v-model.trim="userEmail"`,
 
 const reviewList = ref([
   {
+    id: 'r12',
+    title: '판정 색을 두 곳에 쓰니 경고판이 됨',
+    when: '내 사람들 화면',
+    why: '카드마다 위쪽에 판정 색 막대를 깔았는데, 네 곳이 모두 같은 등급인 날에는 빨간 줄이 나란히 서서 액자가 아니라 경고판처럼 보였다. 색을 막대와 문구 두 곳에 쓴 게 과했다.',
+    before: `.person::before {          /* 카드 상단 3px 막대 */
+  height: 3px;
+}
+.person.stop::before { background: var(--color-stop); }
+
+.person.stop .say { color: var(--color-stop); }   /* 문구도 빨강 */`,
+    after: `/* 막대를 걷어내고 이름 앞 점 하나로 */
+.pip { width: 7px; height: 7px; border-radius: 50%; }
+.pip.stop { background: var(--color-stop); }
+
+/* 색은 판정 문구에만 남긴다 */
+.person.stop .say { color: var(--color-stop); }`,
+    note: '같은 정보를 두 번 칠하면 강조가 아니라 소음이 된다. 점 하나로 줄이니 오히려 눈에 잘 들어왔다.',
+  },
+  {
+    id: 'r13',
+    title: '밑줄을 반짝임으로',
+    when: '내 사람들 화면',
+    why: '제목 아래에 손으로 그은 듯한 밑줄을 넣었는데, 작게 보니 자로 잰 직선과 구분이 안 됐다. 강조도 안 되고 손맛도 안 났다.',
+    before: `.mark::after {
+  /* SVG 로 그린 물결 밑줄 */
+  background-image: url("data:image/svg+xml,...path d='M3 6.4C24 2.9...'");
+}`,
+    after: `<span class="mark">
+  내 사람들
+  <svg class="twinkle">...</svg>   <!-- 크고 작은 별 두 개 -->
+</span>
+
+/* 두 별의 박자를 어긋나게 해서 규칙적으로 깜빡이지 않게 */
+.twinkle .big   { animation: twinkle 3.4s ease-in-out infinite; }
+.twinkle .small { animation: twinkle 3.4s ease-in-out infinite 1.1s; }`,
+    note: '아껴 두는 것에 표시를 남기는 느낌으로 바꿨다. 전역 CSS 에 prefers-reduced-motion 규칙이 있어 움직임을 꺼둔 사람에게는 깜빡이지 않는다.',
+  },
+  {
     id: 'r10',
     title: '기본 목록에서 개인 정보만 걷어내기',
     when: '문구 정리',
