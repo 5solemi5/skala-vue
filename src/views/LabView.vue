@@ -40,6 +40,7 @@ import PropsEmitsParent from '../components/practices/component/PropsEmitsParent
 import SlotDefaultParent from '../components/practices/component/SlotDefaultParent.vue'
 import SlotNamedParent from '../components/practices/component/SlotNamedParent.vue'
 import SlotScopedParent from '../components/practices/component/SlotScopedParent.vue'
+import StoreCounter from '../components/practices/library/StoreCounter.vue'
 
 /**
  * 수업에서 진행한 Code Challenge 결과물을 단원별로 모아둔 화면.
@@ -57,6 +58,7 @@ const groupList = ref([
   { id: 7, title: '8. Component Lifecycle', day: '3일차 · Vue Components', components: [LifecycleParent] },
   { id: 8, title: '9. Props & Emits', day: '3일차 · Vue Components', components: [PropsEmitsParent] },
   { id: 9, title: '10. Component Slot', day: '3일차 · Vue Components', components: [SlotDefaultParent, SlotNamedParent, SlotScopedParent] },
+  { id: 10, title: '11. Store (Pinia)', day: '4일차 · 외부 라이브러리', components: [StoreCounter] },
 ])
 
 const currentGroupId = ref(0)

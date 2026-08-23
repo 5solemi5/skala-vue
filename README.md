@@ -332,6 +332,30 @@ src/
 - 3일차 과제에서 `BaseDashboardCard` 가 검색박스와 리스트박스의 공통 디자인을 갖고
   내용은 부모가 주입하는 구조인데, 그게 정확히 여기서 배운 기본 슬롯이다.
 
+
+## 4일차 — 외부 라이브러리
+
+### Code Challenge 10. Store (Pinia) (p.211)
+
+| 파일 | 내용 |
+|---|---|
+| `main.js` | `app.use(createPinia())` 로 Pinia 등록 |
+| `stores/counter.js` | `defineStore` 로 state / getters / actions 정의 |
+| `components/practices/library/StoreCounter.vue` | 스토어를 불러와 화면에서 사용 |
+
+**알게 된 점**
+
+- Pinia 스토어는 **Composition API 문법 그대로** 쓴다.
+  `ref` 가 state, `computed` 가 getters, 일반 함수가 actions 다.
+  따로 배울 문법이 아니라 지금까지 쓰던 걸 `defineStore` 로 감싼 것뿐이었다.
+- `useCounterStore()` 는 호출할 때마다 새로 만드는 게 아니라 **같은 인스턴스를 돌려준다.**
+  그래서 어느 컴포넌트에서 값을 바꿔도 다른 컴포넌트가 같이 반응한다.
+- 지금까지는 부모가 값을 갖고 props / emit 으로 오르내렸는데,
+  스토어를 쓰면 **컴포넌트 계층을 건너뛰고** 어디서든 바로 접근할 수 있다.
+  Navigation Bar 의 단위 토글이 카드 안의 온도를 바꾸는 것처럼,
+  서로 멀리 떨어진 컴포넌트가 같은 상태를 봐야 할 때 쓸 자리다.
+- Vue Devtools 의 Pinia 탭에서 state 를 직접 고치면 화면이 바로 따라 바뀌는 것도 확인했다.
+
 ---
 
 # 과제 (Hands on) 기록
