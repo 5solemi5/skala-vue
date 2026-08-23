@@ -55,6 +55,10 @@ import WatchersWatchEffect from './components/practices/composition/WatchersWatc
 import LifecycleParent from './components/practices/component/LifecycleParent.vue'
 // 9. Props & Emits
 import PropsEmitsParent from './components/practices/component/PropsEmitsParent.vue'
+// 10. Component Slot
+import SlotDefaultParent from './components/practices/component/SlotDefaultParent.vue'
+import SlotNamedParent from './components/practices/component/SlotNamedParent.vue'
+import SlotScopedParent from './components/practices/component/SlotScopedParent.vue'
 </script>
 
 <template>
@@ -134,6 +138,12 @@ import PropsEmitsParent from './components/practices/component/PropsEmitsParent.
     <h1>9. Props &amp; Emits</h1>
     <hr />
     <PropsEmitsParent />
+
+    <h1>10. Component Slot</h1>
+    <hr />
+    <SlotDefaultParent />
+    <SlotNamedParent />
+    <SlotScopedParent />
   </div>
 </template>
 
