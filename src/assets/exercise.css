@@ -1,29 +1,5 @@
 /* 과제(Hands on) 화면 공통 레이아웃 */
-.app-container {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px 36px;
-  background-color: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(44, 62, 80, 0.06);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  color: #2c3e50;
-  line-height: 1.6;
-}
-.app-container h1 {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 12px 0;
-}
-.app-container hr {
-  border: none;
-  border-top: 2px solid #e9ecef;
-  margin-bottom: 24px;
-}
+/* .app-container 규칙은 App.vue 레이아웃을 새로 짜면서 쓰지 않게 되어 제거했다 */
 
 /* 좁은 화면에서는 바깥 여백을 줄여 콘텐츠 폭을 확보한다 */
 @media (max-width: 640px) {

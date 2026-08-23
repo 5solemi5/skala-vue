@@ -19,7 +19,7 @@ const modeExamples = [
 
 <template>
   <div class="about">
-    <h2>ℹ️ 서비스 소개</h2>
+    <h2>서비스 소개</h2>
 
     <section class="lead">
       <p class="big">날씨를 숫자가 아니라 <strong>“오늘 뭘 해야 하는지”</strong>로 알려드립니다.</p>

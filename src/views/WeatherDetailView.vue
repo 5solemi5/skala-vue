@@ -1,12 +1,13 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
 import { buildAdvice } from '../utils/adviceRules'
-import AdviceList from '../components/exercise/AdviceList.vue'
+import { fetchCityWeather, fetchHourly } from '../api/weatherApi'
 import { useConfigStore } from '@/stores/configStore'
 import { useCityStore } from '@/stores/cityStore'
-import { fetchCityWeather, fetchHourly } from '../api/weatherApi'
-import HourlyTimeline from '../components/exercise/HourlyTimeline.vue'
+import VerdictMark from '../components/service/VerdictMark.vue'
+import HourlyBar from '../components/service/HourlyBar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -41,14 +42,11 @@ const loadCity = async (id) => {
 
 onMounted(() => {
   loadCity(route.params.cityId)
-  if (route.query.mode) {
-    configStore.setMode(route.query.mode)
-  }
+  if (route.query.mode) configStore.setMode(route.query.mode)
 })
 
-// /weather/city_01 -> /weather/city_02 처럼 파라미터만 바뀌면
-// Vue Router 는 같은 컴포넌트를 재사용해서 onMounted 가 다시 실행되지 않는다.
-// 그래서 파라미터를 따로 감시한다.
+// 파라미터만 바뀌면 Vue Router 가 같은 컴포넌트를 재사용해서
+// onMounted 가 다시 실행되지 않는다. 그래서 따로 감시한다.
 watch(
   () => route.params.cityId,
   (newId) => {
@@ -56,220 +54,299 @@ watch(
   },
 )
 
-// 모든 모드의 채비를 한 번에 보여준다 (상세 페이지에서만 제공하는 정보)
-const adviceByMode = computed(() => {
+const order = { stop: 0, warn: 1, info: 2, good: 3 }
+
+// 상세 화면에서만 네 가지 일을 한 번에 비교해 볼 수 있다
+const byMode = computed(() => {
   if (!cityData.value) return []
   return configStore.modeList.map((mode) => ({
-    ...mode,
-    advices: buildAdvice(cityData.value, mode.id),
+    id: mode.id,
+    label: mode.label.replace(/[^가-힣]/g, ''),
+    advices: [...buildAdvice(cityData.value, mode.id)].sort(
+      (a, b) => order[a.level] - order[b.level],
+    ),
   }))
 })
 
-// 스토어에 설정된 단위에 맞춰 기온을 변환한다
 const displayTemp = computed(() =>
   cityData.value ? configStore.convertTemp(cityData.value.temp) : 0,
 )
-const displayMinTemp = computed(() =>
+const displayMin = computed(() =>
   cityData.value ? configStore.convertTemp(cityData.value.minTemp) : 0,
 )
-
-const goHome = () => {
-  router.push('/')
-}
 </script>
 
 <template>
-  <div class="detail-container">
-    <div v-if="cityData">
-      <p class="crumb">{{ cityData.region }}</p>
-      <h2>{{ cityData.name }}</h2>
+  <div class="detail">
+    <button type="button" class="back" @click="router.push('/')">
+      <span aria-hidden="true">←</span> 전체 지역
+    </button>
 
-      <div class="hero">
-        <p class="temp">
-          {{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span>
-        </p>
-        <div class="hero-meta">
-          <p class="status">{{ cityData.status }}</p>
-          <span v-if="cityData.temp >= 25" class="badge hot">🔥 더움 (25도 이상)</span>
-          <span v-else class="badge cool">❄️ 선선함 (25도 미만)</span>
+    <div v-if="isLoading" class="state">불러오는 중입니다</div>
+
+    <template v-else-if="cityData">
+      <header class="head">
+        <div>
+          <p class="region">{{ cityData.region }}</p>
+          <h2>{{ cityData.name }}</h2>
         </div>
-      </div>
-
-      <h3>관측값</h3>
-      <ul class="metric">
-        <li>
-          <span>습도</span><b>{{ cityData.humidity }}%</b>
-        </li>
-        <li>
-          <span>강수확률</span><b>{{ cityData.rainProb }}%</b>
-        </li>
-        <li>
-          <span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b>
-        </li>
-        <li>
-          <span>풍속</span><b>{{ cityData.wind }}m/s</b>
-        </li>
-      </ul>
-
-      <h3>시간대별</h3>
-      <HourlyTimeline
-        v-if="hourlyRows.length"
-        :rows="hourlyRows"
-        :mode="configStore.currentMode"
-        :mode-label="configStore.currentModeLabel.replace(/^\S+\s*/, '')"
-      />
-
-      <h3>하는 일별 오늘의 채비</h3>
-      <p class="hint">
-        메인 화면에서는 선택한 한 가지만 보이지만, 여기서는 네 가지를 한눈에 비교할 수 있습니다.
-      </p>
-      <div class="mode-grid">
-        <div v-for="mode in adviceByMode" :key="mode.id" class="mode-column">
-          <p class="mode-label" :class="{ on: mode.id === configStore.currentMode }">
-            {{ mode.label }}
+        <div class="now">
+          <img
+            v-if="cityData.icon"
+            :src="`https://openweathermap.org/img/wn/${cityData.icon}@2x.png`"
+            :alt="cityData.description"
+          />
+          <p class="deg tnum">
+            {{ displayTemp }}<span>{{ configStore.unitSymbol }}</span>
           </p>
-          <AdviceList :advice-list="mode.advices" />
         </div>
-      </div>
-    </div>
+      </header>
 
-    <div v-else-if="isLoading" class="not-found">
-      <p class="dim">불러오는 중입니다...</p>
-    </div>
+      <dl class="obs">
+        <div>
+          <dt>날씨</dt>
+          <dd>{{ cityData.description ?? cityData.status }}</dd>
+        </div>
+        <div>
+          <dt>습도</dt>
+          <dd class="tnum">{{ cityData.humidity }}%</dd>
+        </div>
+        <div>
+          <dt>강수확률</dt>
+          <dd class="tnum">{{ cityData.rainProb }}%</dd>
+        </div>
+        <div>
+          <dt>최저기온</dt>
+          <dd class="tnum">{{ displayMin }}{{ configStore.unitSymbol }}</dd>
+        </div>
+        <div>
+          <dt>풍속</dt>
+          <dd class="tnum">{{ cityData.wind }}m/s</dd>
+        </div>
+        <div>
+          <dt>체감</dt>
+          <dd class="tnum">
+            {{ configStore.convertTemp(cityData.feelsLike) }}{{ configStore.unitSymbol }}
+          </dd>
+        </div>
+      </dl>
 
-    <div v-else class="not-found">
+      <section v-if="hourlyRows.length" class="block">
+        <HourlyBar :rows="hourlyRows" :mode="configStore.currentMode" />
+      </section>
+
+      <section class="block">
+        <h3>하는 일별 채비</h3>
+        <p class="lead">
+          메인에서는 고른 한 가지만 보이지만 여기서는 네 가지를 나란히 볼 수 있습니다.
+        </p>
+
+        <div class="modes">
+          <article
+            v-for="mode in byMode"
+            :key="mode.id"
+            class="mode"
+            :class="{ on: mode.id === configStore.currentMode }"
+          >
+            <h4>{{ mode.label }}</h4>
+            <ul>
+              <li v-for="(advice, i) in mode.advices" :key="i">
+                <VerdictMark :level="advice.level" />
+                <span class="t">{{ advice.title }}</span>
+                <span class="d">{{ advice.desc }}</span>
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </template>
+
+    <div v-else class="state">
       <p>내 지역 목록에 없는 곳입니다.</p>
-      <p class="dim">메인 화면에서 지역을 추가한 뒤 다시 들어와 주세요.</p>
+      <p class="dim">전체 지역 화면에서 먼저 추가해 주세요.</p>
     </div>
-
-    <button class="back-btn" @click="goHome">← 메인 대시보드로 돌아가기</button>
   </div>
 </template>
 
 <style scoped>
-.crumb {
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 22px;
+  padding: 0;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--color-ink-3);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.back:hover {
+  color: var(--color-ink);
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-line);
+}
+.region {
   margin: 0;
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  color: #adb5bd;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-3);
 }
 h2 {
-  margin: 4px 0 20px;
-  font-size: 1.6rem;
+  margin: 4px 0 0;
+  font-size: 32px;
   font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
 }
-h3 {
-  margin: 26px 0 10px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #34495e;
-}
-.hero {
+.now {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #f1f6fb 0%, #f4fbf8 100%);
-  border-radius: 12px;
+  gap: 2px;
+  flex: none;
 }
-.temp {
+.now img {
+  width: 54px;
+  height: 54px;
+  opacity: 0.85;
+}
+.deg {
   margin: 0;
-  font-size: 54px;
-  font-weight: 700;
+  font-size: 46px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
   line-height: 1;
 }
-.unit {
-  font-size: 22px;
-  font-weight: 500;
-  color: #868e96;
+.deg span {
   margin-left: 2px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-ink-3);
 }
-.status {
-  margin: 0 0 8px;
-  font-size: 15px;
-  color: #495057;
-}
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-}
-.badge.hot {
-  background-color: #ffe8e0;
-  color: #d9480f;
-}
-.badge.cool {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-.metric {
+
+.obs {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
-  gap: 8px 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(120px, 100%), 1fr));
+  gap: 0;
+  margin: 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.obs > div {
+  padding: 16px 14px 16px 0;
+}
+.obs dt {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-3);
+}
+.obs dd {
+  margin: 5px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.block {
+  padding: 26px 0;
+  border-bottom: 1px solid var(--color-line);
+}
+.block:last-child {
+  border-bottom: 0;
+}
+.block h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.lead {
+  margin: 6px 0 18px;
+  font-size: 12.5px;
+  color: var(--color-ink-3);
+}
+
+.modes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 1px;
+  background: var(--color-line);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.mode {
+  padding: 16px 16px 18px;
+  background: var(--color-paper);
+}
+.mode.on {
+  background: var(--color-paper-2);
+}
+.mode h4 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink-3);
+}
+.mode.on h4 {
+  color: var(--color-ink);
+}
+.mode ul {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
-  color: #868e96;
-}
-.metric li {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f3f5;
+  flex-direction: column;
+  gap: 12px;
 }
-.metric b {
-  color: #212529;
+.mode li {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
-.hint {
-  margin: 0 0 14px;
+.mode .t {
   font-size: 13px;
-  color: #868e96;
-}
-.mode-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
-  gap: 16px;
-}
-.mode-column {
-  padding: 14px 16px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-}
-.mode-label {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: #adb5bd;
-}
-/* 지금 선택되어 있는 모드를 강조한다 */
-.mode-label.on {
-  color: #35495e;
-}
-.not-found {
-  padding: 40px 0;
-  text-align: center;
-}
-.dim {
-  color: #adb5bd;
-  font-size: 13px;
-}
-.back-btn {
-  width: 100%;
-  margin-top: 28px;
-  padding: 11px;
-  font-size: 14px;
   font-weight: 500;
-  color: #ffffff;
-  background-color: #35495e;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  line-height: 1.45;
 }
-.back-btn:hover {
-  background-color: #2c3e50;
+.mode .d {
+  font-size: 11.5px;
+  color: var(--color-ink-3);
+  line-height: 1.55;
+}
+
+.state {
+  padding: 70px 0;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-ink-2);
+}
+.state p {
+  margin: 0 0 6px;
+}
+.state .dim {
+  color: var(--color-ink-3);
+  font-size: 12.5px;
+}
+
+@media (max-width: 640px) {
+  h2 {
+    font-size: 25px;
+  }
+  .deg {
+    font-size: 36px;
+  }
+  .now img {
+    width: 42px;
+    height: 42px;
+  }
 }
 </style>

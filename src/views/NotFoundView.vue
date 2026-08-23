@@ -9,7 +9,6 @@ const goHome = () => {
 
 <template>
   <div class="not-found">
-    <div class="icon">🌫️</div>
     <h2>페이지를 찾을 수 없습니다</h2>
     <p>요청하신 주소가 존재하지 않거나,<br />아직 만들어지지 않았습니다.</p>
     <button class="home-btn" @click="goHome">날씨 메인으로 이동</button>

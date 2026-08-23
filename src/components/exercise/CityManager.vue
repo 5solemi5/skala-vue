@@ -68,7 +68,7 @@ const handleRemove = (city) => {
 <template>
   <div>
     <div class="flex flex-wrap items-center justify-between gap-2">
-      <h3>📍 내 지역</h3>
+      <h3>내 지역</h3>
       <Button variant="ghost" size="sm" @click="isOpen = !isOpen">
         {{ isOpen ? '닫기' : '지역 추가·삭제' }}
       </Button>

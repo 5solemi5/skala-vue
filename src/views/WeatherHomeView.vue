@@ -2,15 +2,15 @@
 import { ref, computed, watch, watchEffect, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 
-import BaseDashboardCard from '../components/exercise/BaseDashboardCard.vue'
-import SearchBar from '../components/exercise/SearchBar.vue'
-import ModeSelector from '../components/exercise/ModeSelector.vue'
-import WeatherCard from '../components/exercise/WeatherCard.vue'
-import { buildAdvice } from '../utils/adviceRules'
-import { fetchAllWeather } from '../api/weatherApi'
-import { useCityStore } from '@/stores/cityStore'
+import ModeBar from '../components/service/ModeBar.vue'
+import CityHero from '../components/service/CityHero.vue'
+import CityRow from '../components/service/CityRow.vue'
 import CityManager from '../components/exercise/CityManager.vue'
-import { Button } from '@/components/ui/button'
+import SearchBar from '../components/exercise/SearchBar.vue'
+
+import { buildAdvice } from '../utils/adviceRules'
+import { fetchAllWeather, fetchHourly } from '../api/weatherApi'
+import { useCityStore } from '@/stores/cityStore'
 import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
@@ -18,21 +18,20 @@ const route = useRoute()
 const configStore = useConfigStore()
 const cityStore = useCityStore()
 
-// 실제 API 에서 받아온 날씨 데이터가 담긴다 (Hands on 7 이전에는 목업 배열이었다)
 const weatherList = ref([])
+const hourlyRows = ref([])
 const isLoading = ref(false)
 const errorMessage = ref('')
 const failedCities = ref([])
 const updatedAt = ref('')
 
 const searchQuery = ref('')
-const selectedCityInfo = ref('카드를 클릭하거나 검색해 보세요.')
+const selectedCityInfo = ref('목록에서 지역을 누르면 여기가 바뀝니다.')
+const selectedId = ref('')
 
-// 모드는 상세 화면과도 공유해야 하므로 스토어에서 가져온다
 const modeList = computed(() => configStore.modeList)
 const currentMode = computed(() => configStore.currentMode)
 
-// 초기 진입 시 주소창의 쿼리 스트링을 읽어 상태를 복원한다
 const loadWeather = async () => {
   isLoading.value = true
   errorMessage.value = ''
@@ -41,31 +40,44 @@ const loadWeather = async () => {
     weatherList.value = list
     failedCities.value = failed.map((f) => f.city.name)
     updatedAt.value = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-    console.log('🌤️ [API] 지역 날씨를 불러왔습니다.', list)
+
+    // 선택된 지역이 목록에서 빠졌으면 맨 앞으로 되돌린다
+    if (!list.some((c) => c.id === selectedId.value)) {
+      selectedId.value = list[0]?.id ?? ''
+    }
+    loadHourly()
   } catch (error) {
     console.error('날씨 데이터를 불러오지 못했습니다:', error)
-    if (error.response?.status === 401) {
-      errorMessage.value =
-        'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
-    } else {
-      errorMessage.value = `날씨 데이터를 불러오지 못했습니다. (${error.message})`
-    }
+    errorMessage.value =
+      error.response?.status === 401
+        ? 'OpenWeatherMap API 키가 유효하지 않습니다. .env.local 의 키를 확인해 주세요.'
+        : `날씨 데이터를 불러오지 못했습니다. (${error.message})`
   } finally {
     isLoading.value = false
   }
 }
 
+// 선택된 지역의 시간대별 예보만 따로 받는다
+const loadHourly = async () => {
+  const city = cityStore.cities.find((c) => c.id === selectedId.value)
+  if (!city) {
+    hourlyRows.value = []
+    return
+  }
+  try {
+    hourlyRows.value = await fetchHourly(city)
+  } catch (error) {
+    console.error('시간대별 예보를 불러오지 못했습니다:', error)
+    hourlyRows.value = []
+  }
+}
+
 onMounted(() => {
-  if (route.query.search) {
-    searchQuery.value = route.query.search
-  }
-  if (route.query.mode) {
-    configStore.setMode(route.query.mode)
-  }
+  if (route.query.search) searchQuery.value = route.query.search
+  if (route.query.mode) configStore.setMode(route.query.mode)
   loadWeather()
 })
 
-// 검색어와 모드를 주소창에 반영해 두면 링크를 그대로 공유할 수 있다
 watch([searchQuery, currentMode], ([newQuery, newMode]) => {
   router.replace({
     path: route.path,
@@ -75,6 +87,14 @@ watch([searchQuery, currentMode], ([newQuery, newMode]) => {
     },
   })
 })
+
+// 지역을 추가하거나 빼면 다시 불러온다
+watch(
+  () => cityStore.cities.map((c) => c.id).join(','),
+  () => loadWeather(),
+)
+
+watch(selectedId, () => loadHourly())
 
 const filteredWeatherList = computed(() => {
   const query = searchQuery.value.trim()
@@ -90,17 +110,35 @@ const adviceMap = computed(() => {
   return map
 })
 
-const alertCityCount = computed(() => {
-  return filteredWeatherList.value.filter((item) =>
-    adviceMap.value[item.id].some((a) => a.level === 'stop'),
-  ).length
-})
-
-// 지역을 추가하거나 빼면 그 지역만 다시 불러온다
-watch(
-  () => cityStore.cities.map((c) => c.id).join(','),
-  () => loadWeather(),
+const selectedCity = computed(
+  () => weatherList.value.find((c) => c.id === selectedId.value) ?? null,
 )
+
+const countBy = (level) =>
+  filteredWeatherList.value.filter((item) =>
+    adviceMap.value[item.id]?.some((a) => a.level === level),
+  ).length
+
+const stopCount = computed(() => countBy('stop'))
+// '중지'가 걸린 곳은 이미 따로 세므로 '주의'만 남은 곳을 센다
+const warnCount = computed(
+  () =>
+    filteredWeatherList.value.filter((item) => {
+      const list = adviceMap.value[item.id] ?? []
+      return !list.some((a) => a.level === 'stop') && list.some((a) => a.level === 'warn')
+    }).length,
+)
+
+// 목록 위에 한 줄 요약을 세워 두면 전체 상황이 먼저 읽힌다.
+const summaryLine = computed(() => {
+  const total = filteredWeatherList.value.length
+  if (!total) return ''
+  const parts = []
+  if (stopCount.value) parts.push(`${stopCount.value}곳은 작업을 미루시는 편이 낫습니다`)
+  if (warnCount.value) parts.push(`${warnCount.value}곳은 주의가 필요합니다`)
+  if (!parts.length) return `${total}곳 모두 오늘 작업에 무리가 없습니다`
+  return `${total}곳 중 ${parts.join(', ')}`
+})
 
 watch(selectedCityInfo, (newInfo, oldInfo) => {
   console.log(`👁️ [watch] 상태바 문구 변경: "${oldInfo}" ➡️ "${newInfo}"`)
@@ -112,126 +150,237 @@ watchEffect(() => {
 
 watch(currentMode, (newMode, oldMode) => {
   console.log(`🧰 [watch] 모드 변경: ${oldMode} ➡️ ${newMode} — 채비 기준을 다시 적용합니다.`)
-  selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
+  selectedCityInfo.value = `${configStore.currentModeLabel.replace(/[^가-힣]/g, '')} 기준으로 오늘의 채비를 다시 계산했습니다.`
 })
 
-// 상세보기는 alert 대신 라우터 이동으로 처리한다
-const handleDetailJump = (cityName) => {
-  const target = weatherList.value.find((item) => item.name === cityName)
-  if (target) {
-    router.push(`/weather/${target.id}`)
-  }
+const handleSelect = (city) => {
+  selectedId.value = city.id
+  selectedCityInfo.value = `${city.name}이 선택되었습니다.`
+}
+
+const handleDetail = (city) => {
+  router.push(`/weather/${city.id}`)
 }
 </script>
 
 <template>
-  <div class="dashboard-wrapper">
-    <BaseDashboardCard>
-      <SearchBar :current-query="searchQuery" @update-query="(val) => (searchQuery = val)" />
-    </BaseDashboardCard>
+  <div class="page">
+    <ModeBar
+      class="modebar"
+      :mode-list="modeList"
+      :current-mode="currentMode"
+      @change-mode="(id) => configStore.setMode(id)"
+    />
 
-    <BaseDashboardCard>
-      <CityManager />
-    </BaseDashboardCard>
+    <p v-if="errorMessage" class="alert stop">{{ errorMessage }}</p>
+    <p v-else-if="failedCities.length" class="alert warn">
+      {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
+    </p>
 
-    <BaseDashboardCard>
-      <ModeSelector
-        :mode-list="modeList"
-        :current-mode="currentMode"
-        :alert-count="alertCityCount"
-        @change-mode="(id) => configStore.setMode(id)"
+    <div v-if="isLoading && !weatherList.length" class="loading">불러오는 중입니다</div>
+
+    <template v-else>
+      <CityHero
+        :city="selectedCity"
+        :advice-list="selectedCity ? adviceMap[selectedCity.id] : []"
+        :hourly-rows="hourlyRows"
+        :status-text="selectedCityInfo"
+        @open-detail="handleDetail"
       />
-    </BaseDashboardCard>
 
-    <BaseDashboardCard>
-      <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h3>🏙️ 지역별 날씨 현황</h3>
-        <div class="flex items-center gap-2">
-          <span v-if="updatedAt" class="text-xs text-muted-foreground">{{ updatedAt }} 기준</span>
-          <Button variant="outline" size="sm" :disabled="isLoading" @click="loadWeather">
-            {{ isLoading ? '불러오는 중...' : '새로고침' }}
-          </Button>
+      <section class="list">
+        <header class="list-head">
+          <div>
+            <h3>다른 지역</h3>
+            <p v-if="summaryLine" class="summary" :class="{ warn: stopCount > 0 || warnCount > 0 }">
+              {{ summaryLine }}
+            </p>
+          </div>
+          <div class="meta">
+            <span v-if="updatedAt" class="tnum">{{ updatedAt }} 기준</span>
+            <button type="button" class="refresh" :disabled="isLoading" @click="loadWeather">
+              {{ isLoading ? '갱신 중' : '새로고침' }}
+            </button>
+          </div>
+        </header>
+
+        <ul v-if="filteredWeatherList.length" class="rows">
+          <CityRow
+            v-for="item in filteredWeatherList"
+            :key="item.id"
+            :city="item"
+            :advice-list="adviceMap[item.id]"
+            :selected="item.id === selectedId"
+            @select="handleSelect"
+            @open-detail="handleDetail"
+          />
+        </ul>
+
+        <div v-else-if="cityStore.count === 0" class="empty">
+          <p>보고 있는 지역이 없습니다.</p>
+          <p class="dim">아래에서 지역을 추가해 주세요.</p>
         </div>
-      </div>
 
-      <!-- 일부 지역만 실패한 경우: 나머지 카드는 그대로 두고 안내만 얹는다 -->
-      <p
-        v-if="!errorMessage && failedCities.length"
-        class="mb-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800"
-      >
-        {{ failedCities.join(', ') }} 은(는) 불러오지 못했습니다. 나머지 지역만 표시합니다.
-      </p>
+        <div v-else class="empty">
+          <p>'{{ searchQuery.trim() }}' 와(과) 일치하는 지역이 목록에 없습니다.</p>
+          <button type="button" class="link" @click="cityStore.requestAdd(searchQuery.trim())">
+            '{{ searchQuery.trim() }}' 추가하기
+          </button>
+        </div>
+      </section>
 
-      <div
-        v-if="errorMessage"
-        class="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-      >
-        ⚠️ {{ errorMessage }}
-      </div>
-
-      <div
-        v-else-if="isLoading && weatherList.length === 0"
-        class="py-12 text-center text-sm text-muted-foreground"
-      >
-        실시간 날씨를 불러오는 중입니다...
-      </div>
-
-      <div v-else class="card-grid">
-        <WeatherCard
-          v-for="item in filteredWeatherList"
-          :key="item.id"
-          :city-item="item"
-          :advice-list="adviceMap[item.id]"
-          @select-card="(msg) => (selectedCityInfo = msg)"
-          @click-detail="handleDetailJump"
-        />
-      </div>
-      <p v-if="cityStore.count === 0" class="empty">
-        보고 있는 지역이 없습니다. 위에서 지역을 추가해 주세요.
-      </p>
-
-      <div v-else-if="filteredWeatherList.length === 0" class="empty">
-        <p class="mb-3">
-          😭 내 지역 목록에 '{{ searchQuery.trim() }}' 와(과) 일치하는 곳이 없습니다.
-        </p>
-        <Button variant="outline" size="sm" @click="cityStore.requestAdd(searchQuery.trim())">
-          '{{ searchQuery.trim() }}' 지역 추가하기
-        </Button>
-      </div>
-    </BaseDashboardCard>
-
-    <div class="status-bar">📍 {{ selectedCityInfo }}</div>
+      <section class="tools">
+        <div class="tool">
+          <SearchBar :current-query="searchQuery" @update-query="(val) => (searchQuery = val)" />
+        </div>
+        <div class="tool">
+          <CityManager />
+        </div>
+      </section>
+    </template>
   </div>
 </template>
 
 <style scoped>
-.dashboard-wrapper {
+.page {
   display: flex;
   flex-direction: column;
+  gap: 22px;
 }
-h3 {
-  margin: 0 0 12px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  color: #34495e;
+.modebar {
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--color-line);
 }
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(270px, 100%), 1fr));
-  gap: 16px;
+
+.alert {
+  margin: 0;
+  padding: 11px 14px;
+  font-size: 13px;
+  border-radius: 4px;
 }
-.empty {
-  padding: 30px 0;
+.alert.stop {
+  color: var(--color-stop);
+  background: var(--color-stop-soft);
+}
+.alert.warn {
+  color: var(--color-warn);
+  background: var(--color-warn-soft);
+}
+
+.loading {
+  padding: 80px 0;
   text-align: center;
-  color: #e03131;
-  font-size: 14px;
+  font-size: 13px;
+  color: var(--color-ink-3);
 }
-.status-bar {
-  padding: 12px 14px;
-  background-color: #f1f3f5;
-  border-left: 4px solid #42b883;
+
+.list {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
   border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
+}
+.list-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--color-line);
+}
+.list-head h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.summary {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--color-ink-2);
+}
+.summary.warn {
+  color: var(--color-stop);
+}
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: none;
+  font-size: 11.5px;
+  color: var(--color-ink-3);
+}
+.refresh {
+  font-family: inherit;
+  font-size: 11.5px;
+  color: var(--color-ink-2);
+  background: none;
+  border: 1px solid var(--color-line-2);
+  border-radius: 3px;
+  padding: 4px 9px;
+  cursor: pointer;
+}
+.refresh:hover:not(:disabled) {
+  border-color: var(--color-ink-3);
+  color: var(--color-ink);
+}
+.refresh:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.empty {
+  padding: 46px 20px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--color-ink-2);
+}
+.empty p {
+  margin: 0 0 6px;
+}
+.empty .dim {
+  color: var(--color-ink-3);
+  font-size: 12.5px;
+}
+.link {
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-ink);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--color-line-2);
+  padding: 0 0 2px;
+  cursor: pointer;
+}
+.link:hover {
+  border-bottom-color: var(--color-ink);
+}
+
+.tools {
+  background: var(--color-paper);
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+}
+.tool {
+  padding: 20px 22px;
+}
+.tool + .tool {
+  border-top: 1px solid var(--color-line);
+}
+
+@media (max-width: 640px) {
+  .list-head {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .tool {
+    padding: 16px;
+  }
 }
 </style>

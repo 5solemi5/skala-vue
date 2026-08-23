@@ -1,37 +1,77 @@
 @import 'tailwindcss';
 
 /*
- * shadcn-vue 디자인 토큰
- * 색을 직접 쓰지 않고 역할(primary / muted / destructive ...)로 부르기 위한 변수.
- * 서비스 포인트 컬러는 Vue 의 그린(#42b883) 계열로 맞췄다.
+ * 색은 판정에만 쓴다.
+ *
+ * 브랜드 색을 따로 두면 화면에 색이 두 종류로 섞여서,
+ * 색이 보여도 그게 "우리 서비스 색"인지 "주의하라는 뜻"인지 알 수 없다.
+ * 그래서 기본은 전부 무채색으로 두고 색은 작업 판정에만 쓰기로 했다.
+ * 화면에서 색이 보이는 곳 = 신경 써야 할 곳.
  */
 @theme {
-  --color-border: hsl(214 20% 91%);
-  --color-input: hsl(214 20% 91%);
-  --color-ring: hsl(160 47% 55%);
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(210 24% 16%);
+  /*
+   * 기상 관측 기록에서 색을 가져왔다.
+   * 종이는 크림색이 아니라 청사진처럼 차갑게, 잉크는 검정이 아니라 짙은 남색.
+   * 판정 세 가지도 형광색이 아니라 인쇄 잉크에 가까운 채도로 낮췄다.
+   */
 
-  --color-primary: hsl(160 47% 49%);
-  --color-primary-foreground: hsl(0 0% 100%);
+  /* 잉크 — 짙은 남색 계열 */
+  --color-ink: #101c26;
+  --color-ink-2: #42535f;
+  --color-ink-3: #7e8c97;
+  --color-ink-4: #aab4bc;
 
-  --color-secondary: hsl(210 24% 28%);
-  --color-secondary-foreground: hsl(0 0% 100%);
+  /* 지면 — 차가운 회청 */
+  --color-paper: #ffffff;
+  --color-paper-2: #f0f3f5;
+  --color-paper-3: #e4e9ed;
+  --color-line: #dce3e8;
+  --color-line-2: #c6d0d7;
 
-  --color-muted: hsl(210 20% 97%);
-  --color-muted-foreground: hsl(215 14% 55%);
+  /* 판정 — 인쇄 잉크 채도 */
+  --color-stop: #9e2b25;
+  --color-stop-soft: #f7edec;
+  --color-warn: #8c6318;
+  --color-warn-soft: #f8f2e8;
+  --color-good: #1f6152;
+  --color-good-soft: #ecf2f0;
 
-  --color-accent: hsl(160 40% 96%);
-  --color-accent-foreground: hsl(210 24% 16%);
+  --font-sans:
+    'IBM Plex Sans KR', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
 
-  --color-destructive: hsl(0 72% 51%);
-  --color-destructive-foreground: hsl(0 0% 100%);
+  --radius-lg: 0.375rem;
+  --radius-md: 0.25rem;
+  --radius-sm: 0.125rem;
+}
 
-  --color-warning: hsl(35 92% 47%);
-  --color-success: hsl(140 55% 40%);
-  --color-info: hsl(209 65% 47%);
+html {
+  background: var(--color-paper-2);
+}
 
-  --radius-lg: 0.75rem;
-  --radius-md: 0.5rem;
-  --radius-sm: 0.375rem;
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 숫자가 세로로 정렬되어야 읽기 쉽다 */
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 키보드로 이동할 때 어디에 있는지 보여야 한다 */
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -39,7 +39,7 @@ const currentStageId = ref(3)
 
 <template>
   <div class="archive">
-    <h2>🗂️ 과제 진행 아카이브</h2>
+    <h2>과제 진행 아카이브</h2>
     <p class="lead">과제가 단원마다 어떻게 바뀌었는지. 단계를 누르면 그때 결과물이 아래에 뜬다.</p>
 
     <ol class="timeline">

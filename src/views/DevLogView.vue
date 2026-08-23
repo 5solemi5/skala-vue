@@ -2,8 +2,8 @@
 import { ref, computed } from 'vue'
 
 const tabList = ref([
-  { id: 'trouble', label: '🔧 트러블슈팅' },
-  { id: 'review', label: '🔍 코드리뷰' },
+  { id: 'trouble', label: '트러블슈팅' },
+  { id: 'review', label: '코드리뷰' },
 ])
 const currentTab = ref('trouble')
 
@@ -153,6 +153,48 @@ v-model.trim="userEmail"`,
 
 const reviewList = ref([
   {
+    id: 'r5',
+    title: '카드 그리드를 히어로 + 목록 구조로',
+    when: '화면 재구성',
+    why: '검색 / 내 지역 / 모드 / 카드목록이 전부 같은 크기의 흰 상자로 쌓여 있어서 무엇부터 봐야 하는지 알 수 없었다. 이 화면이 하는 일은 하나인데(오늘 이 일을 해도 되는가) 정작 그 판단이 카드 안쪽 작은 글씨에 묻혀 있었다.',
+    before: `<!-- 같은 무게의 상자 네 개 -->
+<BaseDashboardCard><SearchBar /></BaseDashboardCard>
+<BaseDashboardCard><CityManager /></BaseDashboardCard>
+<BaseDashboardCard><ModeSelector /></BaseDashboardCard>
+<BaseDashboardCard>
+  <div class="card-grid">
+    <WeatherCard v-for="item in list" ... />   <!-- 판정은 카드 안쪽 -->
+  </div>
+</BaseDashboardCard>`,
+    after: `<!-- 결정 순서대로 위에서 아래로 -->
+<ModeBar />                       <!-- 1. 나는 어떤 일을 하는가 -->
+<CityHero :city="selectedCity" /> <!-- 2. 그래서 오늘 뭘 해야 하는가 -->
+<ul>                              <!-- 3. 다른 지역은 어떤가 -->
+  <CityRow v-for="item in list" :selected="item.id === selectedId" />
+</ul>
+<section class="tools">           <!-- 4. 목록 손보기 -->
+  <SearchBar /><CityManager />
+</section>`,
+    note: '교재의 "카드를 누르면 상태바 문구가 바뀐다" 요구사항이 그대로 이 동작이 됐다. 상태바를 화면 아래 회색 띠로 두는 대신 선택한 지역을 위쪽에 크게 띄우는 방식으로 바꿨다. 요구사항 문구는 히어로 하단에 그대로 남겼다.',
+  },
+  {
+    id: 'r6',
+    title: '색을 판정에만 쓰기로',
+    when: '화면 재구성',
+    why: '브랜드 색으로 쓰던 초록과 "양호" 판정 초록이 같은 색이라, 화면에서 색이 보여도 그게 우리 서비스 색인지 괜찮다는 뜻인지 알 수 없었다. 버튼도 초록, 좋은 상태도 초록이었다.',
+    before: `--color-primary: hsl(160 47% 49%);   /* 브랜드 초록 */
+--color-good: 초록 계열                /* 판정 초록 */
+/* 버튼, 링크, 태그, 판정이 전부 같은 초록 */`,
+    after: `/* 기본은 전부 무채색으로 두고 색은 판정에만 */
+--color-ink: #101c26;      /* 잉크 - 짙은 남색 */
+--color-paper-2: #f0f3f5;  /* 지면 - 차가운 회청 */
+
+--color-stop: #9e2b25;
+--color-warn: #8c6318;
+--color-good: #1f6152;`,
+    note: '이렇게 두니 화면에서 색이 보이는 곳이 곧 신경 써야 할 곳이 됐다. 판정 색도 형광에 가까운 기본 팔레트 대신 인쇄 잉크 정도로 채도를 낮췄다.',
+  },
+  {
     id: 'r4',
     title: 'Promise.all 을 allSettled 로',
     when: '지역 추가 기능',
@@ -231,7 +273,7 @@ const currentList = computed(() =>
 
 <template>
   <div class="devlog">
-    <h2>🛠️ 개발 기록</h2>
+    <h2>개발 기록</h2>
     <p class="lead">막혔던 것과, 배운 걸 적용해서 고쳐 쓴 코드.</p>
 
     <nav class="tabs">

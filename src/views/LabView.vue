@@ -154,7 +154,7 @@ const currentGroup = computed(() => groupList.value.find((g) => g.id === current
 
 <template>
   <div class="lab">
-    <h2>📚 Vue 문법 실습실</h2>
+    <h2>Vue 문법 실습실</h2>
     <p class="lead">
       수업에서 진행한 Code Challenge 결과물. 콘솔(F12)을 열어두면 watch·라이프사이클 로그도 같이
       보인다.

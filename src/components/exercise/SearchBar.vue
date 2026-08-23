@@ -13,7 +13,7 @@ defineProps({
 
 <template>
   <div class="search-inner">
-    <h3>🔍 도시 검색</h3>
+    <h3>지역 찾기</h3>
     <input
       type="text"
       class="search-input"
