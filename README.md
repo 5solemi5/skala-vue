@@ -503,6 +503,57 @@ const adviceMap = computed(() => {
 교재에는 컴포넌트 이름이 `WeatheCard.vue` 로 적혀 있는데 `r` 이 빠진 오타로 보인다.
 강사님 저장소의 실제 파일명이 `WeatherCard.vue` 라서 그쪽을 따랐다.
 
+
+## Hands on 5. Weather Router (p.196~197) — 4일차 과제
+
+### 교재 요구사항 이행
+
+| 요구사항 | 구현 |
+|---|---|
+| 1. Router 설정 | 지연 로딩(`() => import(...)`) 적용, `/:pathMatch(.*)*` Catch-all Route 적용 |
+| 2. `App.vue` | 상단 Navigation Bar(`RouterLink`) + 메인 영역(`RouterView`) 배치 |
+| 3. `WeatherHomeView.vue` | `WeatherParent` 대체. 상세보기에서 `window.alert()` 제거하고 `router.push('/weather/' + id)` 로 이동 |
+| 4. `WeatherDetailView.vue` | `cityId` 동적 경로 매칭으로 Mock Data 에서 도시 선택 |
+| 5. `WeatherAboutView.vue` | 서비스 소개 + 대시보드 홈으로 이동 버튼 |
+| 6. 본인의 추가 view | 아래 참조 |
+
+### 라우팅 구조
+
+| 경로 | 화면 | 비고 |
+|---|---|---|
+| `/` | 오늘의 채비 (메인) | |
+| `/weather/:cityId` | 지역 상세 | 동적 경로 매칭 |
+| `/about` | 서비스 소개 | |
+| `/lab` | 📚 Vue 문법 실습실 | **추가 view** |
+| `/archive` | 🗂️ 과제 진행 아카이브 | **추가 view** |
+| `/dev-log` | 🛠️ 개발 기록 | **추가 view** |
+| 그 외 전부 | 404 | Catch-all |
+
+### 개인 Customization (요구사항 6번) — 추가한 view 3개
+
+**① `/lab` — Vue 문법 실습실**
+수업에서 진행한 Code Challenge 결과물 38개 컴포넌트를 단원별 탭으로 모아뒀다.
+한 번에 다 띄우면 타이머가 도는 컴포넌트까지 전부 살아있게 되므로,
+선택한 단원만 `v-if` 로 마운트하고 `<component :is="...">` 로 렌더링한다.
+
+**② `/archive` — 과제 진행 아카이브**
+Hands on 2 → 3 → 4 결과물을 그대로 보관했다.
+최종 화면만 보면 중간에 무엇을 배워 무엇을 고쳤는지가 남지 않기 때문이다.
+단계별로 "배운 것"과 "이 단계의 특징"을 함께 적어뒀다.
+
+**③ `/dev-log` — 개발 기록**
+실제로 막혔던 문제(트러블슈팅)와 배운 것을 적용해 고쳐 쓴 코드(코드리뷰)를 정리했다.
+코드리뷰는 Before / After 를 나란히 보여준다.
+
+### 추가로 정리한 것
+
+- **판정 규칙을 공용 모듈로 추출.** 같은 `buildAdvice` 함수가 세 파일에 복사되어 있어서
+  `src/utils/adviceRules.js` 로 분리했다. 규칙을 고칠 때 한 곳만 손보면 된다.
+- **검색어와 모드를 주소창에 반영.** `router.replace` 로 `?search=서울&mode=farm` 형태로 남겨서
+  링크를 그대로 공유하거나 새로고침해도 상태가 유지된다.
+- **스캐폴드 잔재 정리.** 더 이상 라우팅되지 않는 `HomeView` / `AboutView` /
+  `HelloWorld` / `TheWelcome` / `WelcomeItem` / `icons` 를 삭제했다.
+
 ---
 
 # 트러블슈팅 기록
