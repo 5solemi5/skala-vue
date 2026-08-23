@@ -117,6 +117,41 @@ src/
   → 1일차 과제(Weather Mockup)에서 카드 안의 [상세보기] 버튼을 누를 때
   카드 선택 이벤트가 같이 발동하지 않게 하려면 여기서 배운 `.stop`이 필요하겠다.
 
+### Code Challenge 4. Vue Form Handling & Vue Style (p.115)
+
+| 파일 | 내용 |
+|---|---|
+| `ModelBasic.vue` | `v-model` 축약 문법과 그 내부 원리(`:value` + `@input`) 비교 |
+| `ModelForm.vue` | textarea / checkbox(단일·다중) / radio / select 와 `v-model` 매핑 |
+| `ModelModifier.vue` | `.lazy`, `.number`, `.trim` 및 수식어 체이닝 |
+| `StyleScoped.vue` | `<style scoped>` 와 외부 CSS 클래스 함께 쓰기 |
+
+**알게 된 점**
+
+- `v-model`은 마법이 아니라 **`:value` 바인딩 + `@input` 이벤트**를 한 줄로 줄여 쓴 것이다.
+  `ModelBasic.vue`에서 두 방식을 나란히 놓고 입력해보니 결과가 똑같았다.
+  1일차 과제에서 한글 입력 때문에 `:value` / `@input`을 직접 쓰는 이유도 여기서 이해됐다.
+- 다중 checkbox는 `ref([])`처럼 **배열로 시작해야** 선택한 값들이 배열에 쌓인다.
+  처음에 `ref('')`로 두면 값이 덮어써진다.
+- 단일 checkbox는 Boolean, 다중 checkbox는 배열, radio·select는 문자열로
+  **요소마다 담기는 자료형이 다르다**는 게 제일 헷갈렸던 부분이다.
+- `<input type="text">`로 숫자를 받으면 값이 **문자열**로 들어온다.
+  `typeof`로 찍어보니 `"25"`가 `string`이었다. `.number`를 붙이니 `number`로 바뀌었다.
+  → 나중에 기온 계산 같은 걸 할 때 문자열이 섞이면 `"25" + 1 = "251"`이 되어버릴 수 있으니 주의해야겠다.
+- `.trim`은 앞뒤 공백을 지워준다. `"   test@mail.com   "`를 입력했더니 길이가 13으로 나왔다.
+  `.trim.number`처럼 **체이닝**도 된다.
+- `<style scoped>`를 붙이면 그 컴포넌트 안에서만 스타일이 먹는다.
+  반면 `App.vue`에서 `@import` 한 `practice.css`의 `.btn-external` 같은 클래스는 전역이라
+  어느 컴포넌트에서든 쓸 수 있다. 공통 디자인은 외부 CSS, 컴포넌트 전용 디자인은 scoped로
+  나누는 기준이 잡혔다.
+
+**직접 고친 부분**
+
+강사님 예제의 2·3번 항목은 제목에 `.number` / `.trim`이라고 적혀 있는데
+정작 바인딩은 `v-model="age"`, `v-model="userEmail"`로 수식어가 빠져 있었다.
+그대로 두니 `typeof`가 계속 `string`으로만 나와서 수식어 효과를 확인할 수 없었다.
+`v-model.number`, `v-model.trim`으로 고쳐서 동작을 확인했다.
+
 ---
 
 # 과제 (Hands on) 기록

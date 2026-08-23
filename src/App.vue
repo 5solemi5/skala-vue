@@ -25,12 +25,12 @@ import EventObject from './components/practices/basic/EventObject.vue'
 import EventModifier from './components/practices/basic/EventModifier.vue'
 
 // 4. Vue Form Handling
-// import ModelBasic from './components/practices/basic/ModelBasic.vue'
-// import ModelForm from './components/practices/basic/ModelForm.vue'
-// import ModelModifier from './components/practices/basic/ModelModifier.vue'
+import ModelBasic from './components/practices/basic/ModelBasic.vue'
+import ModelForm from './components/practices/basic/ModelForm.vue'
+import ModelModifier from './components/practices/basic/ModelModifier.vue'
 
 // 5. Vue Style Handling
-// import StyleScoped from './components/practices/basic/StyleScoped.vue'
+import StyleScoped from './components/practices/basic/StyleScoped.vue'
 </script>
 
 <template>
@@ -63,17 +63,15 @@ import EventModifier from './components/practices/basic/EventModifier.vue'
     <EventObject />
     <EventModifier />
 
-    <!-- 진도 나갈 때 해당 블록의 import와 태그 주석을 함께 해제한다 -->
-    <!--
     <h1>4. Vue Form Handling</h1>
     <hr />
     <ModelBasic />
     <ModelForm />
     <ModelModifier />
+
     <h1>5. Vue Style Handling</h1>
     <hr />
     <StyleScoped />
-    -->
   </div>
 </template>
 
