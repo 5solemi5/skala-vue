@@ -2,6 +2,9 @@
 import { computed } from 'vue'
 import AdviceList from './AdviceList.vue'
 import { useConfigStore } from '@/stores/configStore'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 const configStore = useConfigStore()
 
@@ -26,102 +29,50 @@ const displayMinTemp = computed(() => configStore.convertTemp(props.cityItem.min
 </script>
 
 <template>
-  <div class="weather-card" @click="$emit('select-card', `${cityItem.name}이 선택되었습니다.`)">
-    <h4>{{ cityItem.name }} ({{ cityItem.status }})</h4>
+  <Card
+    class="flex cursor-pointer flex-col transition-shadow hover:border-primary hover:shadow-md"
+    @click="$emit('select-card', `${cityItem.name}이 선택되었습니다.`)"
+  >
+    <CardContent class="flex flex-1 flex-col p-5">
+      <div class="flex items-start justify-between">
+        <h4 class="text-base font-bold text-foreground">{{ cityItem.name }} ({{ cityItem.status }})</h4>
+        <img
+          v-if="cityItem.icon"
+          :src="`https://openweathermap.org/img/wn/${cityItem.icon}.png`"
+          :alt="cityItem.description"
+          class="-mt-1 h-10 w-10"
+        />
+      </div>
 
-    <p class="temp">{{ displayTemp }}<span class="unit">{{ configStore.unitSymbol }}</span></p>
+      <p class="mt-1 text-3xl font-bold leading-none">
+        {{ displayTemp }}<span class="ml-0.5 text-base font-medium text-muted-foreground">{{ configStore.unitSymbol }}</span>
+      </p>
+      <p v-if="cityItem.description" class="mt-1 text-xs text-muted-foreground">{{ cityItem.description }}</p>
 
-    <span v-if="cityItem.temp >= 25" class="badge hot">🔥 더움 (25도 이상)</span>
-    <span v-else class="badge cool">❄️ 선선함 (25도 미만)</span>
+      <div class="mt-3">
+        <Badge v-if="cityItem.temp >= 25" variant="hot">🔥 더움 (25도 이상)</Badge>
+        <Badge v-else variant="cool">❄️ 선선함 (25도 미만)</Badge>
+      </div>
 
-    <ul class="metric">
-      <li><span>습도</span><b>{{ cityItem.humidity }}%</b></li>
-      <li><span>강수확률</span><b>{{ cityItem.rainProb }}%</b></li>
-      <li><span>최저기온</span><b>{{ displayMinTemp }}{{ configStore.unitSymbol }}</b></li>
-    </ul>
+      <ul class="mt-4 space-y-1 border-t border-dashed border-border pt-3 text-xs text-muted-foreground">
+        <li class="flex justify-between"><span>습도</span><b class="text-foreground">{{ cityItem.humidity }}%</b></li>
+        <li class="flex justify-between"><span>강수확률</span><b class="text-foreground">{{ cityItem.rainProb }}%</b></li>
+        <li class="flex justify-between">
+          <span>최저기온</span><b class="text-foreground">{{ displayMinTemp }}{{ configStore.unitSymbol }}</b>
+        </li>
+        <li v-if="cityItem.wind !== undefined" class="flex justify-between">
+          <span>풍속</span><b class="text-foreground">{{ cityItem.wind }}m/s</b>
+        </li>
+      </ul>
 
-    <AdviceList :advice-list="adviceList" />
+      <AdviceList :advice-list="adviceList" />
 
-    <button class="btn-detail" @click.stop="$emit('click-detail', cityItem.name, cityItem.status)">상세보기</button>
-  </div>
+      <Button
+        class="mt-auto w-full"
+        @click.stop="$emit('click-detail', cityItem.name, cityItem.status)"
+      >
+        상세보기
+      </Button>
+    </CardContent>
+  </Card>
 </template>
-
-<style scoped>
-.weather-card {
-  display: flex;
-  flex-direction: column;
-  padding: 18px;
-  background-color: #ffffff;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.weather-card:hover {
-  border-color: #42b883;
-  box-shadow: 0 6px 16px rgba(44, 62, 80, 0.08);
-}
-h4 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-}
-.temp {
-  margin: 8px 0 10px;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 1;
-}
-.unit {
-  font-size: 16px;
-  font-weight: 500;
-  color: #868e96;
-  margin-left: 2px;
-}
-.badge {
-  align-self: flex-start;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.badge.hot {
-  background-color: #ffe8e0;
-  color: #d9480f;
-}
-.badge.cool {
-  background-color: #e3f2fd;
-  color: #1565c0;
-}
-.metric {
-  margin: 14px 0 0;
-  padding: 12px 0 0;
-  border-top: 1px dashed #e9ecef;
-  list-style: none;
-  font-size: 12.5px;
-  color: #868e96;
-}
-.metric li {
-  display: flex;
-  justify-content: space-between;
-  padding: 1px 0;
-}
-.metric b {
-  color: #495057;
-}
-.btn-detail {
-  width: 100%;
-  padding: 9px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  background-color: #42b883;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.btn-detail:hover {
-  background-color: #33a06f;
-}
-</style>
