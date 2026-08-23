@@ -75,7 +75,7 @@ const pickCity = (city) => {
 const save = () => {
   const who = form.value.who.trim()
   if (!who) {
-    message.value = '어떻게 부를지 적어 주세요. (예: 아버지, 나, 주말 경기)'
+    message.value = '어떻게 부를지 적어 주세요. (예: 정비소, 밭, 출퇴근길)'
     return
   }
   if (!form.value.city) {
@@ -141,7 +141,7 @@ const remove = (person) => {
         <form v-else class="edit" @submit.prevent="save">
           <label class="field">
             <span>어떻게 부를까요</span>
-            <input v-model="form.who" type="text" placeholder="예: 아버지, 나, 주말 경기" />
+            <input v-model="form.who" type="text" placeholder="예: 정비소, 밭, 출퇴근길" />
           </label>
 
           <fieldset class="field">
@@ -195,7 +195,7 @@ const remove = (person) => {
         <form class="edit" @submit.prevent="save">
           <label class="field">
             <span>어떻게 부를까요</span>
-            <input v-model="form.who" type="text" placeholder="예: 아버지, 나, 주말 경기" />
+            <input v-model="form.who" type="text" placeholder="예: 정비소, 밭, 출퇴근길" />
           </label>
 
           <fieldset class="field">

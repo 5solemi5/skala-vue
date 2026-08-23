@@ -8,7 +8,7 @@ defineEmits(['change-mode'])
 
 <template>
   <div class="modebar">
-    <p class="eyebrow">누구의 오늘</p>
+    <p class="eyebrow">무엇을 볼까요</p>
     <div class="seg" role="tablist" aria-label="하는 일 선택">
       <button
         v-for="mode in modeList"
@@ -20,7 +20,6 @@ defineEmits(['change-mode'])
         :class="{ on: currentMode === mode.id }"
         @click="$emit('change-mode', mode.id)"
       >
-        <span class="who">{{ mode.who }}</span>
         <span class="what">{{ mode.label }}</span>
       </button>
     </div>
@@ -60,18 +59,10 @@ defineEmits(['change-mode'])
   cursor: pointer;
   transition: color 0.15s ease;
 }
-.who {
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  color: var(--color-ink-4);
-}
 .what {
   font-size: 15px;
   font-weight: 500;
   white-space: nowrap;
-}
-.seg-item.on .who {
-  color: var(--color-ink-3);
 }
 .seg-item:last-child {
   margin-right: 0;

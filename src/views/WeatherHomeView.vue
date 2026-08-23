@@ -95,6 +95,13 @@ const loadHourly = async () => {
 onMounted(() => {
   if (route.query.search) searchQuery.value = route.query.search
   if (route.query.mode) configStore.setMode(route.query.mode)
+
+  // 등록해 둔 첫 곳을 바로 펼쳐 둔다.
+  // 위 카드는 정비소(전주)인데 아래 화면은 서울이 떠 있으면 둘이 따로 노는 것처럼 보인다.
+  // 주소로 직접 들어온 경우(?mode=...)에는 그 설정을 존중한다.
+  const first = peopleStore.people[0]
+  if (first && !route.query.mode) handlePersonSelect(first)
+
   loadWeather()
   loadPeople()
 })
@@ -198,8 +205,8 @@ watch(currentMode, (newMode, oldMode) => {
   selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
 })
 
-// 사람을 고르면 하는 일과 지역이 함께 바뀐다.
-// 아버지를 골랐는데 서울 날씨로 정비 판정을 하던 문제를 여기서 막는다.
+// 대상을 고르면 하는 일과 지역이 함께 바뀐다.
+// 정비소를 골랐는데 서울 날씨로 판정하던 문제를 여기서 막는다.
 const handlePersonSelect = (person) => {
   selectedPersonId.value = person.id
   configStore.setMode(person.modeId)

@@ -12,19 +12,22 @@ const STORAGE_KEY = 'skala-chaebi-people'
 export const MAX_PEOPLE = 8
 
 /**
- * 챙기는 사람 목록.
+ * 챙기는 대상 목록.
  *
  * 처음에는 "하는 일"과 "지역"을 따로 골랐다.
- * 그런데 아버지 정비소는 전주에 있고 할머니 밭은 철원에 있는데
- * 아버지를 고르면 서울 날씨로 정비 판정을 하고 있었다.
- * 사람마다 지역이 다르니 둘을 하나로 묶어야 맞다.
+ * 그런데 정비소는 전주에 있고 밭은 철원에 있는데
+ * 정비소를 골라도 서울 날씨로 판정하고 있었다.
+ * 대상마다 지역이 다르니 둘을 하나로 묶어야 맞다.
  *
- * 한 사람 = 호칭 + 하는 일 + 지역
+ * 하나의 항목 = 부르는 이름 + 하는 일 + 지역
+ *
+ * 아래는 처음 들어온 사람에게 보여줄 예시다.
+ * 무엇을 넣는 화면인지 한눈에 알 수 있도록 서로 다른 네 가지를 골랐다.
  */
 const DEFAULT_PEOPLE = [
   {
-    id: 'p_father',
-    who: '아버지',
+    id: 'p_shop',
+    who: '정비소',
     modeId: 'repair',
     city: {
       id: 'geo_35.824_127.148',
@@ -35,8 +38,8 @@ const DEFAULT_PEOPLE = [
     },
   },
   {
-    id: 'p_grandma',
-    who: '할머니',
+    id: 'p_farm',
+    who: '밭',
     modeId: 'farm',
     city: {
       id: 'geo_38.209_127.218',
@@ -47,8 +50,8 @@ const DEFAULT_PEOPLE = [
     },
   },
   {
-    id: 'p_me',
-    who: '나',
+    id: 'p_commute',
+    who: '출퇴근길',
     modeId: 'bike',
     city: { id: 'geo_37.567_126.978', name: '서울', region: '수도권', lat: 37.5665, lon: 126.978 },
   },
@@ -86,8 +89,7 @@ export const usePeopleStore = defineStore('people', () => {
   const people = ref(load())
 
   // 한 번도 손대지 않았으면 예시 목록이라는 뜻이다.
-  // 처음 들어온 사람에게 남의 아버지 이야기를 그대로 보여줄 수는 없어서,
-  // 예시임을 알리고 바꾸도록 안내하는 데 쓴다.
+  // 버튼 문구를 '내 사람들로 바꾸기' / '사람 고치기' 로 갈라 쓰는 데 사용한다.
   const isSample = ref(localStorage.getItem(STORAGE_KEY) === null)
   const markTouched = () => {
     isSample.value = false

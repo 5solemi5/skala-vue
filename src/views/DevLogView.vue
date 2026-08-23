@@ -36,7 +36,7 @@ Error parsing JavaScript expression: Unexpected token, expected "," (3:10)
     title: '철원이 검색되지 않음',
     date: '지역 검색',
     symptom:
-      '할머니 밭이 있는 철원을 추가하려는데 검색 결과가 비어 있었다. 영월·정선 같은 다른 소도시는 나오는데 철원만 안 나왔다.',
+      '철원을 추가하려는데 검색 결과가 비어 있었다. 영월·정선 같은 다른 소도시는 나오는데 철원만 안 나왔다.',
     log: `$ curl "api.openweathermap.org/geo/1.0/direct?q=철원&appid=..."
 []
 
@@ -195,6 +195,44 @@ v-model.trim="userEmail"`,
 
 const reviewList = ref([
   {
+    id: 'r10',
+    title: '기본 목록에서 개인 정보만 걷어내기',
+    when: '문구 정리',
+    why: '기본 목록과 소개 글에 가까운 사람들이 무슨 일을 하는지가 그대로 적혀 있었다. 공개된 저장소에 올라가는 화면이라 그 부분은 가려야 했다.',
+    before: `const DEFAULT_PEOPLE = [
+  { who: '아버지', modeId: 'repair', ... },
+  { who: '할머니', modeId: 'farm',   ... },
+]
+
+// 소개 글
+"아버지가 자동차 정비소를, 할머니가 농사를 하십니다..."`,
+    after: `const DEFAULT_PEOPLE = [
+  { who: '정비소',   modeId: 'repair', ... },
+  { who: '밭',       modeId: 'farm',   ... },
+  { who: '출퇴근길', modeId: 'bike',   ... },
+]
+
+// 소개 글은 한 문장만 바꿨다
+"가까운 분들 중에 날씨로 하루가 달라지는 일을 하시는 분들이 있습니다."`,
+    note: '처음엔 글 전체를 사실 설명으로 바꿨는데, 그러니 왜 이걸 만들었는지가 사라졌다. 만든 이유는 남기고 누가 무슨 일을 하는지만 가리는 쪽으로 다시 고쳤다. 이름을 장소로 바꾼 것은 덤으로 무엇을 넣는 칸인지 더 잘 보이게 했다.',
+  },
+    id: 'r11',
+    title: '첫 화면에서 카드와 아래 내용이 따로 놀던 것',
+    when: '문구 정리',
+    why: '맨 위 첫 카드는 정비소(전주)인데 그 아래 큰 화면은 서울이 떠 있었다. 카드를 눌러야 맞춰지는데, 누르기 전까지는 두 영역이 서로 다른 곳을 보고 있었다.',
+    before: `onMounted(() => {
+  loadWeather()   // 지역 목록의 첫 번째를 고름
+  loadPeople()    // 등록한 곳들을 따로 불러옴
+})`,
+    after: `onMounted(() => {
+  // 등록해 둔 첫 곳을 바로 펼쳐 둔다
+  const first = peopleStore.people[0]
+  if (first && !route.query.mode) handlePersonSelect(first)
+  ...
+})`,
+    note: '주소에 ?mode= 가 붙어 들어온 경우에는 그 설정을 존중하도록 조건을 뒀다. 링크로 공유한 화면이 열자마자 다른 걸 보여주면 안 되기 때문이다.',
+  },
+  {
     id: 'r9',
     title: '안내 문구를 빼고 버튼 하나로',
     when: '사람 편집 기능',
@@ -214,11 +252,11 @@ const reviewList = ref([
     id: 'r8',
     title: '나만 쓸 수 있는 화면이던 것을 고침',
     when: '사람 편집 기능',
-    why: '사람 목록을 코드에 박아 두고 편집 화면을 안 만들었더니, 처음 들어온 사람은 남의 아버지와 남의 할머니를 보게 됐다. 스토어에 추가·수정·삭제 함수는 있었지만 부를 곳이 없어서 사실상 고정이었다.',
+    why: '챙길 대상 목록을 코드에 박아 두고 편집 화면을 안 만들었더니, 처음 들어온 사람은 남이 정해 둔 목록을 그대로 보게 됐다. 스토어에 추가·수정·삭제 함수는 있었지만 부를 곳이 없어서 사실상 고정이었다.',
     before: `// stores/peopleStore.js 안에만 있고 화면에서 부르는 곳이 없었다
 const DEFAULT_PEOPLE = [
-  { who: '아버지', modeId: 'repair', city: { name: '전주', ... } },
-  { who: '할머니', modeId: 'farm',   city: { name: '철원', ... } },
+  { who: '정비소', modeId: 'repair', city: { name: '전주', ... } },
+  { who: '밭',     modeId: 'farm',   city: { name: '철원', ... } },
 ]
 const addPerson = ...    // 호출하는 곳 없음
 const updatePerson = ... // 호출하는 곳 없음`,
@@ -237,20 +275,20 @@ const isSample = ref(localStorage.getItem(STORAGE_KEY) === null)
     id: 'r7',
     title: '사람과 지역을 하나로 묶기',
     when: '컨셉 정리',
-    why: '하는 일과 지역을 따로 고르게 해뒀더니, 아버지를 골랐는데 서울 날씨로 정비 판정을 하고 있었다. 아버지 정비소는 전주에 있고 할머니 밭은 철원에 있는데 둘 다 서울로 보고 있었던 것이다. 챙기는 사람마다 지역이 다르니 둘을 따로 두면 안 됐다.',
+    why: '하는 일과 지역을 따로 고르게 해뒀더니, 정비소를 골랐는데 서울 날씨로 판정하고 있었다. 정비소는 전주에 있고 밭은 철원에 있는데 둘 다 서울로 보고 있었던 것이다. 챙기는 대상마다 지역이 다르니 둘을 따로 두면 안 됐다.',
     before: `// 모드(하는 일)와 지역이 서로 모르는 상태
 configStore.currentMode   // 'repair'
 selectedId                // 'city_01' (서울)
 // 사용자가 매번 둘 다 맞춰야 한다`,
     after: `// 한 사람 = 호칭 + 하는 일 + 지역
-{ who: '아버지',  modeId: 'repair', city: { name: '전주', lat, lon } }
-{ who: '할머니',  modeId: 'farm',   city: { name: '철원', lat, lon } }
+{ who: '정비소', modeId: 'repair', city: { name: '전주', lat, lon } }
+{ who: '밭',     modeId: 'farm',   city: { name: '철원', lat, lon } }
 
 const handlePersonSelect = (person) => {
   configStore.setMode(person.modeId)   // 하는 일과
   selectedId.value = person.city.id    // 지역이 함께 바뀐다
 }`,
-    note: '화면 맨 위에 네 사람을 한 줄로 놓고 각자 자기 지역 날씨와 판정을 보여주도록 바꿨다. 아침에 한 번 열면 네 사람의 오늘이 한눈에 들어온다.',
+    note: '화면 맨 위에 등록한 대상을 한 줄로 놓고 각자 자기 지역 날씨와 판정을 보여주도록 바꿨다. 아침에 한 번 열면 챙길 곳들이 한눈에 들어온다.',
   },
   {
     id: 'r5',

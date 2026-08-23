@@ -39,19 +39,16 @@ export const useConfigStore = defineStore('config', () => {
 
   // state: 사용 가능한 모드 목록과 현재 선택된 모드
   const modeList = ref([
-    { id: 'repair', label: '자동차 정비소', who: '아버지' },
-    { id: 'farm', label: '농사', who: '할머니' },
-    { id: 'bike', label: '자전거', who: '나' },
-    { id: 'baseball', label: '야구', who: '주말 경기' },
+    { id: 'repair', label: '자동차 정비소' },
+    { id: 'farm', label: '농사' },
+    { id: 'bike', label: '자전거' },
+    { id: 'baseball', label: '야구' },
   ])
   // 저장된 값이 지금 목록에 없는 경우가 있다.
   // 모드를 바꾸거나 이름을 고치면 예전에 저장된 id 가 그대로 남아
   // 어떤 규칙에도 걸리지 않고 빈 판정만 나온다. 그래서 확인 후 되돌린다.
   const isKnownMode = (id) => modeList.value.some((m) => m.id === id)
   const currentMode = ref(isKnownMode(saved.currentMode) ? saved.currentMode : modeList.value[0].id)
-  const currentModeWho = computed(
-    () => modeList.value.find((m) => m.id === currentMode.value)?.who ?? '',
-  )
 
   // getter: 현재 모드의 표시용 이름
   const currentModeLabel = computed(() => {
@@ -93,7 +90,6 @@ export const useConfigStore = defineStore('config', () => {
     modeList,
     currentMode,
     currentModeLabel,
-    currentModeWho,
     setMode,
     convertTemp,
   }
