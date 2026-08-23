@@ -260,6 +260,30 @@ src/
 정작 `practice.css` 에 기본 스타일이 없어서 테두리·여백이 잡히지 않았다.
 `practice.css` 에 `.monitor` 기본 스타일을 추가해서 해결했다.
 
+
+## 3일차 — Vue Components
+
+### Code Challenge 7. Component Lifecycle (p.155)
+
+| 파일 | 내용 |
+|---|---|
+| `LifecycleParent.vue` | `v-if` 로 자식 컴포넌트를 생성·파괴하는 스위치 |
+| `LifecycleChild.vue` | `onMounted` / `onUpdated` / `onUnmounted` 훅 실행 순서 확인 |
+
+**알게 된 점**
+
+- `<script setup>` 본문 자체가 **생성(Creation) 단계**다. 여기서는 아직 DOM이 없어서
+  화면 요소에 접근할 수 없다. 콘솔 로그가 1번으로 찍히는 걸로 확인했다.
+- `onMounted` 는 화면에 붙은 뒤라 **API 호출이나 DOM 조작을 하기 적당한 시점**이다.
+  여기서 `setInterval` 로 3초마다 카운트가 올라가는 타이머를 걸었다.
+- **가장 중요한 건 `onUnmounted` 였다.** 타이머를 걸어놓고 컴포넌트를 파괴했을 때
+  `clearInterval` 을 안 해주면 화면에서 사라져도 타이머가 백그라운드에서 계속 돈다.
+  이게 메모리 누수다. 파괴 버튼을 눌렀다가 다시 살리기를 반복하면
+  타이머가 겹쳐서 카운트가 여러 번씩 뛰게 된다.
+  → **"켠 것은 반드시 끈다"** 가 컴포넌트 생명주기의 핵심이라고 이해했다.
+- `onUpdated` 는 데이터가 바뀌어 화면을 다시 그릴 때마다 실행된다.
+  타이머가 도는 동안 3초마다 로그가 계속 찍히는 걸로 확인했다.
+
 ---
 
 # 과제 (Hands on) 기록

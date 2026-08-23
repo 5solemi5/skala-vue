@@ -50,6 +50,9 @@ import WatchersReactive from './components/practices/composition/WatchersReactiv
 import WatchersRefArray from './components/practices/composition/WatchersRefArray.vue'
 import WatchersReactiveArray from './components/practices/composition/WatchersReactiveArray.vue'
 import WatchersWatchEffect from './components/practices/composition/WatchersWatchEffect.vue'
+
+// 8. Component Lifecycle
+import LifecycleParent from './components/practices/component/LifecycleParent.vue'
 </script>
 
 <template>
@@ -121,6 +124,10 @@ import WatchersWatchEffect from './components/practices/composition/WatchersWatc
     <WatchersRefArray />
     <WatchersReactiveArray />
     <WatchersWatchEffect />
+
+    <h1>8. Component Lifecycle</h1>
+    <hr />
+    <LifecycleParent />
   </div>
 </template>
 
