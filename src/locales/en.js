@@ -33,6 +33,16 @@ export default {
   'here.failedTitle': "Found you, but the weather didn't load. Tap to try again",
   'here.unnamed': 'Where you are',
 
+  // ── yard scenery ──
+  'yard.aria': 'Choose the scenery',
+  'yard.prev': 'Previous scenery',
+  'yard.next': 'Next scenery',
+  'yard.meadow': 'Meadow',
+  'yard.seaside': 'Seaside',
+  'yard.night': 'Night',
+  'yard.snow': 'Snow',
+  'yard.city': 'Street',
+
   // ── weather ─────────────────────────────────
   'cond.clear': 'Clear',
   'cond.clouds': 'Cloudy',

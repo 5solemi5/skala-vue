@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useConfigStore } from '@/stores/configStore'
 import PersonCard from './PersonCard.vue'
 import TwinkleMark from './TwinkleMark.vue'
+import PeopleAmbient from './PeopleAmbient.vue'
 
 const configStore = useConfigStore()
 
@@ -54,6 +55,7 @@ watch(
         </h2>
         <p class="sub">{{ configStore.t('people.count', { n: people.length }) }}</p>
       </div>
+
       <button type="button" class="setup" @click="$emit('setup')">
         {{ configStore.t(isSample ? 'people.setup' : 'people.setupMore') }}
       </button>
@@ -78,6 +80,8 @@ watch(
         />
       </TransitionGroup>
     </div>
+
+    <PeopleAmbient :people="people" />
   </section>
 </template>
 
@@ -89,7 +93,7 @@ watch(
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   margin-bottom: 16px;
 }
 h2 {
