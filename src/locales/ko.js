@@ -26,6 +26,17 @@ export default {
   'foot.credit': 'SKALA Full-Stack Engineering · Frontend framework: Vue.js',
   'lang.aria': '언어 선택',
 
+  // ── 지금 있는 곳 ──
+  'here.ask': '내 위치',
+  'here.askTitle': '지금 계신 곳의 날씨를 봅니다',
+  'here.loading': '찾는 중',
+  'here.goTitle': ({ name }) => `${name} 오늘의 채비 보기`,
+  'here.denied': '위치를 쓸 수 없음',
+  'here.deniedTitle': '브라우저에서 위치 접근이 막혀 있습니다',
+  'here.failed': '다시',
+  'here.failedTitle': '위치는 찾았지만 날씨를 못 받았습니다. 다시 눌러 보세요',
+  'here.unnamed': '지금 이곳',
+
   // ── 날씨 상태 ────────────────────────────────
   'cond.clear': '맑음',
   'cond.clouds': '구름',

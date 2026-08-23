@@ -102,11 +102,25 @@ onMounted(() => {
   // 위 카드는 정비소(전주)인데 아래 화면은 서울이 떠 있으면 둘이 따로 노는 것처럼 보인다.
   // 주소로 직접 들어온 경우(?mode=...)에는 그 설정을 존중한다.
   const first = peopleStore.people[0]
-  if (first && !route.query.mode) handlePersonSelect(first)
+  if (first && !route.query.mode && !route.query.city) handlePersonSelect(first)
 
   loadWeather()
   loadPeople()
 })
+
+// 헤더의 '내 위치' 를 누르면 ?city= 를 달고 이 화면으로 온다.
+// 이미 이 화면에 있을 때도 눌리므로 onMounted 말고 따로 본다.
+watch(
+  () => route.query.city,
+  (id) => {
+    if (!id) return
+    selectedPersonId.value = ''
+    selectedId.value = id
+    const known = weatherList.value.find((c) => c.id === id)
+    if (known) selectedCityInfo.value = configStore.t('home.picked', { name: known.name })
+  },
+  { immediate: true },
+)
 
 watch([searchQuery, currentMode], ([newQuery, newMode]) => {
   router.replace({
