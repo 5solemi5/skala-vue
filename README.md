@@ -529,6 +529,79 @@ const regionGreeting = `웰컴 투 ${myRegion}`
 ESLint 는 **코드가 옳은지**(버그·안티패턴), Prettier 는 **보기 좋은지**(줄바꿈·공백·따옴표)를 본다.
 `eslint-config-prettier` 가 설정에 들어있는 이유도 두 도구가 서식 문제로 싸우지 않게 하려는 것이다.
 
+
+### Code Challenge 17. Environment Variables (p.272)
+
+**환경별 파일 생성**
+
+```
+.env.staging      → VITE_API_URL=https://api-stage.skcc.com
+.env.production   → VITE_API_URL=https://api-prod.skcc.com
+.env.local        → VITE_OPENWEATHER_API_KEY=...   (실제 키, Git 제외)
+```
+
+**빌드 스크립트 추가**
+
+```json
+"build:staging": "vite build --mode staging",
+"build:production": "vite build --mode production"
+```
+
+**관측 결과** — `npm run build:staging` 을 실행하니 터미널에 모드가 찍혔다.
+
+```
+vite v8.2.1 building client environment for staging...
+```
+
+빌드 결과물을 열어 어떤 값이 박혔는지 직접 확인했다.
+
+| 명령 | 터미널 표시 | 번들에 박힌 값 |
+|---|---|---|
+| `npm run build:staging` | `... for staging` | `api-stage.skcc.com` |
+| `npm run build` | `... for production` | `api-prod.skcc.com` |
+
+**알게 된 점**
+
+- `VITE_` 접두사가 붙은 변수만 클라이언트 코드에 노출된다. 접두사가 없으면 `undefined` 가 된다.
+- `import.meta.env.MODE` 로 현재 빌드 모드를 알 수 있다.
+- **환경 변수는 런타임이 아니라 빌드 시점에 문자열로 치환된다.** 그래서
+  빌드 산출물을 `grep` 해보면 값이 그대로 박혀 있다. 배포 후에 값만 바꿀 수는 없고 다시 빌드해야 한다.
+- `.env.local` 은 모든 모드에서 함께 읽힌다. 그래서 실제 API 키는 여기 두고
+  모드별 파일에는 비밀이 아닌 값만 넣었다.
+
+### Code Challenge 18. Bundling and Build (p.273)
+
+`npm run build` 실행 후 생성된 `dist/` 를 확인했다.
+
+```
+dist/
+├── index.html
+├── favicon.ico
+└── assets/
+    ├── index-CWma_k0b.js            ← 메인 번들
+    ├── index-B8QLbwFh.css
+    ├── pinia-DllntOJT.js
+    ├── WeatherDetailView-D29BZ3jR.js   ← 라우트별로 쪼개진 청크
+    ├── WeatherAboutView-C1LEzND-.js
+    ├── LabView-Bi3zHM1x.js
+    ├── ArchiveView-zpL7Nsdf.js
+    ├── DevLogView-Gy1NFRFT.js
+    └── NotFoundView-BnqzCHZ9.js
+```
+
+**알게 된 점**
+
+- 파일명 뒤에 `index-CWma_k0b.js` 처럼 **해시가 붙는다.** 내용이 바뀌면 해시도 바뀌므로
+  브라우저가 옛날 파일을 캐시에 물고 있는 문제를 막을 수 있다.
+- **라우터에 걸어둔 지연 로딩이 실제로 동작한 게 눈에 보였다.**
+  `() => import('../views/LabView.vue')` 로 쓴 화면들이 각각 별도 파일로 떨어졌다.
+  처음 접속할 때 전부 받지 않고, 해당 경로로 들어갈 때만 내려받는다.
+- CSS 도 라우트별로 쪼개져 있다. 각 컴포넌트의 `<style scoped>` 가 그쪽 청크로 따라간 것이다.
+- 메인 번들이 1MB 를 넘는다. Element Plus 를 전역 등록(`app.use(ElementPlus)`)해서
+  실제로 안 쓰는 컴포넌트까지 다 들어간 탓이다.
+  실무라면 필요한 컴포넌트만 불러오는 방식으로 줄여야 할 부분이다.
+- `dist/` 는 `.gitignore` 에 들어 있어 커밋되지 않는다. 빌드는 배포 시점에 다시 만들면 되는 산출물이다.
+
 ---
 
 # 과제 (Hands on) 기록
