@@ -4,83 +4,41 @@ import { useRoute, useRouter } from 'vue-router'
 import { buildAdvice } from '../utils/adviceRules'
 import AdviceList from '../components/exercise/AdviceList.vue'
 import { useConfigStore } from '@/stores/configStore'
+import { useCityStore } from '@/stores/cityStore'
+import { fetchCityWeather, fetchHourly } from '../api/weatherApi'
+import HourlyTimeline from '../components/exercise/HourlyTimeline.vue'
 
 const route = useRoute()
 const router = useRouter()
 const configStore = useConfigStore()
-
-// 도시 코드에 해당하는 상세 Mock Data
-const mockDetails = {
-  city_01: {
-    name: '서울특별시',
-    temp: 28,
-    status: '맑음',
-    humidity: 55,
-    rainProb: 10,
-    minTemp: 21,
-    wind: 2.1,
-    region: '수도권',
-  },
-  city_02: {
-    name: '경기도 수원시',
-    temp: 24,
-    status: '비',
-    humidity: 88,
-    rainProb: 80,
-    minTemp: 19,
-    wind: 3.4,
-    region: '수도권',
-  },
-  city_03: {
-    name: '부산광역시',
-    temp: 26,
-    status: '구름',
-    humidity: 72,
-    rainProb: 30,
-    minTemp: 22,
-    wind: 5.2,
-    region: '영남권',
-  },
-  city_04: {
-    name: '전라북도 전주시',
-    temp: 33,
-    status: '맑음',
-    humidity: 45,
-    rainProb: 5,
-    minTemp: 24,
-    wind: 1.8,
-    region: '호남권',
-  },
-  city_05: {
-    name: '대구광역시',
-    temp: 21,
-    status: '흐림',
-    humidity: 82,
-    rainProb: 40,
-    minTemp: 2,
-    wind: 0.9,
-    region: '영남권',
-  },
-  city_06: {
-    name: '강원도 강릉시',
-    temp: 18,
-    status: '맑음',
-    humidity: 58,
-    rainProb: 10,
-    minTemp: 12,
-    wind: 4.5,
-    region: '강원권',
-  },
-}
+const cityStore = useCityStore()
 
 const cityData = ref(null)
+const hourlyRows = ref([])
+const isLoading = ref(false)
 
-// 동적 경로의 cityId 로 Mock Data 에서 도시 객체를 선택한다
-const loadCity = (id) => {
-  cityData.value = mockDetails[id] ?? null
+// 목록에서 해당 지역을 찾아 실시간 날씨와 시간대별 예보를 받는다
+const loadCity = async (id) => {
+  const city = cityStore.cities.find((c) => c.id === id)
+  if (!city) {
+    cityData.value = null
+    hourlyRows.value = []
+    return
+  }
+
+  isLoading.value = true
+  try {
+    const [current, hourly] = await Promise.all([fetchCityWeather(city), fetchHourly(city)])
+    cityData.value = current
+    hourlyRows.value = hourly
+  } catch (error) {
+    console.error('상세 정보를 불러오지 못했습니다:', error)
+    cityData.value = null
+  } finally {
+    isLoading.value = false
+  }
 }
 
-// Mount 시점 처리
 onMounted(() => {
   loadCity(route.params.cityId)
   if (route.query.mode) {
@@ -88,9 +46,9 @@ onMounted(() => {
   }
 })
 
-// ⚠️ /weather/city_01 → /weather/city_02 처럼 파라미터만 바뀌면
-// Vue Router 는 같은 컴포넌트를 재사용하기 때문에 onMounted 가 다시 실행되지 않는다.
-// 그래서 파라미터를 따로 감시해서 데이터를 다시 읽어준다.
+// /weather/city_01 -> /weather/city_02 처럼 파라미터만 바뀌면
+// Vue Router 는 같은 컴포넌트를 재사용해서 onMounted 가 다시 실행되지 않는다.
+// 그래서 파라미터를 따로 감시한다.
 watch(
   () => route.params.cityId,
   (newId) => {
@@ -153,6 +111,14 @@ const goHome = () => {
         </li>
       </ul>
 
+      <h3>시간대별</h3>
+      <HourlyTimeline
+        v-if="hourlyRows.length"
+        :rows="hourlyRows"
+        :mode="configStore.currentMode"
+        :mode-label="configStore.currentModeLabel.replace(/^\S+\s*/, '')"
+      />
+
       <h3>하는 일별 오늘의 채비</h3>
       <p class="hint">
         메인 화면에서는 선택한 한 가지만 보이지만, 여기서는 네 가지를 한눈에 비교할 수 있습니다.
@@ -167,9 +133,13 @@ const goHome = () => {
       </div>
     </div>
 
+    <div v-else-if="isLoading" class="not-found">
+      <p class="dim">불러오는 중입니다...</p>
+    </div>
+
     <div v-else class="not-found">
-      <p>해당 지역의 상세 데이터가 존재하지 않습니다.</p>
-      <p class="dim">주소창의 도시 코드를 확인해 주세요. (예: /weather/city_01)</p>
+      <p>내 지역 목록에 없는 곳입니다.</p>
+      <p class="dim">메인 화면에서 지역을 추가한 뒤 다시 들어와 주세요.</p>
     </div>
 
     <button class="back-btn" @click="goHome">← 메인 대시보드로 돌아가기</button>

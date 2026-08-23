@@ -119,3 +119,39 @@ export const searchCity = async (query) => {
     lon: c.lon,
   }))
 }
+
+/**
+ * 한 지역의 오늘 시간대별 예보 (Open-Meteo).
+ * 하루 중 언제 일하기 좋은지 보려면 하루 한 덩어리 값으로는 부족해서 따로 받는다.
+ * 지난 시간은 볼 필요가 없으니 현재 시각 이후만 남긴다.
+ */
+export const fetchHourly = async (city) => {
+  const { data } = await axios.get(METEO_URL, {
+    params: {
+      latitude: city.lat,
+      longitude: city.lon,
+      hourly: 'temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m',
+      timezone: 'Asia/Seoul',
+      forecast_days: 2,
+    },
+  })
+
+  const h = data.hourly
+  const now = new Date()
+
+  return (
+    h.time
+      .map((t, i) => ({
+        at: new Date(t),
+        time: t.slice(11, 16),
+        hour: Number(t.slice(11, 13)),
+        temp: Math.round(h.temperature_2m[i]),
+        humidity: h.relative_humidity_2m[i],
+        rainProb: h.precipitation_probability[i] ?? 0,
+        wind: Number((h.wind_speed_10m[i] ?? 0).toFixed(1)),
+      }))
+      // 지난 시간은 볼 필요가 없다. 저녁에 들어와도 쓸모 있도록 앞으로 18시간을 보여준다.
+      .filter((row) => row.at >= now)
+      .slice(0, 18)
+  )
+}
