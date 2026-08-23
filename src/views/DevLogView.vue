@@ -9,6 +9,25 @@ const currentTab = ref('trouble')
 
 const troubleList = ref([
   {
+    id: 't7',
+    title: '철원이 검색되지 않음',
+    date: '지역 검색',
+    symptom:
+      '할머니 밭이 있는 철원을 추가하려는데 검색 결과가 비어 있었다. 영월·정선 같은 다른 소도시는 나오는데 철원만 안 나왔다.',
+    log: `$ curl "api.openweathermap.org/geo/1.0/direct?q=철원&appid=..."
+[]
+
+$ curl "geocoding-api.open-meteo.com/v1/search?name=철원&language=ko"
+{"results":[{"name":"철원","latitude":38.20917,"longitude":127.2175,
+  "admin1":"강원도","admin2":"철원군", ...}]}`,
+    cause:
+      '두 지오코딩 API 모두 GeoNames 를 쓰지만 서로 다른 스냅샷이라 빠지는 지명이 다르다. 철원은 OpenWeatherMap 에 없고, 반대로 영월은 Open-Meteo 에 없다.',
+    fix: `const results = await Promise.allSettled([searchOwm(q), searchMeteo(q)])
+const found = results.filter(r => r.status === 'fulfilled').flatMap(r => r.value)
+// 좌표가 거의 같은 결과는 한 번만 보여준다`,
+    note: '10곳을 표본으로 확인해 보니 한쪽만 쓰면 4곳이 안 나오고, 합치면 9곳이 나왔다. 좌표만 있으면 날씨는 어디든 받을 수 있으니 한계는 이름을 좌표로 바꾸는 단계에만 있다.',
+  },
+  {
     id: 't6',
     title: '모바일에서 가로 스크롤이 생김',
     date: '4일차',
@@ -152,6 +171,25 @@ v-model.trim="userEmail"`,
 ])
 
 const reviewList = ref([
+  {
+    id: 'r7',
+    title: '사람과 지역을 하나로 묶기',
+    when: '컨셉 정리',
+    why: '하는 일과 지역을 따로 고르게 해뒀더니, 아버지를 골랐는데 서울 날씨로 정비 판정을 하고 있었다. 아버지 정비소는 전주에 있고 할머니 밭은 철원에 있는데 둘 다 서울로 보고 있었던 것이다. 챙기는 사람마다 지역이 다르니 둘을 따로 두면 안 됐다.',
+    before: `// 모드(하는 일)와 지역이 서로 모르는 상태
+configStore.currentMode   // 'repair'
+selectedId                // 'city_01' (서울)
+// 사용자가 매번 둘 다 맞춰야 한다`,
+    after: `// 한 사람 = 호칭 + 하는 일 + 지역
+{ who: '아버지',  modeId: 'repair', city: { name: '전주', lat, lon } }
+{ who: '할머니',  modeId: 'farm',   city: { name: '철원', lat, lon } }
+
+const handlePersonSelect = (person) => {
+  configStore.setMode(person.modeId)   // 하는 일과
+  selectedId.value = person.city.id    // 지역이 함께 바뀐다
+}`,
+    note: '화면 맨 위에 네 사람을 한 줄로 놓고 각자 자기 지역 날씨와 판정을 보여주도록 바꿨다. 아침에 한 번 열면 네 사람의 오늘이 한눈에 들어온다.',
+  },
   {
     id: 'r5',
     title: '카드 그리드를 히어로 + 목록 구조로',

@@ -5,18 +5,21 @@ import { useRouter, useRoute } from 'vue-router'
 import ModeBar from '../components/service/ModeBar.vue'
 import CityHero from '../components/service/CityHero.vue'
 import CityRow from '../components/service/CityRow.vue'
+import PeopleBoard from '../components/service/PeopleBoard.vue'
 import CityManager from '../components/exercise/CityManager.vue'
 import SearchBar from '../components/exercise/SearchBar.vue'
 
 import { buildAdvice } from '../utils/adviceRules'
-import { fetchAllWeather, fetchHourly } from '../api/weatherApi'
+import { fetchAllWeather, fetchHourly, fetchCityWeather } from '../api/weatherApi'
 import { useCityStore } from '@/stores/cityStore'
+import { usePeopleStore } from '@/stores/peopleStore'
 import { useConfigStore } from '@/stores/configStore'
 
 const router = useRouter()
 const route = useRoute()
 const configStore = useConfigStore()
 const cityStore = useCityStore()
+const peopleStore = usePeopleStore()
 
 const weatherList = ref([])
 const hourlyRows = ref([])
@@ -24,6 +27,10 @@ const isLoading = ref(false)
 const errorMessage = ref('')
 const failedCities = ref([])
 const updatedAt = ref('')
+
+// 사람마다 지역이 다르므로 각자 자기 지역 날씨를 따로 받는다
+const peopleWeather = ref({})
+const selectedPersonId = ref('')
 
 const searchQuery = ref('')
 const selectedCityInfo = ref('목록에서 지역을 누르면 여기가 바뀝니다.')
@@ -57,6 +64,17 @@ const loadWeather = async () => {
   }
 }
 
+// 사람마다 자기 지역 날씨를 받아 둔다
+const loadPeople = async () => {
+  const list = peopleStore.people
+  const results = await Promise.allSettled(list.map((p) => fetchCityWeather(p.city)))
+  const map = {}
+  results.forEach((r, i) => {
+    if (r.status === 'fulfilled') map[list[i].id] = r.value
+  })
+  peopleWeather.value = map
+}
+
 // 선택된 지역의 시간대별 예보만 따로 받는다
 const loadHourly = async () => {
   const city = cityStore.cities.find((c) => c.id === selectedId.value)
@@ -76,6 +94,7 @@ onMounted(() => {
   if (route.query.search) searchQuery.value = route.query.search
   if (route.query.mode) configStore.setMode(route.query.mode)
   loadWeather()
+  loadPeople()
 })
 
 watch([searchQuery, currentMode], ([newQuery, newMode]) => {
@@ -109,6 +128,19 @@ const adviceMap = computed(() => {
   })
   return map
 })
+
+const peopleAdvice = computed(() => {
+  const map = {}
+  peopleStore.people.forEach((p) => {
+    const w = peopleWeather.value[p.id]
+    if (w) map[p.id] = buildAdvice(w, p.modeId)
+  })
+  return map
+})
+
+const modeLabelById = computed(() =>
+  Object.fromEntries(configStore.modeList.map((m) => [m.id, m.label])),
+)
 
 const selectedCity = computed(
   () => weatherList.value.find((c) => c.id === selectedId.value) ?? null,
@@ -153,6 +185,23 @@ watch(currentMode, (newMode, oldMode) => {
   selectedCityInfo.value = `${configStore.currentModeLabel} 기준으로 오늘의 채비를 다시 계산했습니다.`
 })
 
+// 사람을 고르면 하는 일과 지역이 함께 바뀐다.
+// 아버지를 골랐는데 서울 날씨로 정비 판정을 하던 문제를 여기서 막는다.
+const handlePersonSelect = (person) => {
+  selectedPersonId.value = person.id
+  configStore.setMode(person.modeId)
+
+  const known = weatherList.value.find((c) => c.id === person.city.id)
+  if (known) {
+    selectedId.value = known.id
+  } else {
+    // 목록에 없는 지역이면 목록에 넣어 두고 이어서 보여준다
+    cityStore.addCity(person.city)
+    selectedId.value = person.city.id
+  }
+  selectedCityInfo.value = `${person.who} · ${person.city.name}`
+}
+
 const handleSelect = (city) => {
   selectedId.value = city.id
   selectedCityInfo.value = `${city.name}이 선택되었습니다.`
@@ -165,6 +214,15 @@ const handleDetail = (city) => {
 
 <template>
   <div class="page">
+    <PeopleBoard
+      :people="peopleStore.people"
+      :weather-by-id="peopleWeather"
+      :advice-by-id="peopleAdvice"
+      :label-by-id="modeLabelById"
+      :selected-id="selectedPersonId"
+      @select="handlePersonSelect"
+    />
+
     <ModeBar
       class="modebar"
       :mode-list="modeList"

@@ -120,9 +120,7 @@ const handleRemove = (city) => {
         >
           <span>
             {{ city.name }}
-            <span class="ml-1 text-xs text-muted-foreground"
-              >{{ city.originalName }} · {{ city.region }}</span
-            >
+            <span class="ml-1 text-xs text-muted-foreground">{{ city.region }}</span>
           </span>
           <Button
             v-if="!cityStore.has(city.id)"

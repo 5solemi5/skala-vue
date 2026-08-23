@@ -16,6 +16,7 @@ const OWM_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
 const OWM_URL = 'https://api.openweathermap.org/data/2.5/weather'
 const METEO_URL = 'https://api.open-meteo.com/v1/forecast'
 const GEO_URL = 'https://api.openweathermap.org/geo/1.0/direct'
+const METEO_GEO_URL = 'https://geocoding-api.open-meteo.com/v1/search'
 
 // 처음 접속했을 때 보여줄 기본 지역 (교재 지정 3곳 + 개인 추가 3곳)
 export const DEFAULT_CITIES = [
@@ -102,28 +103,60 @@ export const fetchAllWeather = async (cities) => {
 }
 
 /**
- * 도시 이름으로 좌표를 찾는다 (OpenWeatherMap Geocoding API).
- * 한글로 검색해도 되고, local_names.ko 로 한글 지명을 돌려준다.
- * '광주' 처럼 같은 이름이 여러 곳이면 여러 개가 나오므로 사용자가 고르게 한다.
+ * 지역 이름으로 좌표를 찾는다.
+ *
+ * 두 곳을 함께 검색한다. 한쪽에만 있는 지역이 꽤 있어서다.
+ * 예를 들어 철원은 OpenWeatherMap 에 없고 Open-Meteo 에만 있는데,
+ * 반대로 영월은 Open-Meteo 에 없고 OpenWeatherMap 에만 있다.
+ * 한 곳만 쓰면 "우리 동네가 안 나온다"는 일이 생긴다.
  */
-export const searchCity = async (query) => {
+const searchOwm = async (query) => {
   const { data } = await axios.get(GEO_URL, {
     params: { q: query, limit: 5, appid: OWM_KEY },
   })
   return data.map((c) => ({
-    id: `geo_${c.lat.toFixed(4)}_${c.lon.toFixed(4)}`,
+    id: `geo_${c.lat.toFixed(3)}_${c.lon.toFixed(3)}`,
     name: c.local_names?.ko ?? c.name,
-    originalName: c.name,
     region: c.state ?? c.country,
     lat: c.lat,
     lon: c.lon,
+    from: 'owm',
   }))
 }
 
+const searchMeteo = async (query) => {
+  const { data } = await axios.get(METEO_GEO_URL, {
+    params: { name: query, count: 5, language: 'ko', format: 'json' },
+  })
+  return (data.results ?? [])
+    .filter((c) => c.country_code === 'KR')
+    .map((c) => ({
+      id: `geo_${c.latitude.toFixed(3)}_${c.longitude.toFixed(3)}`,
+      name: c.name,
+      region: [c.admin1, c.admin2].filter(Boolean).join(' '),
+      lat: c.latitude,
+      lon: c.longitude,
+      from: 'meteo',
+    }))
+}
+
+export const searchCity = async (query) => {
+  const results = await Promise.allSettled([searchOwm(query), searchMeteo(query)])
+  const found = results.filter((r) => r.status === 'fulfilled').flatMap((r) => r.value)
+
+  // 좌표가 거의 같은 결과는 한 번만 보여준다
+  const seen = new Set()
+  return found.filter((c) => {
+    if (seen.has(c.id)) return false
+    seen.add(c.id)
+    return true
+  })
+}
+
 /**
- * 한 지역의 오늘 시간대별 예보 (Open-Meteo).
- * 하루 중 언제 일하기 좋은지 보려면 하루 한 덩어리 값으로는 부족해서 따로 받는다.
- * 지난 시간은 볼 필요가 없으니 현재 시각 이후만 남긴다.
+ * 한 지역의 시간대별 예보 (Open-Meteo).
+ * 하루 중 언제 괜찮은지 보려면 하루 한 덩어리 값으로는 부족해서 따로 받는다.
+ * 저녁에 들어와도 쓸모 있도록 현재 시각부터 18시간을 보여준다.
  */
 export const fetchHourly = async (city) => {
   const { data } = await axios.get(METEO_URL, {
@@ -139,19 +172,16 @@ export const fetchHourly = async (city) => {
   const h = data.hourly
   const now = new Date()
 
-  return (
-    h.time
-      .map((t, i) => ({
-        at: new Date(t),
-        time: t.slice(11, 16),
-        hour: Number(t.slice(11, 13)),
-        temp: Math.round(h.temperature_2m[i]),
-        humidity: h.relative_humidity_2m[i],
-        rainProb: h.precipitation_probability[i] ?? 0,
-        wind: Number((h.wind_speed_10m[i] ?? 0).toFixed(1)),
-      }))
-      // 지난 시간은 볼 필요가 없다. 저녁에 들어와도 쓸모 있도록 앞으로 18시간을 보여준다.
-      .filter((row) => row.at >= now)
-      .slice(0, 18)
-  )
+  return h.time
+    .map((t, i) => ({
+      at: new Date(t),
+      time: t.slice(11, 16),
+      hour: Number(t.slice(11, 13)),
+      temp: Math.round(h.temperature_2m[i]),
+      humidity: h.relative_humidity_2m[i],
+      rainProb: h.precipitation_probability[i] ?? 0,
+      wind: Number((h.wind_speed_10m[i] ?? 0).toFixed(1)),
+    }))
+    .filter((row) => row.at >= now)
+    .slice(0, 18)
 }
